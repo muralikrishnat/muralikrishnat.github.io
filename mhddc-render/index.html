@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+        </style>
+    </head>
+    <body >
+        <div class="canvas-container">
+            
+        </div>
+        <div>
+            <input type="file" onchange="handleImage(event)" />
+        </div>
+        <script>
+            var $ = function(sel){
+                return document.querySelector(sel);
+            };
+            var handleImage = function(e) {
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    var img = new Image();
+                    img.onload = function () {
+                        alert('w x h ' + img.width + ' h: ' + img.height);
+                        img.style.width = '100%';
+                        $('.canvas-container').append(img);
+                    };
+                    img.src = event.target['result'];
+                    e.target.value = null;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            };
+        </script>
+    </body>
+</html>
