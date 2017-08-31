@@ -39,7 +39,7 @@ module.exports = function (options) {
            
             }
         }).resume();
-    }).listen(fePort, options.ip, () => {
+    }).listen(fePort, options.ip || '127.0.0.1', () => {
         console.log('Server Listining on ' + fePort);
     })
 };
