@@ -1,0 +1,203 @@
+/*==================================================
+=            Bootstrap 3 Media Queries             =
+==================================================*/
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.5;
+}
+
+p,
+li {
+    font-size: 12px;
+}
+
+h5 {
+    font-size: 15px;
+    color: #0f70ec;
+}
+
+.container {
+    width: 960px;
+    margin: 0 auto;
+}
+
+p,
+h3,
+h4,
+h5 {
+    margin: 0px;
+    padding: 0px;
+}
+
+.search-module {
+    width: 100%;
+}
+
+.search-module .search-term {
+    width: 100%;
+    height: 30px;
+    border: 1px solid #bdc1c5;
+    float: : left;
+}
+
+.search-module .search-icon {
+    float: right;
+    position: relative;
+    top: -30px;
+    text-decoration: none;
+}
+
+.pin-search {
+    background-color: #eee;
+    width: 100%;
+    overflow: hidden;
+}
+
+.pinsearch-content {
+    float: left;
+    width: 85%;
+    padding: 10px;
+}
+
+.pin-image {
+    float: left;
+    width: 10%;
+}
+
+.solrSearch-wrapper {
+    margin-top: 20px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.filterBy-section {
+    border-right: 2px solid #eee;
+    float: left;
+    padding-right: 30px;
+    width: 25%;
+}
+
+.searchResults-section {
+    float: left;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.searchResults-section .search-image {
+    float: left;
+    margin-right: 20px;
+    text-align: right;
+    width: 10%;
+}
+
+.searchResults-section .search-content {
+    float: left;
+    width: 85%;
+}
+
+.results-wrapper {
+    float: left;
+    width: 70%;
+}
+
+.pagination-links li {
+    list-style: none;
+    float: left;
+    padding: 10px;
+}
+
+.pagination-links li a {
+    color: #0f70ec;
+    text-decoration: none;
+}
+
+.pagination-module {
+    margin-left: 7%;
+}
+
+.filterBy-section ul {
+    padding: 0px;
+}
+
+.filterBy-section ul img {
+    width: 16px;
+}
+
+.filterBy-section ul li {
+    margin-left: 10px;
+    padding: 5px;
+    overflow-wrap: break-word;
+}
+
+.filterBy-section ul {
+    list-style: none;
+}
+
+.filterBy-section .hidden {
+    display: none;
+}
+
+.filterBy-section .visible {
+    display: inline-block;
+}
+
+.pinsearch-content a {
+    color: #0f70ec;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+
+/*==========  Non-Mobile First Method  ==========*/
+
+
+/* Large Devices, Wide Screens */
+
+@media only screen and (max-width: 1200px) {
+
+}
+
+
+/* Medium Devices, Desktops */
+
+@media only screen and (max-width: 992px) {}
+
+
+/* Small Devices, Tablets */
+
+@media only screen and (max-width: 768px) {
+    .container {
+        width: 100%;
+        margin: 0 auto;
+    }
+    .pin-image {
+        display: none;
+    }
+    .pinsearch-content {
+        width: 95%;
+    }
+    .filterBy-section {
+        display: none;
+    }
+    .results-wrapper {
+        width: 100%;
+    }
+    .search-image {
+        display: none;
+    }
+    .searchResults-section .search-content {
+        width: 100%;
+    }
+    .pagination-module {
+        margin-left: 0px;
+    }
+    ul.pagination-links {
+        padding-left: 0px;
+    }
+}
+
+
+/* Extra Small Devices, Phones */
+
+@media only screen and (max-width: 480px) {}
