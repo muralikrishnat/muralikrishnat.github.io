@@ -1,0 +1,39 @@
+.filter-component {
+    padding:0;
+    margin:0;
+    * {
+        padding: 0;
+        margin: 0;
+    }
+    .filter-list {
+        margin-top: 10px;
+        .arrow-icon {
+            width: 16px;
+            cursor: pointer;
+        }
+        .filter-category-heading {
+            .down-arrow {
+                display: none;
+            }
+        }
+        .filter-list-items {
+            display: none;
+            padding-left: 20px;
+        }
+        &.expanded {
+            .filter-category-heading {
+                .left-arrow {
+                    display: none;
+                }
+                .down-arrow {
+                    display: inline;
+                }
+            }
+            .filter-list-items {
+                display: block;
+            }
+        }
+       
+    }
+    
+}

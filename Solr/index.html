@@ -6,74 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/search.css">
-    <style>
-        .search-component {
-            padding: 0;
-            margin: 0;
-            box-sizing: border-box;
-        }
-        
-        .search-component * {
-            padding: 0;
-            margin: 0;
-            box-sizing: border-box;
-        }
-        
-        .search-component .search-field {
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            border: 1px solid #bdc1c5;
-            border-radius: 5px;
-            height: 34px;
-        }
-        
-        .search-component .search-field .search-input {
-            width: 100%;
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            border: none;
-            border-radius: 5px;
-            padding-left: 10px;
-        }
-        
-        .search-component .search-field .right-corner {
-            position: relative;
-        }
-        
-        .search-component .search-field .right-corner .btn-search {
-            float: right;
-            border-left: 1px solid #bdc1c5;
-            width: 30px;
-            height: 34px;
-        }
-        
-        .search-component .search-field .right-corner .btn-search a {
-            position: relative;
-            top: 7px;
-            left: 4px;
-        }
-        
-        .search-component .search-field .right-corner .btn-search a img {
-            height: 20px;
-        }
-        
-        .search-component .search-field .right-corner .clear-search {
-            float: right;
-            height: 34px;
-        }
-        
-        .search-component .search-field .right-corner .clear-search a {
-            position: relative;
-            top: 5px;
-        }
-        
-        .search-component .search-field .right-corner .clear-search a img {
-            height: 20px;
-        }
-    </style>
+    <link rel="stylesheet/less" type="text/css" href="css/global.less" />
+    <script src="js/vendor/less.min.js" type="text/javascript"></script>
 </head>
 
 <body>
@@ -82,20 +16,22 @@
 
         <div class="search-component">
             <div class="search-field">
-                <input autocomplete="off" placeholder="Enter Search Keyword" role="textbox" type="text" class="search-input" />
+                <input autocomplete="off" placeholder="Enter Search Keyword" role="textbox" type="text" class="search-input auto-suggestion" />
                 <div class="right-corner">
                     <div class="btn-search">
-                        <a href="#">
+                        <a href="#" class="link-search">
                             <img src="images/search-icon.png" alt="search">
                         </a>
                     </div>
                     <div class="clear-search">
-                        <a href="#">
+                        <a href="#" class="btn-clear-search">
                             <img src="images/close.png" alt="close"></a>
                         </a>
                     </div>
                 </div>
+                <ul class="search-suggestion hidden"> </ul>
             </div>
+
         </div>
         <!--End of Search Bar Module -->
         <!--Pin Search Module -->
@@ -105,134 +41,27 @@
             </div>
             <div class="pinsearch-content">
                 <h4>Polycom TRIO 8800</h4>
-                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...</p>
-                <a href="#">Learn More > </a>
+                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...
+                </p>
+                <a href="#">Learn More &gt; </a>
             </div>
         </div>
         <!--End of Pin Search Module -->
 
         <div class="solrSearch-wrapper">
             <!--Left Rail Filter Module -->
-            <div class="filterBy-section">
-                <p class="filter-text">FILTER BY</p>
-                <ul class="product-list">
-                    <img class="left-arrow " src="images/left.png" />
-                    <img class="arrow hidden" src="images/down.png" />PRODUCT
-                    <li>
-                        <input name="centro" class="checkbox" type="checkbox">
-                        <label for="centro" class="labelcheckbox">RealPresence Centro</label>
-                    </li>
-                    <li>
-                        <input name="resource" class="checkbox" type="checkbox">
-                        <label for="resource" class="labelcheckbox">RealPresence Resource Manager</label>
-                    </li>
-                    <li>
-                        <input name="vvx" class="checkbox" type="checkbox">
-                        <label for="vvx" class="labelcheckbox">VVX</label>
-                    </li>
+            <div class="filterBy-section filter-component">
+                <p class="filter-section-heading">FILTER BY</p>
+                <div class="filter-category-list"></div>
 
-                </ul>
-                <ul class="content-list">
-                    <img class="left-arrow" src="images/left.png" />
-                    <img class="arrow hidden" src="images/down.png" />CONTENT Type
-                    <li>
-                        <input name="salesconnect" id="sales" class="checkbox" type="checkbox">
-                        <label for="salesconnect" class="spancheckbox">SalesConnect</label>
-                    </li>
-                    <li>
-                        <input name="salesconnect" class="checkbox" type="checkbox">
-                        <label for="salesconnect" class="spancheckbox">SalesConnect</label>
-                    </li>
-                    <li>
-                        <input name="salesconnect" class="checkbox" type="checkbox">
-                        <label for="salesconnect" class="spancheckbox">SalesConnect</label>
-                    </li>
-                </ul>
-                <ul class="asset-list">
-                    <img class="left-arrow" src="images/left.png" />
-                    <img class="arrow hidden" src="images/down.png" />ASSET TYPE
-                    <li>
-                        <input name="salesconnect" id="sales" class="checkbox" type="checkbox">
-                        <label for="salesconnect" class="spancheckbox">SalesConnect</label>
-                    </li>
-                    <li>
-                        <input name="salesconnect" class="checkbox" type="checkbox">
-                        <label for="salesconnect" class="spancheckbox">SalesConnect</label>
-                    </li>
-                    <li>
-                        <input name="salesconnect" class="checkbox" type="checkbox">
-                        <label for="salesconnect" class="spancheckbox">SalesConnect</label>
-                    </li>
-                </ul>
             </div>
             <!--End of Left Rail Filter Module -->
             <!--Right Rail Search Results Module -->
             <div class="results-wrapper">
-                <div class="searchResults-section">
-                    <div class="search-image">
-                        <img src="images/polycom-logo.jpeg" alt="polycom-logo" style="height: 70px;width: 70px;">
-                    </div>
-                    <div class="search-content">
-                        <h5>Polycom TRIO 8800</h5>
-                        <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...</p>
-                        <p style="color:grey">http://connect.polycom.com/content/dam/polycom/common/documents/presentations/realpresence-<span class="highlight">trio</span>-sales-presentation-enus.pptx</p>
-                    </div>
-                </div>
-                <div class="searchResults-section">
-                    <div class="search-image">
-                        <img src="images/pptx.jpg" alt="polycom-logo">
-                    </div>
-                    <div class="search-content">
-                        <h5>Polycom TRIO 8800</h5>
-                        <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...</p>
-                        <p style="color:grey">http://connect.polycom.com/content/dam/polycom/common/documents/presentations/realpresence-<span class="highlight">trio</span>-sales-presentation-enus.pptx</p>
-                    </div>
-                </div>
-                <div class="searchResults-section">
-                    <div class="search-image">
-                        <img src="images/pptx.jpg" alt="polycom-logo">
-                    </div>
-                    <div class="search-content">
-                        <h5>Polycom TRIO 8800</h5>
-                        <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...</p>
-                        <p style="color:grey">http://connect.polycom.com/content/dam/polycom/common/documents/presentations/realpresence-<span class="highlight">trio</span>-sales-presentation-enus.pptx</p>
-                    </div>
-                </div>
+                <div class="search-results-list"> </div>
                 <!--Pagination Module -->
                 <div class="pagination-module">
-                    <ul class="pagination-links">
-                        <li>
-                            <a href="#" class="previous-link">
-                                <</a>
-                        </li>
-                        <li>
-                            <a href="#" class="page-link">1</a>
-                        </li>
-                        <li>
-                            <a href="#" class="page-link">2</a>
-                        </li>
-                        <li>
-                            <a href="#" class="page-link">3</a>
-                        </li>
-                        <li>
-                            <a href="#" class="page-link">4</a>
-                        </li>
-                        <li>
-                            <a href="#" class="page-link">5</a>
-                        </li>
-                        <li>
-                            <a href="#" class="page-link">6</a>
-                        </li>
-                        <li>
-                            <a href="#" class="page-link">7</a>
-                        </li>
-                        <li>
-                            <a href="#" class="page-link">8</a>
-                        </li>
-                        <li>
-                            <a href="#" class="next-link"> > </a>
-                        </li>
-                    </ul>
+                    <ul class="pagination-links"> </ul>
                 </div>
                 <!--End of Pagination Module -->
 
@@ -242,7 +71,263 @@
 
     </div>
 
+    <!-- START Templates -->
+    <div class="templates hidden" style="display: none;">
+        <div class="filter-list template-filter-category">
+            <div class="filter-category-heading">
+                <img class="left-arrow arrow-icon" src="images/left.png" />
+                <img class="down-arrow arrow-icon" src="images/down.png" />
+                <span class="category-name"></span>
+            </div>
+            <div class="filter-list-items"></div>
+        </div>
+        <div class="filter-list-item template-filter-item">
+            <input name="centro" class="checkbox" type="checkbox">
+            <label for="centro" class="labelcheckbox filter-item-name">RealPresence Centro</label>
+        </div>
+        <div class="template-pagination-item">
+            <li>
+                <a href="#" class="page-link">1</a>
+            </li>
+        </div>
+        <div class="template-search-reult searchResults-section">
+            <div class="search-image">
+                <img src="images/polycom-logo.jpeg" alt="polycom-logo" style="height: 70px;width: 70px;">
+            </div>
+            <div class="search-content">
+                <h5>Polycom TRIO 8800</h5>
+                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...</p>
+                <p style="color:grey">http://connect.polycom.com/content/dam/polycom/common/documents/presentations/realpresence-
+                    <span class="highlight">trio</span>-sales-presentation-enus.pptx</p>
+            </div>
+        </div>
+    </div>
+    <!-- END Templates -->
 
+    <script src="js/vendor/jquery-3.2.1.min.js"></script>
+    <script>
+        var filterJSON = [{
+            name: 'PRODUCT',
+            items: [{
+                name: 'RealPresence Centro',
+                value: '1'
+            }, {
+                name: 'RealPresence Resource Manager',
+                value: '2'
+            }, {
+                name: 'VVX',
+                value: '3'
+            }]
+        }, {
+            name: 'CONTENT Type',
+            items: [{
+                name: 'SalesConnect',
+                value: '4'
+            }, {
+                name: 'SalesConnect',
+                value: '5'
+            }, {
+                name: 'SalesConnect',
+                value: '6'
+            }]
+        }, {
+            name: 'ASSET TYPE',
+            items: [{
+                name: 'SalesConnect',
+                value: '7'
+            }, {
+                name: 'SalesConnect',
+                value: '8'
+            }, {
+                name: 'SalesConnect',
+                value: '9'
+            }]
+        }];
+        var suggestions = ['aaa1', 'aaa2', 'aaa3', 'aaa4', 'aaa5', 'aaa6', 'aae', 'aa6', 'bbb', 'ccc', 'ddd', 'eee', 'fff', 'ggg', 'hhh', 'iii'];
+
+        var renderPagination = function(index, count) {
+            $('.pagination-links').html('');
+            var links = '';
+            for (var i = 0; i < count; i++) {
+                var $templatePage = $('.template-pagination-item').clone();
+                $templatePage.find('.page-link').html(i + index);
+                links = links + $templatePage.html();
+            }
+            if (index > 1) {
+                $('.pagination-links').append('<li>  <a href="#" class="previous-link">   &lt; </a>  </li>');
+            }
+            $('.pagination-links').append(links);
+            $('.pagination-links').append('<li>  <a href="#" class="previous-link">   &gt; </a>  </li>');
+
+        };
+        var bindFilterEvents = function() {
+            $('.arrow-icon').click(function() {
+                $(this).closest('.filter-list').toggleClass('expanded');
+            });
+        };
+        var renderFilterComponent = function(filterData) {
+            $('.filter-category-list').html('');
+            if (filterData && filterData instanceof Array) {
+                filterData.forEach(function(category, ci) {
+                    var $templateHTML = $('.template-filter-category').clone();
+                    $templateHTML.removeClass('template-filter-category').removeClass('hidden');
+                    $templateHTML.find('.category-name').html(category.name);
+                    if (ci === 0) {
+                        $templateHTML.addClass('expanded');
+                    }
+
+                    if (category.items && category.items instanceof Array) {
+                        category.items.forEach(function(filterItem, fi) {
+                            var $filterTemplate = $('.template-filter-item').clone();
+                            $filterTemplate.removeClass('template-filter-item');
+
+                            $filterTemplate.find('.filter-item-name').html(filterItem.name);
+                            $filterTemplate.find('input:checkbox').attr('name', 'filter' + ci + '' + fi);
+                            $filterTemplate.find('input:checkbox').attr('id', 'filter' + ci + '' + fi);
+                            $filterTemplate.find('label').attr('for', 'filter' + ci + '' + fi);
+                            $templateHTML.find('.filter-list-items').append($filterTemplate);
+                        });
+                    }
+
+                    $('.filter-category-list').append($templateHTML);
+                });
+            }
+        };
+
+        var renderResults = function() {
+            $('.search-results-list').html('');
+            getResults().then(function(resp) {
+                if (resp.response.docs) {
+                    resp.response.docs.forEach(function(sItem) {
+                        var $resultTemplate = $('.template-search-reult').clone();
+                        $resultTemplate.removeClass('template-search-reult');
+                        $('.search-results-list').append($resultTemplate);
+                    });
+                }
+
+            });
+
+        };
+
+        var getResults = function() {
+            // return $.get('http://localhost:3435/json-data/results.json');
+            return new Promise(function(res, rej) {
+                res({
+                    "responseHeader": {
+                        "zkConnected": true,
+                        "status": 0,
+                        "QTime": 26,
+                        "params": {
+                            "hl.snippets": "1",
+                            "q": "center",
+                            "hl": "true",
+                            "hl.fragsize": "0",
+                            "hl.fl": "description",
+                            "wt": "json"
+                        }
+                    },
+                    "response": {
+                        "numFound": 3,
+                        "start": 0,
+                        "maxScore": 2.5930927,
+                        "docs": [{
+                            "id": "/content/geometrixx/en/company/press/assetviewer",
+                            "title": ["Press Center Asset Viewer"],
+                            "url": ["/content/geometrixx/en/company/press/assetviewer.html"],
+                            "lastModified": ["2011-03-70T11:13:06Z"],
+                            "contentType": ["page"],
+                            "_version_": 1578595973565775872
+                        }, {
+                            "id": "/content/geometrixx/en/company/press",
+                            "title": ["Press Center"],
+                            "url": ["/content/geometrixx/en/company/press.html"],
+                            "lastModified": ["2010-11-329T07:20:41Z"],
+                            "contentType": ["page"],
+                            "_version_": 1578595973121179648
+                        }, {
+                            "id": "/content/geometrixx/en/company/press/asseteditor",
+                            "title": ["Press Center Asset Editor"],
+                            "url": ["/content/geometrixx/en/company/press/asseteditor.html"],
+                            "lastModified": ["2011-03-70T11:14:11Z"],
+                            "contentType": ["page"],
+                            "_version_": 1578595973556338688
+                        }]
+                    },
+                    "highlighting": {
+                        "/content/geometrixx/en/company/press/assetviewer": {},
+                        "/content/geometrixx/en/company/press": {},
+                        "/content/geometrixx/en/company/press/asseteditor": {}
+                    }
+                });
+            });
+        };
+
+        var bindAutoSuggestionEvents = function() {
+            $('.btn-clear-search').click(function(e) {
+                e.preventDefault();
+                $('.auto-suggestion').val('');
+                $('.search-suggestion').addClass('hidden');
+            });
+            $('.auto-suggestion').keyup(function(e) {
+                var value = $(this).val();
+                if (e.keyCode == 13) {
+                    if ($('.suggestion-item.active').length > 0) {
+                        $('.auto-suggestion').val($('.suggestion-item.active').attr('val'));
+                    }
+                    $('.search-suggestion').addClass('hidden');
+                    renderResults();
+                } else if (e.keyCode == 38) {
+                    //up arrow
+                    if ($('.suggestion-item.active').length > 0) {
+                        var currentSuggestion = $('.suggestion-item.active');
+                        var nextSuggestion = $('.suggestion-item.active').prev();
+                        currentSuggestion.removeClass('active');
+                        nextSuggestion.addClass('active');
+                    } else {
+                        $('.suggestion-item').first().addClass('active');
+                    }
+                } else if (e.keyCode == 40) {
+                    //down arrow
+                    if ($('.suggestion-item.active').length > 0) {
+                        var currentSuggestion = $('.suggestion-item.active');
+                        var nextSuggestion = $('.suggestion-item.active').next();
+                        currentSuggestion.removeClass('active');
+                        nextSuggestion.addClass('active');
+                    } else {
+                        $('.suggestion-item').first().addClass('active');
+                    }
+                } else {
+                    $('.search-suggestion').html('');
+                    if (value.length >= 3) {
+                        $('.search-suggestion').removeClass('hidden');
+                        suggestions.forEach(function(s) {
+                            if (s.indexOf(value) === 0) {
+                                $('.search-suggestion').append('<li class="suggestion-item" val="' + s + '">' + s + '</li>');
+                            }
+                        });
+                    } else {
+                        $('.search-suggestion').addClass('hidden');
+                    }
+                }
+            });
+
+            $('.link-search').click(function(e) {
+                e.preventDefault();
+                $('.search-suggestion').addClass('hidden');
+                renderResults();
+            });
+
+        };
+
+
+        $(document).ready(function() {
+            bindAutoSuggestionEvents();
+            renderFilterComponent(filterJSON);
+            bindFilterEvents();
+            renderResults();
+            renderPagination(1, 8);
+        });
+    </script>
 </body>
 
 </html>

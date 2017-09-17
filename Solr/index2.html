@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/search.css">
+    <style>
+        .search-component {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        .search-component * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        .search-component .search-field {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            border: 1px solid #bdc1c5;
+            border-radius: 5px;
+            height: 34px;
+        }
+        
+        .search-component .search-field .search-input {
+            width: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            border: none;
+            border-radius: 5px;
+            padding-left: 10px;
+        }
+        
+        .search-component .search-field .right-corner {
+            position: relative;
+        }
+        
+        .search-component .search-field .right-corner .btn-search {
+            float: right;
+            border-left: 1px solid #bdc1c5;
+            width: 30px;
+            height: 34px;
+        }
+        
+        .search-component .search-field .right-corner .btn-search a {
+            position: relative;
+            top: 7px;
+            left: 4px;
+        }
+        
+        .search-component .search-field .right-corner .btn-search a img {
+            height: 20px;
+        }
+        
+        .search-component .search-field .right-corner .clear-search {
+            float: right;
+            height: 34px;
+        }
+        
+        .search-component .search-field .right-corner .clear-search a {
+            position: relative;
+            top: 5px;
+        }
+        
+        .search-component .search-field .right-corner .clear-search a img {
+            height: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!--Search Bar Module -->
+
+        <div class="search-component">
+            <div class="search-field">
+                <input autocomplete="off" placeholder="Enter Search Keyword" role="textbox" type="text" class="search-input" />
+                <div class="right-corner">
+                    <div class="btn-search">
+                        <a href="#">
+                            <img src="images/search-icon.png" alt="search">
+                        </a>
+                    </div>
+                    <div class="clear-search">
+                        <a href="#">
+                            <img src="images/close.png" alt="close"></a>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--End of Search Bar Module -->
+        <!--Pin Search Module -->
+        <div class="pin-search" style="margin-top:20px;">
+            <div class="pin-image">
+                <img src="images/polycom-logo.jpeg" alt="polycom-logo" style="height: 70px;padding: 10px;width: 70px;">
+            </div>
+            <div class="pinsearch-content">
+                <h4>Polycom TRIO 8800</h4>
+                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...</p>
+                <a href="#">Learn More > </a>
+            </div>
+        </div>
+        <!--End of Pin Search Module -->
+
+        <div class="solrSearch-wrapper">
+            <!--Left Rail Filter Module -->
+            <div class="filterBy-section">
+                <p class="filter-text">FILTER BY</p>
+                <ul class="product-list">
+                    <img class="left-arrow " src="images/left.png" />
+                    <img class="arrow hidden" src="images/down.png" />PRODUCT
+                    <li>
+                        <input name="centro" class="checkbox" type="checkbox">
+                        <label for="centro" class="labelcheckbox">RealPresence Centro</label>
+                    </li>
+                    <li>
+                        <input name="resource" class="checkbox" type="checkbox">
+                        <label for="resource" class="labelcheckbox">RealPresence Resource Manager</label>
+                    </li>
+                    <li>
+                        <input name="vvx" class="checkbox" type="checkbox">
+                        <label for="vvx" class="labelcheckbox">VVX</label>
+                    </li>
+
+                </ul>
+                <ul class="content-list">
+                    <img class="left-arrow" src="images/left.png" />
+                    <img class="arrow hidden" src="images/down.png" />CONTENT Type
+                    <li>
+                        <input name="salesconnect" id="sales" class="checkbox" type="checkbox">
+                        <label for="salesconnect" class="spancheckbox">SalesConnect</label>
+                    </li>
+                    <li>
+                        <input name="salesconnect" class="checkbox" type="checkbox">
+                        <label for="salesconnect" class="spancheckbox">SalesConnect</label>
+                    </li>
+                    <li>
+                        <input name="salesconnect" class="checkbox" type="checkbox">
+                        <label for="salesconnect" class="spancheckbox">SalesConnect</label>
+                    </li>
+                </ul>
+                <ul class="asset-list">
+                    <img class="left-arrow" src="images/left.png" />
+                    <img class="arrow hidden" src="images/down.png" />ASSET TYPE
+                    <li>
+                        <input name="salesconnect" id="sales" class="checkbox" type="checkbox">
+                        <label for="salesconnect" class="spancheckbox">SalesConnect</label>
+                    </li>
+                    <li>
+                        <input name="salesconnect" class="checkbox" type="checkbox">
+                        <label for="salesconnect" class="spancheckbox">SalesConnect</label>
+                    </li>
+                    <li>
+                        <input name="salesconnect" class="checkbox" type="checkbox">
+                        <label for="salesconnect" class="spancheckbox">SalesConnect</label>
+                    </li>
+                </ul>
+            </div>
+            <!--End of Left Rail Filter Module -->
+            <!--Right Rail Search Results Module -->
+            <div class="results-wrapper">
+                <div class="searchResults-section">
+                    <div class="search-image">
+                        <img src="images/polycom-logo.jpeg" alt="polycom-logo" style="height: 70px;width: 70px;">
+                    </div>
+                    <div class="search-content">
+                        <h5>Polycom TRIO 8800</h5>
+                        <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...</p>
+                        <p style="color:grey">http://connect.polycom.com/content/dam/polycom/common/documents/presentations/realpresence-<span class="highlight">trio</span>-sales-presentation-enus.pptx</p>
+                    </div>
+                </div>
+                <div class="searchResults-section">
+                    <div class="search-image">
+                        <img src="images/pptx.jpg" alt="polycom-logo">
+                    </div>
+                    <div class="search-content">
+                        <h5>Polycom TRIO 8800</h5>
+                        <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...</p>
+                        <p style="color:grey">http://connect.polycom.com/content/dam/polycom/common/documents/presentations/realpresence-<span class="highlight">trio</span>-sales-presentation-enus.pptx</p>
+                    </div>
+                </div>
+                <div class="searchResults-section">
+                    <div class="search-image">
+                        <img src="images/pptx.jpg" alt="polycom-logo">
+                    </div>
+                    <div class="search-content">
+                        <h5>Polycom TRIO 8800</h5>
+                        <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...</p>
+                        <p style="color:grey">http://connect.polycom.com/content/dam/polycom/common/documents/presentations/realpresence-<span class="highlight">trio</span>-sales-presentation-enus.pptx</p>
+                    </div>
+                </div>
+                <!--Pagination Module -->
+                <div class="pagination-module">
+                    <ul class="pagination-links">
+                        <li>
+                            <a href="#" class="previous-link">
+                                &lt; </a>
+                        </li>
+                        <li>
+                            <a href="#" class="page-link">1</a>
+                        </li>
+                        <li>
+                            <a href="#" class="page-link">2</a>
+                        </li>
+                        <li>
+                            <a href="#" class="page-link">3</a>
+                        </li>
+                        <li>
+                            <a href="#" class="page-link">4</a>
+                        </li>
+                        <li>
+                            <a href="#" class="page-link">5</a>
+                        </li>
+                        <li>
+                            <a href="#" class="page-link">6</a>
+                        </li>
+                        <li>
+                            <a href="#" class="page-link">7</a>
+                        </li>
+                        <li>
+                            <a href="#" class="page-link">8</a>
+                        </li>
+                        <li>
+                            <a href="#" class="next-link"> &gt; </a>
+                        </li>
+                    </ul>
+                </div>
+                <!--End of Pagination Module -->
+
+            </div>
+            <!--Right Rail Search Results Module -->
+        </div>
+
+    </div>
+
+
+</body>
+
+</html>
