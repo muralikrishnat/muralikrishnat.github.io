@@ -286,6 +286,10 @@
                 $('.auto-suggestion').val('');
                 $('.search-suggestion').addClass('hidden');
             });
+
+            $('.auto-suggestion').blur(function(){
+                $('.search-suggestion').addClass('hidden');
+            });
             $('.auto-suggestion').keyup(function (e) {
                 var value = $(this).val();
                 if (e.keyCode == 13) {
