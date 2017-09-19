@@ -10,19 +10,19 @@
         .hidden {
             display: none;
         }
-
+        
         .search-component {
             padding: 0;
             margin: 0;
             box-sizing: border-box;
         }
-
+        
         .search-component * {
             padding: 0;
             margin: 0;
             box-sizing: border-box;
         }
-
+        
         .search-component .search-field {
             position: relative;
             width: 100%;
@@ -30,7 +30,7 @@
             border-radius: 5px;
             height: 34px;
         }
-
+        
         .search-component .search-field .search-input {
             width: 100%;
             position: absolute;
@@ -41,42 +41,42 @@
             border-radius: 5px;
             padding-left: 10px;
         }
-
+        
         .search-component .search-field .right-corner {
             position: relative;
         }
-
+        
         .search-component .search-field .right-corner .btn-search {
             float: right;
             border-left: 1px solid #bdc1c5;
             width: 30px;
             height: 34px;
         }
-
+        
         .search-component .search-field .right-corner .btn-search a {
             position: relative;
             top: 7px;
             left: 4px;
         }
-
+        
         .search-component .search-field .right-corner .btn-search a img {
             height: 20px;
         }
-
+        
         .search-component .search-field .right-corner .clear-search {
             float: right;
             height: 34px;
         }
-
+        
         .search-component .search-field .right-corner .clear-search a {
             position: relative;
             top: 5px;
         }
-
+        
         .search-component .search-field .right-corner .clear-search a img {
             height: 20px;
         }
-
+        
         .search-component .search-field .search-suggestion {
             position: absolute;
             top: 34px;
@@ -87,66 +87,64 @@
             border-bottom-right-radius: 5px;
             border-bottom-left-radius: 5px;
         }
-
+        
         .search-component .search-field .search-suggestion .suggestion-item {
             padding-left: 12px;
             padding-top: 10px;
             cursor: pointer;
             padding-bottom: 10px;
         }
-
+        
         .search-component .search-field .search-suggestion .suggestion-item:hover {
             background-color: #773514;
             color: white;
         }
-
+        
         .search-component .search-field .search-suggestion .suggestion-item.active {
             background-color: #773514;
             color: white;
         }
-
+        
         .filter-component {
             padding: 0;
             margin: 0;
         }
-
+        
         .filter-component * {
             padding: 0;
             margin: 0;
         }
-
+        
         .filter-component .filter-list {
             margin-top: 10px;
         }
-
+        
         .filter-component .filter-list .arrow-icon {
             width: 16px;
             cursor: pointer;
         }
-
+        
         .filter-component .filter-list .filter-category-heading .down-arrow {
             display: none;
         }
-
+        
         .filter-component .filter-list .filter-list-items {
             display: none;
             padding-left: 20px;
         }
-
+        
         .filter-component .filter-list.expanded .filter-category-heading .left-arrow {
             display: none;
         }
-
+        
         .filter-component .filter-list.expanded .filter-category-heading .down-arrow {
             display: inline;
         }
-
+        
         .filter-component .filter-list.expanded .filter-list-items {
             display: block;
         }
     </style>
-    <!-- <link rel="stylesheet/less" type="text/css" href="css/global.less" />
-    <script src="js/vendor/less.min.js" type="text/javascript"></script> -->
 </head>
 
 <body>
@@ -155,8 +153,7 @@
 
         <div class="search-component">
             <div class="search-field">
-                <input autocomplete="off" placeholder="Enter Search Keyword" role="textbox" type="text" class="search-input auto-suggestion"
-                />
+                <input autocomplete="off" placeholder="Enter Search Keyword" role="textbox" type="text" class="search-input auto-suggestion" />
                 <div class="right-corner">
                     <div class="btn-search">
                         <a href="#" class="link-search">
@@ -181,9 +178,7 @@
             </div>
             <div class="pinsearch-content">
                 <h4>Polycom TRIO 8800</h4>
-                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point
-                    phone into a modular voice, video and content sharing system for any team environment, large or small.
-                    When...
+                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...
                 </p>
                 <a href="#">Learn More &gt; </a>
             </div>
@@ -237,9 +232,7 @@
             </div>
             <div class="search-content">
                 <h5 class="result-item-title">Polycom TRIO 8800</h5>
-                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point
-                    phone into a modular voice, video and content sharing system for any team environment, large or small.
-                    When...
+                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...
                 </p>
                 <p style="color:grey">http://connect.polycom.com/content/dam/polycom/common/documents/presentations/realpresence-
                     <span class="highlight">trio</span>-sales-presentation-enus.pptx</p>
@@ -291,7 +284,7 @@
             'eee', 'fff', 'ggg', 'hhh', 'iii'
         ];
 
-        var renderPagination = function (index, count) {
+        var renderPagination = function(index, count) {
             $('.pagination-links').html('');
             var links = '';
             for (var i = 0; i < count; i++) {
@@ -306,15 +299,15 @@
             $('.pagination-links').append('<li>  <a href="#" class="previous-link">   &gt; </a>  </li>');
 
         };
-        var bindFilterEvents = function () {
-            $('.arrow-icon').click(function () {
+        var bindFilterEvents = function() {
+            $('.arrow-icon').click(function() {
                 $(this).closest('.filter-list').toggleClass('expanded');
             });
         };
-        var renderFilterComponent = function (filterData) {
+        var renderFilterComponent = function(filterData) {
             $('.filter-category-list').html('');
             if (filterData && filterData instanceof Array) {
-                filterData.forEach(function (category, ci) {
+                filterData.forEach(function(category, ci) {
                     var $templateHTML = $('.template-filter-category').clone();
                     $templateHTML.removeClass('template-filter-category').removeClass('hidden');
                     $templateHTML.find('.category-name').html(category.name);
@@ -323,7 +316,7 @@
                     }
 
                     if (category.items && category.items instanceof Array) {
-                        category.items.forEach(function (filterItem, fi) {
+                        category.items.forEach(function(filterItem, fi) {
                             var $filterTemplate = $('.template-filter-item').clone();
                             $filterTemplate.removeClass('template-filter-item');
 
@@ -342,16 +335,15 @@
             }
         };
 
-        var highliter = function (tagToHighlite, textToHighlite) {
-            var html = tagToHighlite.html().replace(new RegExp(' ' + textToHighlite + ' ', 'g'), ' <b>' +
-                textToHighlite + '</b> ')
+        var highliter = function(tagToHighlite, textToHighlite) {
+            var html = tagToHighlite.html().replace(new RegExp(' ' + textToHighlite + ' ', 'g'), ' <b>' + textToHighlite + '</b> ')
             tagToHighlite.html(html);
         };
-        var renderResults = function () {
+        var renderResults = function() {
             $('.search-results-list').html('');
-            getResults().then(function (resp) {
+            getResults().then(function(resp) {
                 if (resp.response.docs) {
-                    resp.response.docs.forEach(function (sItem) {
+                    resp.response.docs.forEach(function(sItem) {
                         var $resultTemplate = $('.template-search-reult').clone();
                         $resultTemplate.removeClass('template-search-reult');
                         $resultTemplate.find('.result-item-title').html(sItem.title);
@@ -365,9 +357,9 @@
 
         };
 
-        var getResults = function () {
+        var getResults = function() {
             // return $.get('/conent/results?q=' + $('.auto-suggestion').val());
-            return new Promise(function (res, rej) {
+            return new Promise(function(res, rej) {
                 res({
                     "responseHeader": {
                         "zkConnected": true,
@@ -421,18 +413,21 @@
             });
         };
 
-        var bindAutoSuggestionEvents = function () {
-            $('.btn-clear-search').click(function (e) {
+        var bindAutoSuggestionEvents = function() {
+            $('.btn-clear-search').click(function(e) {
                 e.preventDefault();
                 $('.auto-suggestion').val('');
                 $('.search-suggestion').addClass('hidden');
             });
-            $('.auto-suggestion').blur(function(){
+
+            $('.auto-suggestion').blur(function() {
                 $('.search-suggestion').addClass('hidden');
             });
-            $('.auto-suggestion').keyup(function (e) {
+            $('.auto-suggestion').keyup(function(e) {
                 var value = $(this).val();
-                if (e.keyCode == 13) {
+                if (e.keyCode == 27) {
+                    $('.search-suggestion').addClass('hidden');
+                } else if (e.keyCode == 13) {
                     if ($('.suggestion-item.active').length > 0) {
                         $('.auto-suggestion').val($('.suggestion-item.active').attr('val'));
                     }
@@ -462,13 +457,13 @@
                     $('.search-suggestion').html('');
                     if (value.length >= 3) {
                         $('.search-suggestion').removeClass('hidden');
-                        suggestions.forEach(function (s) {
+                        suggestions.forEach(function(s) {
                             if (s.indexOf(value) === 0) {
                                 $('.search-suggestion').append('<li class="suggestion-item" val="' +
                                     s + '">' + s + '</li>');
                             }
                         });
-                        $('.suggestion-item').click(function () {
+                        $('.suggestion-item').click(function() {
                             $('.auto-suggestion').val($(this).attr('val'));
                             $('.search-suggestion').addClass('hidden');
                             renderResults();
@@ -479,7 +474,7 @@
                 }
             });
 
-            $('.link-search').click(function (e) {
+            $('.link-search').click(function(e) {
                 e.preventDefault();
                 $('.search-suggestion').addClass('hidden');
                 renderResults();
@@ -490,7 +485,7 @@
         };
 
 
-        $(document).ready(function () {
+        $(document).ready(function() {
             bindAutoSuggestionEvents();
             renderFilterComponent(filterJSON);
             bindFilterEvents();
