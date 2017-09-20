@@ -16,7 +16,8 @@
 
         <div class="search-component">
             <div class="search-field">
-                <input autocomplete="off" placeholder="Enter Search Keyword" role="textbox" type="text" class="search-input auto-suggestion" />
+                <input autocomplete="off" placeholder="Enter Search Keyword" role="textbox" type="text" class="search-input auto-suggestion"
+                />
                 <div class="right-corner">
                     <div class="btn-search">
                         <a href="#" class="link-search">
@@ -41,7 +42,9 @@
             </div>
             <div class="pinsearch-content">
                 <h4>Polycom TRIO 8800</h4>
-                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...
+                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point
+                    phone into a modular voice, video and content sharing system for any team environment, large or small.
+                    When...
                 </p>
                 <a href="#">Learn More &gt; </a>
             </div>
@@ -95,7 +98,9 @@
             </div>
             <div class="search-content">
                 <h5 class="result-item-title">Polycom TRIO 8800</h5>
-                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...
+                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point
+                    phone into a modular voice, video and content sharing system for any team environment, large or small.
+                    When...
                 </p>
                 <p style="color:grey">http://connect.polycom.com/content/dam/polycom/common/documents/presentations/realpresence-
                     <span class="highlight">trio</span>-sales-presentation-enus.pptx</p>
@@ -106,26 +111,17 @@
 
     <script src="js/vendor/jquery-3.2.1.min.js"></script>
     <script>
-        var renderPagination = function(index, count) {
-            $('.pagination-links').html('');
-            var links = '';
-            for (var i = 0; i < count; i++) {
-                var $templatePage = $('.template-pagination-item').clone();
-                $templatePage.find('.page-link').html(i + index);
-                links = links + $templatePage.html();
-            }
-            if (index > 1) {
-                $('.pagination-links').append('<li>  <a href="#" class="previous-link">   &lt; </a>  </li>');
-            }
-            $('.pagination-links').append(links);
-            $('.pagination-links').append('<li>  <a href="#" class="previous-link">   &gt; </a>  </li>');
-
+        var paginationConfig = {
+            resultsPerPage: 1,
+            noofpages: 2,
+            active: 1
         };
-        var bindFilterEvents = function() {
-            $('.arrow-icon').click(function() {
+
+        var bindFilterEvents = function () {
+            $('.arrow-icon').click(function () {
                 $(this).closest('.filter-list').toggleClass('expanded');
             });
-            $('.filter-list-item').find('.checkbox').change(function() {
+            $('.filter-list-item').find('.checkbox').change(function () {
                 filterParams.contentType = [];
                 $('.filter-list-item').find('.checkbox:checked').each((i, n) => {
                     if ($(n).attr('key') === 'contentType') {
@@ -135,11 +131,11 @@
                 parseResults();
             });
         };
-        var renderFilterComponent = function(filterData) {
+        var renderFilterComponent = function (filterData) {
             $('.filter-category-list').html('');
             $('.filter-component').addClass('hidden');
             if (filterData && filterData instanceof Array) {
-                filterData.forEach(function(category, ci) {
+                filterData.forEach(function (category, ci) {
                     var $templateHTML = $('.template-filter-category').clone();
                     $templateHTML.removeClass('template-filter-category').removeClass('hidden');
                     $templateHTML.find('.category-name').html(category.name);
@@ -148,7 +144,7 @@
                     }
 
                     if (category.items && category.items instanceof Array) {
-                        category.items.forEach(function(filterItem, fi) {
+                        category.items.forEach(function (filterItem, fi) {
                             var $filterTemplate = $('.template-filter-item').clone();
                             $filterTemplate.removeClass('template-filter-item');
                             $filterTemplate.find('.filter-item-name').text(filterItem);
@@ -169,7 +165,7 @@
             }
         };
 
-        var highliter = function(tagToHighlite, textToHighlite) {
+        var highliter = function (tagToHighlite, textToHighlite) {
             if (textToHighlite.indexOf('*') < 0) {
                 var html = tagToHighlite.html().replace(new RegExp(' ' + textToHighlite + ' ', 'g'), ' <b>' + textToHighlite + '</b> ')
                 tagToHighlite.html(html);
@@ -181,24 +177,91 @@
             contentType: []
         };
 
-        var parseResults = function() {
+        var renderResultItem = function (sItem) {
+            var $resultTemplate = $('.template-search-reult').clone();
+            $resultTemplate.removeClass('template-search-reult');
+            $resultTemplate.find('.result-item-title').html(sItem.title);
+            $resultTemplate.find('.content-desc').html(sItem.description);
+            highliter($resultTemplate.find('.content-desc'), $('.auto-suggestion').val());
+            $('.search-results-list').append($resultTemplate);
+        };
+        var renderresultsWithPagination = function (filteredResults) {
+            $('.search-results-list').html('');
+            var startindex = (paginationConfig.active - 1) * paginationConfig.resultsPerPage;
+            filteredResults.forEach(function (sItem, idx) {
+                if (idx >= startindex && idx < (startindex + paginationConfig.resultsPerPage)) {
+                    renderResultItem(sItem);
+                }
+            });
+
+            $('.pagination-links').html('');
+            var links = '';
+            var index = 1;
+            var totalpages = Math.ceil(filteredResults.length / paginationConfig.resultsPerPage);
+            var count = paginationConfig.noofpages;
+            if (totalpages < paginationConfig.noofpages) {
+                count = totalpages;
+            }
+            if (paginationConfig.active > count) {
+                index = index + (paginationConfig.active - count);
+            }
+            if (paginationConfig.active > 1) {
+                $('.pagination-links').append('<li>  <a href="#" data-dir="0" class="previous-link page-nav-link">   &lt; </a>  </li>');
+            }
+            for (var i = 0; i < count; i++) {
+                var $templatePage = $('.template-pagination-item').clone();
+                if (paginationConfig.active == (i + index)) {
+                    links = links + '<li>' + (i + index) + '</li>';
+                } else {
+                    $templatePage.find('.page-link').html((i + index));
+                    links = links + $templatePage.html();
+                }
+            }
+
+            $('.pagination-links').append(links);
+            if (totalpages > paginationConfig.active) {
+                $('.pagination-links').append('<li>  <a href="#" data-dir="1" class="next-link page-nav-link">   &gt; </a>  </li>');
+            }
+
+            $('.page-link').click(function (e) {
+                e.preventDefault();
+                paginationConfig.active = parseInt($(this).text());
+                renderresultsWithPagination(filteredResults);
+            });
+
+            $('.page-nav-link').click(function(e){
+                e.preventDefault();
+                if ($(this).attr('data-dir') == '1') {
+                    paginationConfig.active = paginationConfig.active + 1;
+                } else {
+                    paginationConfig.active = paginationConfig.active - 1;
+                }
+                renderresultsWithPagination(filteredResults);
+            });
+
+        };
+        var parseResults = function (contentType) {
             $('.search-results-list').html('');
             var text = filterParams.textSelected;
-            results.forEach(function(sItem) {
-                if (sItem.title && sItem.title.filter(function(r) {
-                        if (text == '*') {
-                            return true;
-                        } else {
-                            return r.toLowerCase().indexOf(text.toLowerCase()) == 0;
-                        }
-                    }).length > 0) {
+            var filteredResults = results.filter(function (sItem) {
+                if (contentType) {
+                    if (sItem['contentType'] && sItem['contentType'].forEach) {
+                        sItem['contentType'].forEach(function (t) {
+                            if (contentType.items.indexOf(t) < 0) {
+                                contentType.items.push(t);
+                            }
+                        });
+                    }
+                }
+                if (sItem.title && sItem.title.filter(function (r) {
+                    if (text == '*') {
+                        return true;
+                    } else {
+                        return r.toLowerCase().indexOf(text.toLowerCase()) == 0;
+                    }
+                }).length > 0) {
                     if (filterParams.contentType.length === 0) {
-                        var $resultTemplate = $('.template-search-reult').clone();
-                        $resultTemplate.removeClass('template-search-reult');
-                        $resultTemplate.find('.result-item-title').html(sItem.title);
-                        $resultTemplate.find('.content-desc').html(sItem.description);
-                        highliter($resultTemplate.find('.content-desc'), $('.auto-suggestion').val());
-                        $('.search-results-list').append($resultTemplate);
+                        return true;
                     } else {
                         var foundContentType = 0;
                         filterParams.contentType.forEach(f => {
@@ -208,23 +271,20 @@
                         });
 
                         if (foundContentType) {
-                            var $resultTemplate = $('.template-search-reult').clone();
-                            $resultTemplate.removeClass('template-search-reult');
-                            $resultTemplate.find('.result-item-title').html(sItem.title);
-                            $resultTemplate.find('.content-desc').html(sItem.description);
-                            highliter($resultTemplate.find('.content-desc'), $('.auto-suggestion').val());
-                            $('.search-results-list').append($resultTemplate);
+                            return true;
                         }
                     }
-
                 }
+                return false;
             });
+
+            renderresultsWithPagination(filteredResults);
         };
-        var renderResults = function() {
+        var renderResults = function () {
             $('.search-results-list').html('');
             var text = $('.auto-suggestion').val();
             filterParams.textSelected = text;
-            getResults().then(function(resp) {
+            getResults().then(function (resp) {
                 if (resp.response.docs) {
                     var contentType = {
                         name: 'CONTENT Type',
@@ -232,31 +292,7 @@
                         items: []
                     }
                     results = resp.response.docs;
-                    resp.response.docs.forEach(function(sItem) {
-                        if (sItem.title && sItem.title.filter(function(r) {
-                                if (text == '*') {
-                                    return true;
-                                } else {
-                                    return r.toLowerCase().indexOf(text.toLowerCase()) == 0;
-                                }
-                            }).length > 0) {
-                            if (sItem['contentType'] && sItem['contentType'].forEach) {
-                                sItem['contentType'].forEach(function(t) {
-                                    if (contentType.items.indexOf(t) < 0) {
-                                        contentType.items.push(t);
-                                    }
-                                });
-                            }
-
-                            var $resultTemplate = $('.template-search-reult').clone();
-                            $resultTemplate.removeClass('template-search-reult');
-                            $resultTemplate.find('.result-item-title').html(sItem.title);
-                            $resultTemplate.find('.content-desc').html(sItem.description);
-                            highliter($resultTemplate.find('.content-desc'), $('.auto-suggestion').val());
-                            $('.search-results-list').append($resultTemplate);
-                        }
-
-                    });
+                    parseResults(contentType);
 
                     var filterData = [contentType];
                     renderFilterComponent(filterData);
@@ -268,9 +304,9 @@
 
         var timeout,
             promiseObject;
-        var getResults = function(q) {
+        var getResults = function (q) {
             // return $.get('/conent/results?q=' + q);
-            promiseObject = new Promise(function(res, rej) {
+            promiseObject = new Promise(function (res, rej) {
                 res({
                     "responseHeader": {
                         "status": 0,
@@ -339,23 +375,23 @@
             });
             return promiseObject;
         };
-        var bindSuggestionLinkEvents = function() {
-            $('.suggestion-item').click(function() {
+        var bindSuggestionLinkEvents = function () {
+            $('.suggestion-item').click(function () {
                 $('.auto-suggestion').val($(this).attr('val'));
                 $('.search-suggestion').addClass('hidden');
                 renderResults();
             });
         };
-        var getSuggestions = function(text) {
+        var getSuggestions = function (text) {
             if (timeout) {
                 clearTimeout(timeout);
             }
-            timeout = setTimeout(function() {
-                getResults(text).then(function(resp) {
+            timeout = setTimeout(function () {
+                getResults(text).then(function (resp) {
                     if (resp.response.docs) {
-                        resp.response.docs.forEach(function(sItem) {
+                        resp.response.docs.forEach(function (sItem) {
                             if (sItem.title) {
-                                sItem.title.forEach(function(r) {
+                                sItem.title.forEach(function (r) {
                                     if (r.toLowerCase().indexOf(text.toLowerCase()) == 0) {
                                         $('.search-suggestion').append('<li class="suggestion-item" val="' +
                                             r + '">' + r + '</li>');
@@ -369,19 +405,19 @@
             }, 700);
         };
 
-        var bindAutoSuggestionEvents = function() {
-            $('.btn-clear-search').click(function(e) {
+        var bindAutoSuggestionEvents = function () {
+            $('.btn-clear-search').click(function (e) {
                 e.preventDefault();
                 $('.auto-suggestion').val('');
                 $('.search-suggestion').addClass('hidden');
             });
 
-            $('body').click(function(e) {
+            $('body').click(function (e) {
                 if (!$(e.target).hasClass('suggestion-item')) {
                     $('.search-suggestion').addClass('hidden');
                 }
             });
-            $('.auto-suggestion').keyup(function(e) {
+            $('.auto-suggestion').keyup(function (e) {
                 var value = $(this).val();
                 if (e.keyCode == 27) {
                     $('.search-suggestion').addClass('hidden');
@@ -426,13 +462,13 @@
                 }
             });
 
-            $('.link-search').click(function(e) {
+            $('.link-search').click(function (e) {
                 e.preventDefault();
                 $('.search-suggestion').addClass('hidden');
                 renderResults();
             });
         };
-        $(document).ready(function() {
+        $(document).ready(function () {
             bindAutoSuggestionEvents();
         });
     </script>
