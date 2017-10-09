@@ -5,49 +5,18 @@
     <title></title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/search.css">
+    <script src="js/jquery-3.2.1.min.js"></script>
     <style>
-        /*==================================================
-  =            CSS Stylings           =
-  ==================================================*/
-        
-        body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.5;
-        }
-        
-        p,
-        li {
-            font-size: 12px;
-        }
-        
-        h5 {
-            font-size: 15px;
-            color: #0f70ec;
-        }
-        
         .hidden {
             display: none;
         }
         
-        .container {
-            width: 1107px;
-            margin: 0 auto;
+        .search-component {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
         }
-        
-        p,
-        h3,
-        h4,
-        h5 {
-            margin: 0px;
-            padding: 0px;
-            font-family: "ProximaNova-Regular";
-        }
-        
-        h4 {
-            font-size: 20px;
-            color: #222222;
-        }
-        /* Search Module Styles */
         
         .search-component * {
             padding: 0;
@@ -57,10 +26,10 @@
         
         .search-component .search-field {
             position: relative;
-            width: 960px;
+            width: 100%;
             border: 1px solid #bdc1c5;
             border-radius: 5px;
-            height: 48px;
+            height: 34px;
         }
         
         .search-component .search-field .search-input {
@@ -82,18 +51,17 @@
             float: right;
             border-left: 1px solid #bdc1c5;
             width: 30px;
-            height: 46px;
+            height: 34px;
         }
         
         .search-component .search-field .right-corner .btn-search a {
             position: relative;
-            top: 14px;
-            left: 6px;
+            top: 7px;
+            left: 4px;
         }
         
         .search-component .search-field .right-corner .btn-search a img {
-            height: 14px;
-            width: 14px;
+            height: 20px;
         }
         
         .search-component .search-field .right-corner .clear-search {
@@ -103,13 +71,11 @@
         
         .search-component .search-field .right-corner .clear-search a {
             position: relative;
-            top: 12px;
-            right: 8px;
+            top: 5px;
         }
         
         .search-component .search-field .right-corner .clear-search a img {
-            height: 12px;
-            width: 12px;
+            height: 20px;
         }
         
         .search-component .search-field .search-suggestion {
@@ -139,94 +105,6 @@
             background-color: #773514;
             color: white;
         }
-        /*.search-module {
-    width: 100%;
-}
-
-.search-module .search-term {
-    width: 100%;
-    height: 30px;
-    border: 1px solid #bdc1c5;
-    float:  left;
-}
-
-.search-module .search-icon {
-    float: right;
-    position: relative;
-    top: -30px;
-    text-decoration: none;
-}
-*/
-        /* Pin Search Styles */
-        
-        .pin-search {
-            background-color: #eee;
-            width: 960px;
-            height: 113px;
-            overflow: hidden;
-        }
-        
-        .pinsearch-content {
-            float: left;
-            width: 82%;
-            padding: 14px 10px;
-        }
-        
-        .pin-image {
-            float: left;
-        }
-        
-        .pin-image .pin-logo {
-            height: 84px;
-            padding: 18px 10px 2px 10px;
-            width: 107px;
-        }
-        
-        .pinsearch-content a {
-            color: #0f70ec;
-            font-size: 14px;
-            text-decoration: none;
-        }
-        /*Left Rail FilterBy section */
-        
-        .solrSearch-wrapper {
-            margin-top: 20px;
-            overflow: hidden;
-            width: 100%;
-        }
-        
-        .filterBy-section {
-            float: left;
-            padding-right: 30px;
-            width: 25%;
-        }
-        
-        .filterBy-section ul {
-            padding: 0px;
-        }
-        
-        .filterBy-section ul img {
-            width: 16px;
-        }
-        
-        .filterBy-section ul li {
-            margin-left: 10px;
-            padding: 5px;
-            overflow-wrap: break-word;
-        }
-        
-        .filterBy-section ul {
-            list-style: none;
-        }
-        
-        .filterBy-section .hidden {
-            display: none;
-        }
-        
-        .filterBy-section .visible {
-            display: inline-block;
-        }
-        /*Filter component*/
         
         .filter-component {
             padding: 0;
@@ -267,81 +145,6 @@
         .filter-component .filter-list.expanded .filter-list-items {
             display: block;
         }
-        /*Right Rail Search Results Section */
-        
-        .searchResults-section {
-            float: left;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        
-        .searchResults-section .search-image {
-            float: left;
-            margin-right: 20px;
-            text-align: right;
-            width: 10%;
-        }
-        
-        .searchResults-section .search-content {
-            float: left;
-            width: 85%;
-        }
-        
-        .results-wrapper {
-            float: left;
-            width: 70%;
-            border-left: 2px solid #eee;
-        }
-        
-        .pagination-links li {
-            list-style: none;
-            float: left;
-            padding: 10px;
-        }
-        
-        .pagination-links li a {
-            color: #0f70ec;
-            text-decoration: none;
-        }
-        
-        .pagination-module {
-            margin-left: 7%;
-        }
-        /* Small Devices, Tablets */
-        
-        @media only screen and (max-width: 768px) {
-            .container {
-                width: 100%;
-                margin: 0 auto;
-            }
-            .pin-image {
-                display: none;
-            }
-            .pinsearch-content {
-                width: 95%;
-            }
-            .filterBy-section {
-                display: none;
-            }
-            .results-wrapper {
-                width: 100%;
-            }
-            .search-image {
-                display: none;
-            }
-            .searchResults-section .search-content {
-                width: 100%;
-            }
-            .pagination-module {
-                margin-left: 0px;
-            }
-            ul.pagination-links {
-                padding-left: 0px;
-            }
-        }
-        /* Extra Small Devices, Phones */
-        
-        @media only screen and (max-width: 480px) {}
     </style>
 </head>
 
@@ -370,7 +173,7 @@
         </div>
         <!--End of Search Bar Module -->
         <!--Pin Search Module -->
-        <div class="pin-search hidden" style="margin-top:20px;">
+        <div class="pin-search" style="margin-top:20px;">
             <div class="pin-image">
                 <img src="images/polycom-logo.jpeg" alt="polycom-logo" style="height: 70px;padding: 10px;width: 70px;">
             </div>
@@ -378,7 +181,7 @@
                 <h4>Polycom TRIO 8800</h4>
                 <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...
                 </p>
-                <a class="link-to-content" href="#">Learn More &gt; </a>
+                <a href="#">Learn More &gt; </a>
             </div>
         </div>
         <!--End of Pin Search Module -->
@@ -391,7 +194,7 @@
             </div>
             <!--End of Left Rail Filter Module -->
             <!--Right Rail Search Results Module -->
-            <div class="results-wrapper hidden">
+            <div class="results-wrapper">
                 <div class="search-results-list"> </div>
                 <!--Pagination Module -->
                 <div class="pagination-module">
@@ -432,9 +235,8 @@
                 <h5 class="result-item-title">Polycom TRIO 8800</h5>
                 <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...
                 </p>
-                <p style="color:grey">
-                    <a class="link-to-content" >http://connect.polycom.com/content/dam/polycom/common/documents/presentations/realpresence-trio-sales-presentation-enus.pptx</a>
-                </p>
+                <p style="color:grey">http://connect.polycom.com/content/dam/polycom/common/documents/presentations/realpresence-
+                    <span class="highlight">trio</span>-sales-presentation-enus.pptx</p>
             </div>
         </div>
     </div>
@@ -459,7 +261,6 @@
                         filterParams.contentType.push($(n).attr('val'))
                     }
                 });
-                paginationConfig.active = 1;
                 parseResults();
             });
         };
@@ -467,43 +268,39 @@
             $('.filter-category-list').html('');
             $('.filter-component').addClass('hidden');
             if (filterData && filterData instanceof Array) {
-                if (filterData.length > 0) {
-                    filterData.forEach(function(category, ci) {
-                        var $templateHTML = $('.template-filter-category').clone();
-                        $templateHTML.removeClass('template-filter-category').removeClass('hidden');
-                        $templateHTML.find('.category-name').html(category.name);
-                        if (ci === 0) {
-                            $templateHTML.addClass('expanded');
-                        }
+                filterData.forEach(function(category, ci) {
+                    var $templateHTML = $('.template-filter-category').clone();
+                    $templateHTML.removeClass('template-filter-category').removeClass('hidden');
+                    $templateHTML.find('.category-name').html(category.name);
+                    if (ci === 0) {
+                        $templateHTML.addClass('expanded');
+                    }
 
-                        if (category.items && category.items instanceof Array) {
-                            category.items.forEach(function(filterItem, fi) {
-                                var $filterTemplate = $('.template-filter-item').clone();
-                                $filterTemplate.removeClass('template-filter-item');
-                                $filterTemplate.find('.filter-item-name').text(filterItem);
-                                $filterTemplate.find('input:checkbox').attr('key', category.key);
-                                $filterTemplate.find('input:checkbox').attr('val', filterItem);
-                                $filterTemplate.find('input:checkbox').attr('name', 'filter' + ci + '' + fi);
-                                $filterTemplate.find('input:checkbox').attr('id', 'filter' + ci + '' + fi);
-                                $filterTemplate.find('label').attr('for', 'filter' + ci + '' + fi);
-                                $templateHTML.find('.filter-list-items').append($filterTemplate);
-                            });
-                        }
+                    if (category.items && category.items instanceof Array) {
+                        category.items.forEach(function(filterItem, fi) {
+                            var $filterTemplate = $('.template-filter-item').clone();
+                            $filterTemplate.removeClass('template-filter-item');
+                            $filterTemplate.find('.filter-item-name').text(filterItem);
+                            $filterTemplate.find('input:checkbox').attr('key', category.key);
+                            $filterTemplate.find('input:checkbox').attr('val', filterItem);
+                            $filterTemplate.find('input:checkbox').attr('name', 'filter' + ci + '' + fi);
+                            $filterTemplate.find('input:checkbox').attr('id', 'filter' + ci + '' + fi);
+                            $filterTemplate.find('label').attr('for', 'filter' + ci + '' + fi);
+                            $templateHTML.find('.filter-list-items').append($filterTemplate);
+                        });
+                    }
 
-                        $('.filter-category-list').append($templateHTML);
-                        $('.filter-component').removeClass('hidden');
-                    });
+                    $('.filter-category-list').append($templateHTML);
+                    $('.filter-component').removeClass('hidden');
+                });
 
-                    bindFilterEvents();
-                } else {
-                    $('.filter-component').addClass('hidden');
-                }
+                bindFilterEvents();
             }
         };
 
         var highliter = function(tagToHighlite, textToHighlite) {
             if (textToHighlite.indexOf('*') < 0) {
-                var html = tagToHighlite.html().replace(new RegExp(' ' + textToHighlite, 'g'), ' <b>' + textToHighlite + '</b> ')
+                var html = tagToHighlite.html().replace(new RegExp(' ' + textToHighlite + ' ', 'g'), ' <b>' + textToHighlite + '</b> ')
                 tagToHighlite.html(html);
             }
         };
@@ -518,27 +315,11 @@
             $resultTemplate.removeClass('template-search-reult');
             $resultTemplate.find('.result-item-title').html(sItem.title);
             $resultTemplate.find('.content-desc').html(sItem.description);
-            $resultTemplate.find('.link-to-content').attr('href', sItem.url);
-            $resultTemplate.find('.link-to-content').html(location.href + sItem.url);
-            highliter($resultTemplate.find('.result-item-title'), $('.auto-suggestion').val());
             highliter($resultTemplate.find('.content-desc'), $('.auto-suggestion').val());
             $('.search-results-list').append($resultTemplate);
         };
-        var parsePinSearch = function(pinItem){
-            var $pinSearch = $('.pin-search');
-            $('.pin-search').addClass('hidden');
-            if (pinItem) {
-                $pinSearch.removeClass('hidden');
-                $pinSearch.find('.pinsearch-content').find('h4').html(pinItem.title);
-                $pinSearch.find('.pinsearch-content').find('.content-desc').html(pinItem.description);
-                $pinSearch.find('.pinsearch-content').find('.link-to-content').attr('href', pinItem.url);
-            }
-        };
         var renderresultsWithPagination = function(filteredResults) {
             $('.search-results-list').html('');
-            if (filteredResults.length > 0) {
-                $('.results-wrapper').removeClass('hidden');
-            }
             var startindex = (paginationConfig.active - 1) * paginationConfig.resultsPerPage;
             filteredResults.forEach(function(sItem, idx) {
                 if (idx >= startindex && idx < (startindex + paginationConfig.resultsPerPage)) {
@@ -559,8 +340,6 @@
             }
             if (paginationConfig.active > 1) {
                 $('.pagination-links').append('<li>  <a href="#" data-dir="0" class="previous-link page-nav-link">   &lt; </a>  </li>');
-            } else {
-                $('.pagination-links').append('<li>  &lt; </li>');
             }
             for (var i = 0; i < count; i++) {
                 var $templatePage = $('.template-pagination-item').clone();
@@ -571,16 +350,10 @@
                     links = links + $templatePage.html();
                 }
             }
-            if (filteredResults.length > 0) {
-                $('.pagination-links').append(links);
-            } else {
-                $('.pagination-links').html('');
-            }
 
-            if (totalpages > paginationConfig.active && filteredResults.length > 0) {
+            $('.pagination-links').append(links);
+            if (totalpages > paginationConfig.active) {
                 $('.pagination-links').append('<li>  <a href="#" data-dir="1" class="next-link page-nav-link">   &gt; </a>  </li>');
-            } else {
-                $('.pagination-links').append('<li>    &gt;   </li>');
             }
 
             $('.page-link').click(function(e) {
@@ -598,7 +371,7 @@
                 }
                 renderresultsWithPagination(filteredResults);
             });
-            parsePinSearch(filteredResults[0]);
+
         };
         var parseResults = function(contentType) {
             $('.search-results-list').html('');
@@ -640,34 +413,26 @@
 
             renderresultsWithPagination(filteredResults);
         };
-       
         var renderResults = function() {
-            $('.results-wrapper').addClass('hidden');
             $('.search-results-list').html('');
             var text = $('.auto-suggestion').val();
             filterParams.textSelected = text;
-            if (text == '') {
-                results = [];
-                
-                parseResults();
-                renderFilterComponent([]);
-            } else {
-                getResults().then(function(resp) {
-                    if (resp.response.docs) {
-                        var contentType = {
-                            name: 'CONTENT Type',
-                            key: 'contentType',
-                            items: []
-                        }
-                        results = resp.response.docs;
-                        parseResults(contentType);
-
-                        var filterData = [contentType];
-                        renderFilterComponent(filterData);
+            getResults().then(function(resp) {
+                if (resp.response.docs) {
+                    var contentType = {
+                        name: 'CONTENT Type',
+                        key: 'contentType',
+                        items: []
                     }
-                });
-            }
-           
+                    results = resp.response.docs;
+                    parseResults(contentType);
+
+                    var filterData = [contentType];
+                    renderFilterComponent(filterData);
+                }
+
+            });
+
         };
 
         var timeout,
@@ -821,7 +586,7 @@
                     }
                 } else {
                     $('.search-suggestion').html('');
-                    if (value.length >= 1) {
+                    if (value.length >= 3) {
                         $('.search-suggestion').removeClass('hidden');
                         getSuggestions(value);
                     } else {
@@ -833,7 +598,6 @@
             $('.link-search').click(function(e) {
                 e.preventDefault();
                 $('.search-suggestion').addClass('hidden');
-                paginationConfig.active = 1;
                 renderResults();
             });
         };
