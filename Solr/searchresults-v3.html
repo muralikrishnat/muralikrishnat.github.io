@@ -167,16 +167,11 @@
         /* Pin Search Styles */
         
         .pin-search {
+            background-color: #eee;
             width: 87%;
             height: auto;
             overflow: hidden;
-            margin: 0 auto;
-        }
-        
-        .pin-serach-item {
-            background-color: #eee;
-            margin-top: 18px;
-            overflow: hidden;
+            margin: 18px auto;
         }
         
         .pinsearch-content {
@@ -252,9 +247,7 @@
         }
         /* Updated for adding nested levels */
         
-        .filetype-pdf img,
-        .filetype-page img,
-        .filetype-video img {
+        .filetype-pdf img, .filetype-page img, .filetype-video img {
             display: none;
         }
         
@@ -264,14 +257,12 @@
             background-size: 30% 46%;
             background-repeat: no-repeat;
         }
-        
         .filetype-page .image-holder {
             background-image: url('images/internet.png');
             background-position: top right;
             background-size: 30% 46%;
             background-repeat: no-repeat;
         }
-        
         .filetype-video .image-holder {
             background-image: url('images/play.png');
             background-position: top right;
@@ -309,7 +300,6 @@
         .filter-component .filter-list-item label {
             cursor: pointer;
             font-size: 18px;
-            word-break: break-word;
         }
         
         .filter-component .filter-list-item input[type="checkbox"]+label:before {
@@ -322,8 +312,6 @@
             padding: 0;
             vertical-align: top;
             width: 12px;
-            position: absolute;
-            left: 0px;
         }
         
         .filter-component .filter-list-item input[type="checkbox"]:checked+label:before {
@@ -331,15 +319,6 @@
             color: #fff;
             content: "\2714";
             text-align: center;
-        }
-        
-        .filter-list-item {
-            padding-left: 20px;
-            position: relative;
-        }
-        .did-you-mean {
-            width: 87%;
-            margin: 10px auto 0 auto;
         }
         /*Right Rail Search Results Section */
         
@@ -490,8 +469,16 @@
         </div>
         <!--End of Search Bar Module -->
         <!--Pin Search Module -->
-        <div class="pin-search">
-
+        <div class="pin-search hidden">
+            <div class="pin-image">
+                <img src="images/polycom.jpg" alt="polycom-logo" class="pin-logo">
+            </div>
+            <div class="pinsearch-content">
+                <h3>Polycom TRIO 8800</h3>
+                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...
+                </p>
+                <a class="link-to-content" href="#">LEARN MORE &gt; </a>
+            </div>
         </div>
         <!--End of Pin Search Module -->
 
@@ -554,17 +541,6 @@
                 </p>
             </div>
         </div>
-        <div class="pin-serach-item template">
-            <div class="pin-image">
-                <img src="images/polycom.jpeg" alt="polycom-logo" class="pin-logo">
-            </div>
-            <div class="pinsearch-content">
-                <h3>Polycom TRIO 8800</h3>
-                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...
-                </p>
-                <a class="link-to-content" href="#">LEARN MORE &gt; </a>
-            </div>
-        </div>
     </div>
     <!-- END Templates -->
 
@@ -581,30 +557,41 @@
             filterParams = {
                 textSelected: '',
                 contentType: [],
-                assetType: [],
-                filters: []
+                assetType: []
             },
             didYouMeanTerms = [];
-        var configs = {
-            hideFilterZeroresults: true
+
+        var contentType = {
+            name: 'CONTENT Type',
+            key: 'contentType',
+            items: []
         };
+
+        var assetType = {
+            name: 'ASSET Type',
+            key: 'assetType',
+            items: []
+        };
+
         var bindFilterEvents = function() {
             $('.arrow-icon').click(function() {
                 $(this).closest('.filter-list').toggleClass('expanded');
             });
-            $('.filter-list-item').find('.checkbox').change(function() {
-                filterParams.filters = [];
-                $('.filter-list-item').find('.checkbox:checked').each((i, n) => {
-                    filterParams.filters.push({
-                        key: $(n).attr('key'),
-                        value: $(n).attr('val')
-                    });
-                });
-                paginationConfig.active = 1;
-                parseResults();
-            });
+            // $('.filter-list-item').find('.checkbox').change(function() {
+            //     filterParams.contentType = [];
+            //     $('.filter-list-item').find('.checkbox:checked').each((i, n) => {
+            //         if ($(n).attr('key') === 'contentType') {
+            //             filterParams.contentType.push($(n).attr('val'))
+            //         }
+            //         if ($(n).attr('key') === 'assetType') {
+            //             filterParams.assetType.push($(n).attr('val'))
+            //         }
+            //     });
+            //     paginationConfig.active = 1;
+            //     parseResults();
+            // });
         };
-        var getFilterItemHtml = function(filterItem, fi, category) {
+        var getFilterItemHtml = function(filterItem,fi) {
             var $filterTemplate = $('.template-filter-item').clone();
             $filterTemplate.removeClass('template-filter-item');
             if (filterItem.items && filterItem.items.length > 0) {
@@ -612,14 +599,10 @@
                 let $templateHTML = getFilterCategory(filterItem);
                 $filterTemplate.append($templateHTML);
             } else {
-                $filterTemplate.find('.filter-item-name').text(filterItem.name);
-                let key = category.id;
-                if (!key) {
-                    key = category.name.toLowerCase().replace(' ', '');
-                }
-                $filterTemplate.find('input:checkbox').attr('key', key);
+                $filterTemplate.find('.filter-item-name').text(filterItem.name); 
+                $filterTemplate.find('input:checkbox').attr('key', filterItem.name.toLowerCase().replace(' ', ''));
                 $filterTemplate.find('input:checkbox').attr('val', filterItem.name);
-                let dt = (new Date).getTime() + '' + fi;
+                let dt = (new Date).getTime()+''+fi;
                 $filterTemplate.find('input:checkbox').attr('name', 'filter' + dt);
                 $filterTemplate.find('input:checkbox').attr('id', 'filter' + dt);
                 $filterTemplate.find('label').attr('for', 'filter' + dt);
@@ -632,7 +615,7 @@
             $templateHTML.find('.category-name').html(category.name);
             if (category.items && category.items.length > 0) {
                 category.items.forEach(function(filterItem, fi) {
-                    $filterItem = getFilterItemHtml(filterItem, fi, category);
+                    $filterItem = getFilterItemHtml(filterItem,fi);
                     $templateHTML.find('.filter-list-items').append($filterItem);
                 });
             }
@@ -658,10 +641,13 @@
             if (textToHighlite.indexOf('*') < 0) {
                 var words = [];
                 tagToHighlite.text().split(' ').forEach(wA => {
+                    var w = wA.toLowerCase();
                     var q = textToHighlite.toLowerCase();
-                    var regexp = new RegExp(q, 'ig');
-                    wA = wA.replace(regexp, '<span class="font-bold">$&</span>');
-                    words.push(wA);
+                    if (w.toLowerCase().indexOf(textToHighlite.toLowerCase()) >= 0) {
+                        words.push('<span class="font-bold">' + wA.substr(0, q.length) + '</span>' + wA.substr(q.length));
+                    } else {
+                        words.push(wA);
+                    }
                 })
                 tagToHighlite.html(words.join(' '));
             }
@@ -687,13 +673,13 @@
             link.href = urlToPoint;
             var pathName = link.pathname;
             var paths = pathName.split('/');
-            var showingUrl = 'http://' + link.hostname + '/' + paths.join('/');
+            var showingUrl = link.hostname + '/' + paths.join('/');
             if (paths.length > 2) {
-                showingUrl = 'http://' + link.hostname + '/' + (paths[0].length > 0 ? paths[0] : paths[1]) + '/.../' + paths[paths.length - 1];
+                showingUrl = link.hostname + '/' + (paths[0].length > 0 ? paths[0] : paths[1]) + '/.../' + paths[paths.length - 1];
             }
             $resultTemplate.find('.link-to-content').html(showingUrl);
             $resultTemplate.find('.link-to-content').attr('title', urlToPoint)
-            if (!sItem.thumbnail) {
+            if (si) {
                 let fileType = ''
                 if (sItem.contentType && sItem.contentType instanceof Array) {
                     fileType = 'filetype-' + sItem.contentType[0];
@@ -703,25 +689,16 @@
             $resultTemplate.find('.search-image').find('img').attr('src', sItem.thumbnail);
             highliter($resultTemplate.find('.result-item-title'), $('.auto-suggestion').val());
             highliter($resultTemplate.find('.content-desc'), $('.auto-suggestion').val());
-            highliter($resultTemplate.find('.link-to-content'), $('.auto-suggestion').val());
             $('.search-results-list').append($resultTemplate);
         };
-        var getPinSearchItem = function(pinItem) {
-            var $pinSearch = $('.pin-serach-item.template').clone();
-            $pinSearch.removeClass('template');
-            $pinSearch.find('.pinsearch-content').find('h3').html(pinItem.title);
-            $pinSearch.find('.pinsearch-content').find('.content-desc').html(pinItem.description);
-            $pinSearch.find('.pinsearch-content').find('.link-to-content').attr('href', pinItem.url);
-            return $pinSearch;
-        };
         var parsePinSearch = function(pinItem) {
-            var $pinSearchContainer = $('.pin-search');
-            $pinSearchContainer.html('');
-            if (filteredResults.length > 0) {
-                $pinSearchContainer.append(getPinSearchItem(filteredResults[0]));
-                if (filteredResults[1]) {
-                    $pinSearchContainer.append(getPinSearchItem(filteredResults[1]));
-                }
+            var $pinSearch = $('.pin-search');
+            $('.pin-search').addClass('hidden');
+            if (pinItem) {
+                $pinSearch.removeClass('hidden');
+                $pinSearch.find('.pinsearch-content').find('h3').html(pinItem.title);
+                $pinSearch.find('.pinsearch-content').find('.content-desc').html(pinItem.description);
+                $pinSearch.find('.pinsearch-content').find('.link-to-content').attr('href', pinItem.url);
             }
         };
         var renderresultsWithPagination = function(filteredResults) {
@@ -790,24 +767,18 @@
                 }
                 renderresultsWithPagination(filteredResults);
             });
-
-            if (filteredResults.length === 0 && configs.hideFilterZeroresults) {
-                $('.filter-component').addClass('hidden');
-                $('.results-wrapper').addClass('hidden');
-            }
-
-            parsePinSearch();
+            parsePinSearch(filteredResults[0]);
         };
         var parseResults = function(contentType) {
             $('.search-results-list').html('');
             var text = filterParams.textSelected;
-            filteredResults = results.filter(function(sItem) {
-                if (filterParams.filters.length === 0) {
+            var filteredResults = results.filter(function(sItem) {
+                if (filterParams.contentType.length === 0 && filterParams.assetType.length === 0) {
                     return true;
                 } else {
                     var foundContentType = 0;
-                    filterParams.filters.forEach(f => {
-                        if (sItem[f.key] && sItem[f.key].indexOf(f.value) >= 0) {
+                    filterParams.contentType.forEach(f => {
+                        if (sItem['contentType'].indexOf(f) >= 0) {
                             foundContentType += 1;
                         }
                     });
@@ -817,43 +788,31 @@
                 }
                 return false;
             });
+            filteredResults = filteredResults;
             renderresultsWithPagination(filteredResults);
         };
 
         var renderResults = function() {
             $('.results-wrapper').addClass('hidden');
             $('.search-results-list').html('');
-            $('.did-you-mean').addClass('hidden');
-            $('.did-you-mean').find('span').html('');
             var text = $('.auto-suggestion').val();
             filterParams.textSelected = text;
             if (text == '') {
                 facetPivot = [];
                 results = [];
-                didYouMeanTerms = [];
                 parseResults();
                 renderFilterComponent();
             } else {
                 getResults(text).then(function({
                     docs,
-                    facet,
-                    didYouMean
+                    facet
                 }) {
-                    if (docs.length > 0) {
+                    if (docs) {
                         results = docs;
                         facetPivot = facet;
-                        didYouMeanTerms = didYouMean;
-                        console.log('did terms ', didYouMeanTerms);
-                        if (didYouMeanTerms.length > 0) {
-                            $('.did-you-mean').find('span').append(didYouMeanTerms.join(','));
-                            $('.did-you-mean').removeClass('hidden');
-                        }
-                    } else {
-                        facetPivot = [];
-                        results = [];
+                        parseResults();
+                        renderFilterComponent();
                     }
-                    parseResults();
-                    renderFilterComponent();
                 });
             }
         };
@@ -879,12 +838,12 @@
                         "docs": [{
                             "id": "/content/projectplan/expertise",
                             "title": ["Expertise"],
+                            "thumbnail": 'images/polycom-logo.jpeg',
                             "url": ["/content/projectplan/expertise.html"],
                             "description": 'The RealPresence TRIO expertise is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
                             "lastModified": ["2017-04-111T11:02:12Z"],
                             "contentType": ["page"],
                             "assetType": ["test"],
-                            "product": ["RealPresence Centro"],
                             "_version_": 1578946212777689088
                         }, {
                             "id": "/content/projectplan/company",
@@ -968,7 +927,7 @@
                             "lastModified": ["2017-04-111T11:01:54Z"],
                             "contentType": ["pdf"],
                             "_version_": 1578946213006278656
-                        }, {
+                        },{
                             "id": "/content/projectplan/news",
                             "title": ["News"],
                             "thumbnail": 'images/polycom-logo.jpeg',
@@ -977,7 +936,7 @@
                             "lastModified": ["2017-04-111T11:01:54Z"],
                             "contentType": ["pdf"],
                             "_version_": 1578946213006278656
-                        }, {
+                        },{
                             "id": "/content/projectplan/news",
                             "title": ["News"],
                             "thumbnail": 'images/polycom-logo.jpeg',
@@ -986,7 +945,7 @@
                             "lastModified": ["2017-04-111T11:01:54Z"],
                             "contentType": ["pdf"],
                             "_version_": 1578946213006278656
-                        }, {
+                        },{
                             "id": "/content/projectplan/news",
                             "title": ["News"],
                             "thumbnail": 'images/polycom-logo.jpeg',
@@ -995,7 +954,8 @@
                             "lastModified": ["2017-04-111T11:01:54Z"],
                             "contentType": ["pdf"],
                             "_version_": 1578946213006278656
-                        }],
+                        }
+                        ],
                         "facet_pivot": [{
                             name: 'Product',
                             id: 'product',
@@ -1018,7 +978,7 @@
                             items: [{
                                 name: 'pdf'
                             }, {
-                                name: 'page'
+                                name: 'html'
                             }, {
                                 name: 'pptx'
                             }, {
@@ -1037,39 +997,14 @@
                                     name: 'Presentations'
                                 }, {
                                     name: 'Sheets'
-                                }, {
-                                    name: 'test'
-                                }]
+                                },{name:'test'}]
                             }]
                         }]
                     }
                 };
-                var iscloseWord = function(t, q) {
-                    var prevMatched = true,
-                        lettersMatched = '';
-                    for (let i = 0; i < q.length; i++) {
-                        if (q[i].toLowerCase() == t[i].toLowerCase() && prevMatched) {
-                            lettersMatched += t[i];
-                            prevMatched = true;
-                        } else {
-                            prevMatched = false;
-                        }
-                    }
-
-                    if (lettersMatched.length > 1) {
-                        console.log('close check', t, q, lettersMatched);
-                        return true;
-                    }
-                };
-                var didYouMean = [];
                 var docs = resp.response.docs.filter(r => {
                     if (r.title.filter(t => {
                             if (t.toLowerCase().indexOf(q.toLowerCase()) == 0 || q === '*') {
-                                return true;
-                            } else if (iscloseWord(t, q)) {
-                                if (didYouMean.indexOf(t) < 0) {
-                                    didYouMean.push(t);
-                                }
                                 return true;
                             }
                             return false;
@@ -1080,8 +1015,7 @@
                 })
                 res({
                     docs,
-                    facet: resp.response.facet_pivot,
-                    didYouMean: didYouMean
+                    facet: resp.response.facet_pivot
                 });
             });
             return promiseObject;
@@ -1102,19 +1036,16 @@
             timeout = setTimeout(function() {
                 getResults(text).then(function({
                     docs,
-                    facet,
-                    didYouMean
+                    facet
                 }) {
                     $('.search-suggestion').html('');
                     if (docs) {
-                        var suggestions = [];
                         docs.forEach(function(sItem) {
                             if (sItem.title) {
                                 sItem.title.forEach(function(r) {
                                     var rL = r.toLowerCase();
                                     var textL = text.toLowerCase();
-                                    if (r.toLowerCase().indexOf(text.toLowerCase()) == 0 && suggestions.indexOf(r) < 0) {
-                                        suggestions.push(r);
+                                    if (r.toLowerCase().indexOf(text.toLowerCase()) == 0) {
                                         $('.search-suggestion').append('<li class="suggestion-item" val="' +
                                             r + '">' + (rL.substr(rL.indexOf(textL), textL.length) + '<span class="font-bold">' + rL.substr(rL.indexOf(textL) + textL.length, rL.length) + '</span>') + '</li>');
                                     }
@@ -1124,7 +1055,7 @@
                         bindSuggestionLinkEvents();
                     }
                 });
-            }, 0);
+            }, 400);
         };
 
         var bindAutoSuggestionEvents = function() {
@@ -1146,6 +1077,7 @@
                     $('.search-suggestion').addClass('hidden');
                     $('.search-suggestion').html('');
                 } else if (e.keyCode == 13) {
+                    $('.search-suggestion').html('');
                     if ($('.auto-suggestion').val() === '*') {
 
                     } else {
@@ -1153,9 +1085,8 @@
                             $('.auto-suggestion').val($('.suggestion-item.active').attr('val'));
                         }
                     }
-                    $('.search-suggestion').html('');
                     paginationConfig.active = 1;
-                    filterParams.filters = [];
+                    filterParams.contentType = [];
                     renderResults();
                 } else if (e.keyCode == 38) {
                     //up arrow
@@ -1192,7 +1123,7 @@
                 e.preventDefault();
                 $('.search-suggestion').addClass('hidden');
                 paginationConfig.active = 1;
-                filterParams.filters = [];
+                filterParams.contentType = [];
                 renderResults();
             });
         };
