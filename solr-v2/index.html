@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      /*==================================================
+  =            CSS Stylings           =
+  ==================================================*/
+
+body {
+    font-family:"ProximaNova-Regular";
+    line-height: 1.5;
+}
+
+h4.filter-section-heading{
+    font-family:"ProximaNova-Bold";
+}
+
+p,a{
+    line-height:18px;
+    font-size:14px;
+}
+.hidden {
+  display: none;
+}
+.container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+p,
+h3,
+h4,
+h5 {
+    margin: 0px;
+    padding: 0px;
+}
+.font-bold { font-weight: bold; }
+
+/* Search Module Styles */
+.search-component * {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.search-component .search-field {
+  position: relative;
+  width: 87%;
+  border: 1px solid #bdc1c5; 
+  height: 48px;
+  margin:20px auto 0px;
+        top: 60px;
+}
+.search-component .search-field .search-input {
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border: none;
+  border-radius: 5px;
+  padding-left: 10px;
+}
+.search-component .search-field .right-corner {
+  position: relative;
+}
+.search-component .search-field .right-corner .btn-search {
+  float: right;
+  border-left: 1px solid #bdc1c5;
+  width: 30px;
+  height: 46px;
+}
+.search-component .search-field .right-corner .btn-search a {
+  position: relative;
+  top: 16px;
+  left: 6px;
+}
+.search-component .search-field .right-corner .btn-search a img {
+  height: 16px;
+  width:16px;
+}
+.search-component .search-field .right-corner .clear-search {
+  float: right;
+  height: 34px;
+}
+.search-component .search-field .right-corner .clear-search a {
+  position: relative;
+  top: 16px;
+  right:8px;
+}
+.search-component .search-field .right-corner .clear-search a img {
+  height: 16px;
+  width:16px;
+}
+.search-component .search-field .search-suggestion {
+  position: absolute;
+  top: 47px;
+  list-style: none;
+  width: 50%;
+  background-color: #fff;
+  box-shadow: 0px 2px 4px #111;
+      z-index: 1000;
+}
+.search-component .search-field .search-suggestion .suggestion-item {
+  padding-left: 12px;
+  padding-top: 10px;
+  cursor: pointer;
+  padding-bottom: 10px;
+}
+.search-component .search-field .search-suggestion .suggestion-item:hover {
+  background-color: #eee; 
+}
+.search-component .search-field .search-suggestion .suggestion-item.active {
+  background-color: #eee; 
+}
+
+    .did-you-mean {
+                width: 87%;
+    margin: 10px auto 0 auto;
+    color: #DC143C;
+    font-weight: bold;
+    position: relative;
+    top: 70px;
+        }
+ .did-you-mean .suggestion-text{
+            color:#0088cc;
+                font-style: italic;
+        }
+        /*==================================================
+  =            CSS Stylings           =
+  ==================================================*/
+
+ /* Pin Search Styles */
+.pin-search { 
+    width: 87%;
+    height:auto;
+    overflow: hidden;
+    margin:0px auto;
+        position: relative;
+    top: 70px;
+}
+
+        
+        .pin-serach-item {
+            background-color: #eee;
+            margin-top: 18px;
+            overflow: hidden;
+        }
+
+.pinsearch-content {
+    float: left;
+    width: 82%;
+    padding:12px 10px 10px 5px;
+}
+
+.pinsearch-content h3{
+    font-size:20px;
+    font-weight:500;
+    }
+.pin-image {
+    float: left; 
+}
+.pin-image .pin-logo{
+    height: 84px;
+    padding: 20px 5px 10px 10px;
+    width: 107px;
+}
+.pinsearch-content a {
+    color: #0088cc;
+    font-size: 12px;
+    font-weight:600;
+    text-decoration: none;
+    display: block;
+}
+.pinsearch-content a:hover{
+            color:#00537c;
+        }
+ /*Left Rail FilterBy section */
+        
+        .solrSearch-wrapper {
+            margin: 20px auto;
+            overflow: hidden;
+            width: 87%;
+    position: relative;
+    top: 70px;
+        }
+        
+
+        .filter-component {
+            float: left; 
+            width: 22%; 
+        }
+        
+        .filter-component ul {
+            padding: 0px;
+            list-style: none;
+        }
+        
+        .filter-component ul img {
+            width: 16px;
+        }
+        
+        .filter-component ul li {
+            margin-left: 10px;
+            padding: 5px;
+            overflow-wrap: break-word;
+        }
+        
+                
+        .filter-component .hidden {
+            display: none;
+        }
+        
+        .filter-component .visible {
+            display: inline-block;
+        }
+             
+        
+        
+        .filter-component .filter-list {
+            margin-top: 10px;
+        }
+        
+        .filter-component .filter-list .arrow-icon {
+                width: 6px;
+    padding-right: 10px;
+    cursor: pointer;
+        }
+        
+
+
+        .filter-component .filter-list .filter-list-items {
+            display: none;
+            padding-left: 10px;
+}    
+
+
+.filter-category-list .filter-list-item:hover{
+background-color:#eee;
+
+        }
+.filter-category-list .filter-list-item{
+    padding-left:30px;
+    cursor:pointer;
+    position: relative;
+    margin-bottom:5px;
+
+        }
+.filter-component .filter-list-item input[type="checkbox"] {
+  visibility: hidden;
+    position:absolute;
+}
+.filter-component .filter-list-item label{
+  cursor: pointer;
+    font-size: 14px;
+    word-break: break-word;
+}
+.filter-component .filter-list-item input[type="checkbox"] + label:before {
+   border: 1px solid #A9A9A9;
+    content: "\00a0";
+    display: inline-block;
+    font-size: 10px;
+    height: 12px;
+    margin: 4px 8px 0px 8px;
+    padding: 0;
+    vertical-align: top;
+    width: 12px;
+    position: absolute;
+     left: 0px;
+
+}
+.filter-component .filter-list-item input[type="checkbox"]:checked + label:before {
+  background: #0088cc;
+  color: #fff;
+  content: "\2714";
+  text-align: center;
+}
+
+
+.filter-component .filter-list>.filter-category-heading>.down-arrow {
+            display: none;
+        }
+        
+        .filter-component .filter-list>.filter-list-items {
+            display: none;
+
+        }
+        
+        .filter-component .filter-list.expanded>.filter-category-heading>.left-arrow {
+            display: none;
+        }
+        
+        .filter-component .filter-list.expanded>.filter-category-heading>.down-arrow {
+            display: inline;
+        }
+        
+        .filter-component .filter-list.expanded>.filter-list-items {
+            display: block;
+        }
+
+.filter-list .filter-category-heading .category-name{
+                font-size:16px;
+            }
+.filter-list .filter-category-heading{
+            margin-bottom:5px;
+        }
+
+        /*Right Rail Search Results Section */
+        .results-wrapper {
+            float: left;
+            width: 75%;
+            padding-left: 10px;
+            border-left: 2px solid #eee;
+        margin-bottom: 50px;
+        }
+        .searchResults-section {
+            float: left;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+.search-content h4 {
+    font-size: 16px;
+    color: #0088cc;
+}
+        .searchResults-section .search-image {
+            float: left;
+            margin-right: 10px;
+            text-align: right;
+            width: 10%;
+        }
+        
+        .searchResults-section .search-content {
+               float: left;
+                width: 85%; 
+           }
+
+        
+        .results-wrapper .pagination-module {
+            margin-left: 7%;
+        }
+        .results-wrapper .pagination-links li {
+            list-style: none;
+            float: left;
+            padding: 8px;
+            font-size:14px;
+        }
+        
+        .results-wrapper .pagination-links li a {
+            color: #0088cc;
+            text-decoration: none;
+            font-weight:bold;
+        }
+.results-wrapper .pagination-links li a:hover{
+        color:#00537c
+            }
+        .link-to-content{
+        color: #A9A9A9;
+    text-decoration: none;
+    }
+
+ .link-to-content:hover{
+color:#A9A9A9;
+    font-weight:bold;
+            }
+
+        .filetype-pdf img, .filetype-page img, .filetype-video img {
+            display: none;
+        }
+        
+        .search-image.filetype-pdf .image-holder {
+            background-image: url('images/file.png');
+            background-position: top right;
+            background-size: 28% 34%;
+            background-repeat: no-repeat;
+        }
+        .search-image.filetype-page .image-holder {
+            background-image: url('images/internet.png');
+            background-position: top right;
+            background-size: 30% 34%;
+            background-repeat: no-repeat;
+        }
+        .search-image.filetype-video .image-holder {
+            background-image: url('images/play.png');
+            background-position: top right;
+            background-size: 30% 32%;
+            background-repeat: no-repeat;
+        }
+.search-image .image-holder{
+       height: 63px;
+    width: 72px;
+    margin-top: 6px;
+        }
+
+.searchResults-section .non-video-content {
+            display: block;
+        }
+
+        .searchResults-section .video-content {
+            display: none;
+        }
+        
+        .searchResults-section.result-type-video .non-video-content {
+            display: none;
+        }
+        
+        .searchResults-section.result-type-video .video-content {
+            display: block;
+        }
+  /* Small Devices, Tablets */
+        
+        @media only screen and (max-width: 768px) {
+            .container {
+                width: 100%;
+                margin: 0 auto;
+            }
+            .pin-search .pin-image {
+                display: none;
+            }
+            .pinsearch-content {
+                width: 95%;
+                padding:12px 10px 10px 15px
+            }
+            .filterBy-section {
+                display: none;
+            }
+            .results-wrapper {
+                width: 100%;
+                border-left:none;
+                padding-left:0px;
+            }
+            .search-image {
+                display: none;
+            }
+            .solrSearch-wrapper .filter-component{
+              display: none;
+            }
+            .searchResults-section .search-content {
+                width: 100%;
+            }
+            .results-wrapper .pagination-module {
+                margin-left: 0px;
+            }
+            ul.pagination-links {
+                padding-left: 0px;
+            }
+        }
+        /* Extra Small Devices, Phones */
+        
+        @media only screen and (max-width: 480px) {
+          .search-component .search-field .right-corner .clear-search a{
+            top: 12px;
+          }
+          .search-component .search-field .right-corner .clear-search a img {
+              height: 22px;
+              width: 22px;
+          }
+          .search-component .search-field .right-corner .btn-search a {
+              position: relative;
+              top: 12px;
+              left: 6px;
+          }
+          .search-component .search-field .right-corner .btn-search a img {
+              height: 26px;
+              width: 26px;
+          }
+          .search-component .search-field .right-corner .btn-search { 
+              width: 40px;
+              height: 46px;
+          }
+           
+          .pinsearch-content{
+            padding: 12px 10px 10px 15px;
+          }
+          .pinsearch-content h3 {
+              font-size: 26px;
+              font-weight: 600;
+          }
+        }
+        
+        @media only screen and (min-width: 1025px) {
+            .container {
+                width: 1107px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+
+
+         <!--Search Bar Module -->
+        <div class="search-component">
+            <div class="search-field">
+                <input autocomplete="off" placeholder="Enter Search Keyword" role="textbox" type="text" class="search-input auto-suggestion" />
+                <div class="right-corner">
+                    <div class="btn-search">
+                        <a href="#" class="link-search">
+                            <img src="images/search-icon.png" alt="search">
+                        </a>
+                    </div>
+                    <div class="clear-search">
+                        <a href="#" class="btn-clear-search">
+                            <img src="images/close.png" alt="close">
+                        </a>
+                    </div>
+                </div>
+                <ul class="search-suggestion hidden"> </ul>
+            </div>
+            <div class="did-you-mean hidden">Did you mean: <span class="suggestion-text"></span></div>
+        </div>
+<!--End of Search Bar Module -->
+<!----Results not found -->
+<div class="results-not-found" style="position: relative;
+top: 80px;
+left: 70px;">
+  <p>Your search term is not found</p>
+  <ul>
+    <li>Serach for more suggestions</li>
+  </ul>
+</div>
+        <!--Pin Search Module -->
+        <div class="pin-search">
+
+        </div>
+        <!--End of Pin Search Module -->
+
+        <div class="solrSearch-wrapper">
+            <!--Left Rail Filter Module -->
+
+            <div class=" filter-component hidden">
+                <h4 class="filter-section-heading">FILTER BY
+<a href="#"><span>RESET ALL FILTERS</span></a>
+                </h4>
+                <div class="filter-category-list"></div> 
+            </div>
+            <!--End of Left Rail Filter Module -->
+            <!--Right Rail Search Results Module -->
+            <div class="results-wrapper hidden">
+                <div class="search-results-list"> </div>
+
+                <!--Pagination Module -->
+                <div class="pagination-module">
+                    <ul class="pagination-links"> </ul>
+                </div>
+            </div>
+            <!--End of Right Rail Search Results Module -->
+        </div>
+
+    </div>
+
+    <!-- START Templates -->
+    <div class="templates hidden" style="display: none;">
+        <div class="filter-list template-filter-category">
+            <div class="filter-category-heading">
+                <img class="left-arrow arrow-icon" src="images/left.png" />
+                <img class="down-arrow arrow-icon" src="images/down.png" />
+                <span class="category-name">
+                  <a href="#"><span>Clear filters</span></a>
+                </span>
+            </div>
+            <div class="filter-list-items"></div>
+        </div>
+        <div class="filter-list-item template-filter-item">
+            <input name="centro" class="checkbox" type="checkbox">
+            <label for="centro" class="labelcheckbox filter-item-name"><span>RealPresence Centro</span></label>
+        </div>
+        <div class="template-pagination-item">
+            <li>
+                <a href="#" class="page-link">1</a>
+            </li>
+        </div>
+        <div class="template-search-reult searchResults-section">
+            <div class="search-image">
+                <div class="image-holder">
+                    <img src="images/polycom.jpg" alt="polycom-logo" style="width: 100%; height: 100%" />
+                </div>
+            </div>
+             <div class="search-content">
+                <h4 class="result-item-title"></h4>
+                <div class="non-video-content">
+                    <p class="content-desc">
+                    </p>
+
+                        <a class="link-to-content"></a>
+                     
+                </div>
+                <div class="video-content" style="position: relative;">
+                    <div class="video-thumb" style="width: 50px;height: 36px;background-color: #eee;float: left;margin-right: 10px;">
+                        <img src="images/video.png" alt="polycom-logo" style="width: 100%; height: 100%" />
+                    </div>
+                    <div>
+                        <p class="content-desc">
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <div class="pin-serach-item template">
+            <div class="pin-image">
+                <a href="https://www.polycom.com"><img src="images/polycom.jpg" alt="polycom-logo" class="pin-logo"></a>
+            </div>
+            <div class="pinsearch-content">
+                <h3><a href="#">Polycom TRIO 8800</a></h3>
+                <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...
+                </p>
+                <a class="content-link" href="#">LEARN MORE &gt; </a>
+                    <a class="content-link" href="#">MORE ABOUT &gt; </a>
+            </div>
+        </div>
+    </div>
+    <!-- END Templates -->
+
+     <script src="jquery-3.2.1.min.js"></script>
+    <script>
+       var paginationConfig = {
+                resultsPerPage: 20,
+                noofpages: 10,
+                active: 1
+            },
+            results = [],
+            facetPivot = [],
+            filterResults = [],
+            filterParams = {
+                textSelected: '',
+                contentType: [],
+                assetType: [],
+                filters: []
+            },
+            didYouMeanTerms = [];
+        var configs = {
+            hideFilterZeroresults: true,
+            updateUrl: true
+        };
+        var bindFilterEvents = function() {
+            $('.arrow-icon').click(function() {
+                $(this).closest('.filter-list').toggleClass('expanded');
+            });
+            $('.filter-list-item').find('.checkbox').change(function() {
+                filterParams.filters = [];
+                $('.filter-list-item').find('.checkbox:checked').each((i, n) => {
+                    filterParams.filters.push({
+                        key: $(n).attr('key'),
+                        value: $(n).attr('val')
+                    });
+                });
+                paginationConfig.active = 1;
+                parseResults();
+            });
+        };
+        var getFilterItemHtml = function(filterItem, fi, category) {
+            var $filterTemplate = $('.template-filter-item').clone();
+            $filterTemplate.removeClass('template-filter-item');
+            if (filterItem.items && filterItem.items.length > 0) {
+                $filterTemplate.html('');
+                let $templateHTML = getFilterCategory(filterItem);
+                $filterTemplate.append($templateHTML);
+            } else {
+                $filterTemplate.find('.filter-item-name').text(filterItem.name);
+                let key = category.id;
+                if (!key) {
+                    key = category.name.toLowerCase().replace(' ', '');
+                }
+                $filterTemplate.find('input:checkbox').attr('key', key);
+                $filterTemplate.find('input:checkbox').attr('val', filterItem.name);
+                let dt = (new Date).getTime() + '' + fi;
+                $filterTemplate.find('input:checkbox').attr('name', 'filter' + dt);
+                $filterTemplate.find('input:checkbox').attr('id', 'filter' + dt);
+                if (filterParams.filters.length > 0) {
+                    var selected = filterParams.filters.filter(function(fparam) {
+                        if (fparam.key === key && fparam.value == filterItem.name) {
+                            return true;
+                        }
+                        return false;
+                    });
+
+                    if (selected.length > 0) {
+                        $filterTemplate.find('input:checkbox').attr('checked', 'checked');
+                    }
+                }
+                $filterTemplate.find('label').attr('for', 'filter' + dt);
+            }
+            return $filterTemplate;
+        };
+        var getFilterCategory = function(category) {
+            var $templateHTML = $('.template-filter-category').clone();
+            $templateHTML.removeClass('template-filter-category').removeClass('hidden');
+            $templateHTML.find('.category-name').html(category.name);
+            if (category.items && category.items.length > 0) {
+                category.items.forEach(function(filterItem, fi) {
+                    $filterItem = getFilterItemHtml(filterItem, fi, category);
+                    $templateHTML.find('.filter-list-items').append($filterItem);
+                });
+            }
+            return $templateHTML;
+        };
+        var renderFilterComponent = function() {
+            $('.filter-category-list').html('');
+            $('.filter-component').addClass('hidden');
+            if (facetPivot && facetPivot instanceof Array && facetPivot.length > 0) {
+                facetPivot.forEach((f, fi) => {
+                    let $templateHTML = getFilterCategory(f);
+                    if (fi === 0) {
+                        $templateHTML.addClass('expanded');
+                    }
+                    $('.filter-category-list').append($templateHTML);
+                });
+                $('.filter-component').removeClass('hidden');
+            }
+            bindFilterEvents();
+
+            if (filteredResults.length === 0 && configs.hideFilterZeroresults) {
+                $('.filter-component').addClass('hidden');
+                $('.results-wrapper').addClass('hidden');
+            }
+        };
+
+        var highliter = function(tagToHighlite, textToHighlite) {
+            if (textToHighlite.indexOf('*') < 0) {
+                var words = [];
+                tagToHighlite.text().split(' ').forEach(wA => {
+                    var q = textToHighlite.toLowerCase();
+                    var regexp = new RegExp(q, 'ig');
+                    wA = wA.replace(regexp, '<span class="font-bold">$&</span>');
+                    words.push(wA);
+                })
+                tagToHighlite.html(words.join(' '));
+            }
+        };
+
+
+        var renderResultItem = function(sItem, si) {
+            var $resultTemplate = $('.template-search-reult').clone();
+            $resultTemplate.removeClass('template-search-reult');
+            $resultTemplate.find('.result-item-title').html(sItem.title);
+            var descriptionContent = sItem.description;
+            var words = descriptionContent.split(' ');
+            var ws = '';
+            for (let i = 0; i < words.length; i++) {
+                if (ws.length + words[i].length < 150) {
+                    ws = ws + (ws.length > 0 ? ' ' : '') + words[i];
+                }
+            }
+            $resultTemplate.find('.content-desc').html(ws + ' ...');
+            var urlToPoint = 'http://www.polycom.com' + sItem.url;
+            $resultTemplate.find('.link-to-content').attr('href', urlToPoint);
+            var link = document.createElement('A');
+            link.href = urlToPoint;
+            var pathName = link.pathname;
+            var paths = pathName.split('/');
+            var showingUrl = 'http://' + link.hostname + '/' + paths.join('/');
+            if (paths.length > 2) {
+                showingUrl = 'http://' + link.hostname + '/' + (paths[0].length > 0 ? paths[0] : paths[1]) + '/.../' + paths[paths.length - 1];
+            }
+            $resultTemplate.find('.link-to-content').html(showingUrl);
+            $resultTemplate.find('.link-to-content').attr('title', urlToPoint);
+            let fileType = ''
+            if (sItem.contentType && sItem.contentType instanceof Array) {
+                fileType = 'filetype-' + sItem.contentType[0];
+            }
+            if (!sItem.thumbnail) {
+                $resultTemplate.find('.search-image').addClass(fileType);
+            }
+            $resultTemplate.addClass('result-type-' + sItem.contentType);
+            $resultTemplate.find('.search-image').find('img').attr('src', sItem.thumbnail);
+            highliter($resultTemplate.find('.result-item-title'), $('.auto-suggestion').val());
+            highliter($resultTemplate.find('.content-desc'), $('.auto-suggestion').val());
+            highliter($resultTemplate.find('.link-to-content'), $('.auto-suggestion').val());
+            $('.search-results-list').append($resultTemplate);
+        };
+        var getPinSearchItem = function(pinItem) {
+            var $pinSearch = $('.pin-serach-item.template').clone();
+            $pinSearch.removeClass('template');
+            $pinSearch.find('.pinsearch-content').find('h3').html(pinItem.title);
+            $pinSearch.find('.pinsearch-content').find('.content-desc').html(pinItem.description);
+            $pinSearch.find('.pinsearch-content').find('.link-to-content').attr('href', pinItem.url);
+            return $pinSearch;
+        };
+        var parsePinSearch = function(pinItem) {
+            var $pinSearchContainer = $('.pin-search');
+            $pinSearchContainer.html('');
+            if (filteredResults.length > 0) {
+                $pinSearchContainer.append(getPinSearchItem(filteredResults[0]));
+                if (filteredResults[1]) {
+                    $pinSearchContainer.append(getPinSearchItem(filteredResults[1]));
+                }
+            }
+        };
+        var renderresultsWithPagination = function(filteredResults) {
+            $('.search-results-list').html('');
+            if (filteredResults.length > 0) {
+                $('.results-wrapper').removeClass('hidden');
+            }
+            var startindex = (paginationConfig.active - 1) * paginationConfig.resultsPerPage;
+            filteredResults.forEach(function(sItem, idx) {
+                if (idx >= startindex && idx < (startindex + paginationConfig.resultsPerPage)) {
+                    renderResultItem(sItem, idx);
+                }
+            });
+
+            $('.pagination-links').html('');
+            var links = '';
+            var index = 1;
+            var totalpages = Math.ceil(filteredResults.length / paginationConfig.resultsPerPage);
+            var count = paginationConfig.noofpages;
+            if (totalpages < paginationConfig.noofpages) {
+                count = totalpages;
+            }
+            if (paginationConfig.active > count) {
+                index = index + (paginationConfig.active - count);
+            }
+            if (paginationConfig.active > 1) {
+                $('.pagination-links').append('<li>  <a href="#" data-dir="0" class="previous-link page-nav-link">   &lt; </a>  </li>');
+            } else {
+                $('.pagination-links').append('<li>  &lt; </li>');
+            }
+            for (var i = 0; i < count; i++) {
+                var $templatePage = $('.template-pagination-item').clone();
+                if (paginationConfig.active == (i + index)) {
+                    links = links + '<li>' + (i + index) + '</li>';
+                } else {
+                    $templatePage.find('.page-link').html((i + index));
+                    links = links + $templatePage.html();
+                }
+            }
+            if (filteredResults.length > 0) {
+                $('.pagination-links').append(links);
+            } else {
+                $('.pagination-links').html('');
+            }
+
+            if (totalpages > paginationConfig.active && filteredResults.length > 0) {
+                $('.pagination-links').append('<li>  <a href="#" data-dir="1" class="next-link page-nav-link">   &gt; </a>  </li>');
+            } else {
+                if (filteredResults.length > 0) {
+                    $('.pagination-links').append('<li>    &gt;   </li>');
+                }
+            }
+
+            $('.page-link').click(function(e) {
+                e.preventDefault();
+                paginationConfig.active = parseInt($(this).text());
+                renderresultsWithPagination(filteredResults);
+            });
+
+            $('.page-nav-link').click(function(e) {
+                e.preventDefault();
+                if ($(this).attr('data-dir') == '1') {
+                    paginationConfig.active = paginationConfig.active + 1;
+                } else {
+                    paginationConfig.active = paginationConfig.active - 1;
+                }
+                renderresultsWithPagination(filteredResults);
+            });
+
+
+
+            parsePinSearch();
+        };
+        var updateUrl = function() {
+            var queryWords = [];
+            if (filterParams.textSelected && filterParams.textSelected.length > 0) {
+                queryWords.push('q=' + encodeURIComponent(filterParams.textSelected));
+            }
+            if (filterParams.filters && filterParams.filters.length > 0) {
+                filterParams.filters.forEach(function(f, fi) {
+                    queryWords.push('filter' + fi + '=' + encodeURIComponent(f.key) + '-' + encodeURIComponent(f.value));
+                });
+            }
+            if (queryWords.length > 0) {
+                history.pushState(filterParams, "Filter Page", location.pathname + '?' + queryWords.join('&'));
+            }
+        };
+        var parseResults = function(contentType) {
+            $('.search-results-list').html('');
+            var text = filterParams.textSelected;
+            filteredResults = results.filter(function(sItem) {
+                if (filterParams.filters.length === 0) {
+                    return true;
+                } else {
+                    var foundContentType = 0;
+                    filterParams.filters.forEach(f => {
+                        if (sItem[f.key] && sItem[f.key].indexOf(f.value) >= 0) {
+                            foundContentType += 1;
+                        }
+                    });
+                    if (foundContentType) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            if (configs.updateUrl) {
+                updateUrl();
+            }
+            renderresultsWithPagination(filteredResults);
+
+            if (filteredResults.length === 0 && configs.hideFilterZeroresults) {
+                $('.filter-component').addClass('hidden');
+                $('.results-wrapper').addClass('hidden');
+            }
+        };
+
+        var renderResults = function(opts) {
+            $('.results-wrapper').addClass('hidden');
+            $('.search-results-list').html('');
+            $('.did-you-mean').addClass('hidden');
+            $('.did-you-mean').find('span').html('');
+            var text = $('.auto-suggestion').val();
+            filterParams.textSelected = text;
+            if (text == '') {
+                facetPivot = [];
+                results = [];
+                didYouMeanTerms = [];
+                parseResults();
+                renderFilterComponent();
+            } else {
+                getResults(text).then(function({
+                    docs,
+                    facet,
+                    didYouMean
+                }) {
+                    if (docs.length > 0) {
+                        results = docs;
+                        facetPivot = facet;
+                        didYouMeanTerms = didYouMean;
+                        if (didYouMeanTerms.length > 0) {
+                            $('.did-you-mean').find('span').append(didYouMeanTerms.join(','));
+                            $('.did-you-mean').removeClass('hidden');
+                        }
+                    } else {
+                        facetPivot = [];
+                        results = [];
+                    }
+                    parseResults();
+                    renderFilterComponent();
+                });
+            }
+        };
+
+        var timeout,
+            promiseObject;
+        var getResults = function(q) {
+            // return $.get('/conent/results?q=' + q);
+            promiseObject = new Promise(function(res, rej) {
+                var resp = {
+                    "responseHeader": {
+                        "status": 0,
+                        "QTime": 23,
+                        "params": {
+                            "q": "*",
+                            "indent": "on",
+                            "wt": "json"
+                        }
+                    },
+                    "response": {
+                        "numFound": 7,
+                        "start": 0,
+                        "docs": [{
+                            "id": "/content/projectplan/expertise",
+                            "title": ["Expertise"],
+                             "thumbnail": 'images/polycom.jpg',
+                            "url": ["/content/projectplan/expertise.html"],
+                            "description": 'The RealPresence TRIO expertise is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:02:12Z"],
+                            "contentType": ["page"],
+                            "assetType": ["test"],
+                            "product": ["RealPresence Centro"],
+                            "_version_": 1578946212777689088
+                        }, {
+                            "id": "/content/projectplan/company",
+                            "title": ["Company Test"],
+                            "videothumbnail": 'images/polycom.jpg',
+                            "url": ["/content/projectplan/company.html"],
+                            "description": 'The RealPresence TRIO  is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-09-257T03:16:09Z"],
+                            "contentType": ["video"],
+                            "assetType": ["video"],
+                            "_version_": 1578946212946509824
+                        }, {
+                            "id": "/content/projectplan/work",
+                            "title": ["Work"],
+
+                            "url": ["/content/projectplan/work.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:08Z"],
+                            "contentType": ["page"],
+                            "_version_": 1578946212979015680
+                        }, {
+                            "id": "/content/projectplan/blog",
+                            "title": ["Blog"],
+
+                            "url": ["/content/projectplan/blog.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:02:03Z"],
+                            "contentType": ["pdf"],
+                            "_version_": 1578946212985307136
+                        }, {
+                            "id": "/content/projectplan/careers",
+                            "title": ["Careers"],
+
+                            "url": ["/content/projectplan/careers.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:44Z"],
+                            "contentType": ["page"],
+                            "_version_": 1578946212991598592
+                        }, {
+                            "id": "/content/projectplan",
+                            "title": ["ProjectPlan"],
+                            "thumbnail": 'images/polycom.jpg',
+                            "url": ["/content/projectplan.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-07-194T01:21:54Z"],
+                            "contentType": ["page"],
+                            "_version_": 1578946212999987200
+                        }, {
+                            "id": "/content/projectplan/news",
+                            "title": ["News"],
+                            "thumbnail": 'images/polycom.jpg',
+                            "url": ["/content/projectplan/news.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:54Z"],
+                            "contentType": ["pdf"],
+                            "_version_": 1578946213006278656
+                        }, {
+                            "id": "/content/projectplan/news",
+                            "title": ["News"],
+                            "thumbnail": 'images/polycom-logo.jpeg',
+                            "url": ["/content/projectplan/news.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:54Z"],
+                            "contentType": ["pdf"],
+                            "_version_": 1578946213006278656
+                        }, {
+                            "id": "/content/projectplan/news",
+                            "title": ["News"],
+                            "thumbnail": 'images/polycom-logo.jpeg',
+                            "url": ["/content/projectplan/news.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:54Z"],
+                            "contentType": ["pdf"],
+                            "_version_": 1578946213006278656
+                        }, {
+                            "id": "/content/projectplan/news",
+                            "title": ["News"],
+                            "thumbnail": 'images/polycom-logo.jpeg',
+                            "url": ["/content/projectplan/news.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:54Z"],
+                            "contentType": ["pdf"],
+                            "_version_": 1578946213006278656
+                        }, {
+                            "id": "/content/projectplan/news",
+                            "title": ["News"],
+                            "thumbnail": 'images/polycom-logo.jpeg',
+                            "url": ["/content/projectplan/news.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:54Z"],
+                            "contentType": ["pdf"],
+                            "_version_": 1578946213006278656
+                        }, {
+                            "id": "/content/projectplan/news",
+                            "title": ["News"],
+                            "thumbnail": 'images/polycom-logo.jpeg',
+                            "url": ["/content/projectplan/news.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:54Z"],
+                            "contentType": ["pdf"],
+                            "_version_": 1578946213006278656
+                        }, {
+                            "id": "/content/projectplan/news",
+                            "title": ["News"],
+                            "thumbnail": 'images/polycom-logo.jpeg',
+                            "url": ["/content/projectplan/news.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:54Z"],
+                            "contentType": ["pdf"],
+                            "_version_": 1578946213006278656
+                        },{
+                            "id": "/content/projectplan/expertise",
+                            "title": ["Expertise"],
+                             "thumbnail": 'images/polycom.jpg',
+                            "url": ["/content/projectplan/expertise.html"],
+                            "description": 'The RealPresence TRIO expertise is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:02:12Z"],
+                            "contentType": ["page"],
+                            "assetType": ["test"],
+                            "product": ["RealPresence Centro"],
+                            "_version_": 1578946212777689088
+                        }, {
+                            "id": "/content/projectplan/company",
+                            "title": ["Company Test"],
+                            "videothumbnail": 'images/polycom.jpg',
+                            "url": ["/content/projectplan/company.html"],
+                            "description": 'The RealPresence TRIO  is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-09-257T03:16:09Z"],
+                            "contentType": ["page"],
+                            "assetType": ["video"],
+                            "_version_": 1578946212946509824
+                        }, {
+                            "id": "/content/projectplan/work",
+                            "title": ["Work"],
+
+                            "url": ["/content/projectplan/work.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:08Z"],
+                            "contentType": ["page"],
+                            "_version_": 1578946212979015680
+                        }, {
+                            "id": "/content/projectplan/blog",
+                            "title": ["Blog"],
+
+                            "url": ["/content/projectplan/blog.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:02:03Z"],
+                            "contentType": ["pdf"],
+                            "_version_": 1578946212985307136
+                        }, {
+                            "id": "/content/projectplan/careers",
+                            "title": ["Careers"],
+
+                            "url": ["/content/projectplan/careers.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:44Z"],
+                            "contentType": ["page"],
+                            "_version_": 1578946212991598592
+                        }, {
+                            "id": "/content/projectplan",
+                            "title": ["ProjectPlan"],
+                            "thumbnail": 'images/polycom.jpg',
+                            "url": ["/content/projectplan.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-07-194T01:21:54Z"],
+                            "contentType": ["page"],
+                            "_version_": 1578946212999987200
+                        }, {
+                            "id": "/content/projectplan/news",
+                            "title": ["News"],
+                            "thumbnail": 'images/polycom.jpg',
+                            "url": ["/content/projectplan/news.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:54Z"],
+                            "contentType": ["pdf"],
+                            "_version_": 1578946213006278656
+                        },
+
+                                ],
+                        "facet_pivot": [{
+                            name: 'PRODUCT',
+                            id: 'product',
+                            items: [{
+                                name: 'RealPresence Centro'
+                            }, {
+                                name: 'RealPresence Resource Manager'
+                            }, {
+                                name: 'VVX'
+                            }, {
+                                name: 'SoundStation'
+                            }, {
+                                name: 'RealPresence Group Service'
+                            }, {
+                                name: 'Soundstructure'
+                            }]
+                        }, {
+                            name: 'CONTENT TYPE',
+                            id: 'contentType',
+                            items: [{
+                                name: 'pdf'
+                            }, {
+                                name: 'page'
+                            }, {
+                                name: 'pptx'
+                            }, {
+                                name: 'video'
+                            }]
+                        }, {
+                            name: 'ASSET TYPE',
+                            id: 'assetType',
+                            items: [{
+                                name: 'Brochures'
+                            }, {
+                                name: 'customer Stories'
+                            }, {
+                                name: 'Posters',
+                                items: [{
+                                    name: 'Presentations'
+                                }, {
+                                    name: 'Sheets'
+                                }, {
+                                    name: 'test'
+                                }]
+                            }]
+                        }]
+                    }
+                };
+                var iscloseWord = function(t, q) {
+                    var prevMatched = true,
+                        lettersMatched = '';
+                    for (let i = 0; i < q.length; i++) {
+                        if (q[i].toLowerCase() == t[i].toLowerCase() && prevMatched) {
+                            lettersMatched += t[i];
+                            prevMatched = true;
+                        } else {
+                            prevMatched = false;
+                        }
+                    }
+
+                    if (lettersMatched.length > 1) {
+                        console.log('close check', t, q, lettersMatched);
+                        return true;
+                    }
+                };
+                var didYouMean = [];
+                var docs = resp.response.docs.filter(r => {
+                    if (r.title.filter(t => {
+                            if (t.toLowerCase().indexOf(q.toLowerCase()) == 0 || q === '*') {
+                                return true;
+                            } else if (iscloseWord(t, q)) {
+                                if (didYouMean.indexOf(t) < 0) {
+                                    didYouMean.push(t);
+                                }
+                                return true;
+                            }
+                            return false;
+                        }).length > 0) {
+                        return true;
+                    }
+                    return false;
+                })
+                res({
+                    docs,
+                    facet: resp.response.facet_pivot,
+                    didYouMean: didYouMean
+                });
+            });
+            return promiseObject;
+        };
+        var bindSuggestionLinkEvents = function() {
+            $('.suggestion-item').click(function() {
+                $('.auto-suggestion').val($(this).attr('val'));
+                $('.search-suggestion').addClass('hidden');
+                paginationConfig.active = 1;
+                filterParams.contentType = [];
+                renderResults();
+            });
+        };
+        var getSuggestions = function(text) {
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+            timeout = setTimeout(function() {
+                getResults(text).then(function({
+                    docs,
+                    facet,
+                    didYouMean
+                }) {
+                    $('.search-suggestion').html('');
+                    if (docs) {
+                        var suggestions = [];
+                        docs.forEach(function(sItem) {
+                            if (sItem.title) {
+                                sItem.title.forEach(function(r) {
+                                    var rL = r.toLowerCase();
+                                    var textL = text.toLowerCase();
+                                    if (r.toLowerCase().indexOf(text.toLowerCase()) == 0 && suggestions.indexOf(r) < 0) {
+                                        suggestions.push(r);
+                                        $('.search-suggestion').append('<li class="suggestion-item" val="' +
+                                            r + '">' + (rL.substr(rL.indexOf(textL), textL.length) + '<span class="font-bold">' + rL.substr(rL.indexOf(textL) + textL.length, rL.length) + '</span>') + '</li>');
+                                    }
+                                });
+                            }
+                        });
+                        bindSuggestionLinkEvents();
+                    }
+                });
+            }, 0);
+        };
+
+        var bindAutoSuggestionEvents = function() {
+            $('.btn-clear-search').click(function(e) {
+                e.preventDefault();
+                $('.search-suggestion').html('');
+                $('.auto-suggestion').val('');
+                $('.search-suggestion').addClass('hidden');
+            });
+
+            $('body').click(function(e) {
+                if (!$(e.target).hasClass('suggestion-item')) {
+                    $('.search-suggestion').addClass('hidden');
+                }
+            });
+            $('.auto-suggestion').keyup(function(e) {
+                var value = $(this).val();
+                if (e.keyCode == 27) {
+                    $('.search-suggestion').addClass('hidden');
+                    $('.search-suggestion').html('');
+                } else if (e.keyCode == 13) {
+                    if ($('.auto-suggestion').val() === '*') {
+
+                    } else {
+                        if ($('.suggestion-item.active').length > 0) {
+                            $('.auto-suggestion').val($('.suggestion-item.active').attr('val'));
+                        }
+                    }
+                    $('.search-suggestion').html('');
+                    paginationConfig.active = 1;
+                    filterParams.filters = [];
+                    renderResults();
+                } else if (e.keyCode == 38) {
+                    //up arrow
+                    if ($('.suggestion-item.active').length > 0) {
+                        var currentSuggestion = $('.suggestion-item.active');
+                        var nextSuggestion = $('.suggestion-item.active').prev();
+                        currentSuggestion.removeClass('active');
+                        nextSuggestion.addClass('active');
+                    } else {
+                        $('.suggestion-item').first().addClass('active');
+                    }
+                } else if (e.keyCode == 40) {
+                    //down arrow
+                    if ($('.suggestion-item.active').length > 0) {
+                        var currentSuggestion = $('.suggestion-item.active');
+                        var nextSuggestion = $('.suggestion-item.active').next();
+                        currentSuggestion.removeClass('active');
+                        nextSuggestion.addClass('active');
+                    } else {
+                        $('.suggestion-item').first().addClass('active');
+                    }
+                } else {
+                    // $('.search-suggestion').html('');
+                    if (value.length >= 1) {
+                        $('.search-suggestion').removeClass('hidden');
+                        getSuggestions(value);
+                    } else {
+                        $('.search-suggestion').addClass('hidden');
+                    }
+                }
+            });
+
+            $('.link-search').click(function(e) {
+                e.preventDefault();
+                $('.search-suggestion').addClass('hidden');
+                paginationConfig.active = 1;
+                filterParams.filters = [];
+                renderResults();
+            });
+        };
+
+        var processQueryString = function() {
+            if (location.search.indexOf('?') >= 0) {
+                var qparam = location.search.split('?')[1];
+                var filterKeys = [];
+                qparam.split('&').forEach(q => {
+                    var r = q.split('=');
+                    if (r[0] === 'q') {
+                        filterParams.textSelected = r[1];
+                    } else if (r[0] && r[0].indexOf('filter') === 0) {
+                        if (r[1] && r[1].indexOf('-') >= 0) {
+                            filterParams.filters.push({
+                                key: r[1].split('-')[0],
+                                value: decodeURIComponent(r[1].split('-')[1]),
+                            });
+                        }
+                    }
+                });
+            }
+        };
+        var getQueryParam = function(name) {
+            if (location.search.indexOf('?') >= 0) {
+                var qparam = location.search.split('?')[1];
+                var paramValue = null;
+                qparam.split('&').forEach(q => {
+                    var r = q.split('=');
+                    if (r[0] === name) {
+                        paramValue = r[1];
+                    }
+                });
+                return paramValue;
+            }
+            return null;
+        }
+
+        $(document).ready(function() {
+            bindAutoSuggestionEvents();
+            processQueryString();
+            if (filterParams.textSelected && filterParams.textSelected.length > 0) {
+                $('.auto-suggestion').val(filterParams.textSelected);
+                renderResults();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -5,220 +5,193 @@
     <title></title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="js/jquery-3.2.1.min.js"></script>
     <style>
+      /*==================================================
+  =            CSS Stylings           =
+  ==================================================*/
+
+body {
+    font-family:"ProximaNova-Regular";
+    line-height: 1.5;
+}
+
+h4.filter-section-heading{
+    font-family:"ProximaNova-Bold";
+}
+
+p,a{
+    line-height:18px;
+    font-size:14px;
+}
+.hidden {
+  display: none;
+}
+.container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+p,
+h3,
+h4,
+h5 {
+    margin: 0px;
+    padding: 0px;
+}
+.font-bold { font-weight: bold; }
+
+/* Search Module Styles */
+.search-component * {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.search-component .search-field {
+  position: relative;
+  width: 87%;
+  border: 1px solid #bdc1c5; 
+  height: 48px;
+  margin:20px auto 0px;
+        top: 60px;
+}
+.search-component .search-field .search-input {
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border: none;
+  border-radius: 5px;
+  padding-left: 10px;
+}
+.search-component .search-field .right-corner {
+  position: relative;
+}
+.search-component .search-field .right-corner .btn-search {
+  float: right;
+  border-left: 1px solid #bdc1c5;
+  width: 30px;
+  height: 46px;
+}
+.search-component .search-field .right-corner .btn-search a {
+  position: relative;
+  top: 16px;
+  left: 6px;
+}
+.search-component .search-field .right-corner .btn-search a img {
+  height: 16px;
+  width:16px;
+}
+.search-component .search-field .right-corner .clear-search {
+  float: right;
+  height: 34px;
+}
+.search-component .search-field .right-corner .clear-search a {
+  position: relative;
+  top: 16px;
+  right:8px;
+}
+.search-component .search-field .right-corner .clear-search a img {
+  height: 16px;
+  width:16px;
+}
+.search-component .search-field .search-suggestion {
+  position: absolute;
+  top: 47px;
+  list-style: none;
+  width: 50%;
+  background-color: #fff;
+  box-shadow: 0px 2px 4px #111;
+      z-index: 1000;
+}
+.search-component .search-field .search-suggestion .suggestion-item {
+  padding-left: 12px;
+  padding-top: 10px;
+  cursor: pointer;
+  padding-bottom: 10px;
+}
+.search-component .search-field .search-suggestion .suggestion-item:hover {
+  background-color: #eee; 
+}
+.search-component .search-field .search-suggestion .suggestion-item.active {
+  background-color: #eee; 
+}
+
+    .did-you-mean {
+                width: 87%;
+    margin: 10px auto 0 auto;
+    color: #DC143C;
+    font-weight: bold;
+    position: relative;
+    top: 70px;
+        }
+ .did-you-mean .suggestion-text{
+            color:#0088cc;
+                font-style: italic;
+        }
         /*==================================================
   =            CSS Stylings           =
   ==================================================*/
-        
-        body {
-            font-family: "ProximaNova";
-            line-height: 1.5;
-        }
-        
-        h5 {
-            font-weight: normal;
-        }
-        
-        p,
-        a {
-            line-height: 20px;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .container {
-            width: 100%;
-            margin: 0 auto;
-        }
-        
-        p,
-        h3,
-        h4,
-        h5 {
-            margin: 0px;
-            padding: 0px;
-        }
-        
-        .font-bold {
-            font-weight: bold;
-        }
-        
-        body {
-            font-family: "ProximaNova";
-            line-height: 1.5;
-        }
-        
-        p,
-        a {
-            line-height: 20px;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .container {
-            width: 100%;
-            margin: 0 auto;
-        }
-        
-        p,
-        h3,
-        h4,
-        h5 {
-            margin: 0px;
-            padding: 0px;
-            font-weight: normal;
-        }
-        /* Search Module Styles */
-        
-        .search-component * {
-            padding: 0;
-            margin: 0;
-            box-sizing: border-box;
-        }
-        
-        .search-component .search-field {
-            position: relative;
-            width: 87%;
-            border: 1px solid #bdc1c5;
-            height: 48px;
-            margin: 18px auto 0px;
-        }
-        
-        .search-component .search-field .search-input {
-            width: 100%;
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            border: none;
-            border-radius: 5px;
-            padding-left: 10px;
-            font-size: 16px;
-        }
-        
-        .search-component .search-field .right-corner {
-            position: relative;
-        }
-        
-        .search-component .search-field .right-corner .btn-search {
-            float: right;
-            border-left: 1px solid #bdc1c5;
-            width: 30px;
-            height: 46px;
-        }
-        
-        .search-component .search-field .right-corner .btn-search a {
-            position: relative;
-            top: 14px;
-            left: 6px;
-        }
-        
-        .search-component .search-field .right-corner .btn-search a img {
-            height: 14px;
-            width: 14px;
-        }
-        
-        .search-component .search-field .right-corner .clear-search {
-            float: right;
-            height: 34px;
-        }
-        
-        .search-component .search-field .right-corner .clear-search a {
-            position: relative;
-            top: 12px;
-            right: 8px;
-        }
-        
-        .search-component .search-field .right-corner .clear-search a img {
-            height: 12px;
-            width: 12px;
-        }
-        
-        .search-component .search-field .search-suggestion {
-            position: absolute;
-            top: 47px;
-            list-style: none;
-            width: 100%;
-            background-color: #fff;
-            box-shadow: 0px 2px 4px #111;
-            border-bottom-right-radius: 5px;
-            border-bottom-left-radius: 5px;
-        }
-        
-        .search-component .search-field .search-suggestion .suggestion-item {
-            padding-left: 12px;
-            padding-top: 10px;
-            cursor: pointer;
-            padding-bottom: 10px;
-        }
-        
-        .search-component .search-field .search-suggestion .suggestion-item:hover {
-            background-color: #eee;
-        }
-        
-        .search-component .search-field .search-suggestion .suggestion-item.active {
-            background-color: #eee;
-        }
-        /* Pin Search Styles */
-        /* start version 3 changes */
-        
-        .pin-search {
-            width: 87%;
-            height: auto;
-            overflow: hidden;
-            margin: 0 auto;
-        }
+
+ /* Pin Search Styles */
+.pin-search { 
+    width: 87%;
+    height:auto;
+    overflow: hidden;
+    margin:0px auto;
+        position: relative;
+    top: 70px;
+}
+
         
         .pin-serach-item {
             background-color: #eee;
             margin-top: 18px;
             overflow: hidden;
         }
-        /* end version 3 changes */
-        
-        .pinsearch-content {
-            float: left;
-            width: 82%;
-            padding: 12px 10px 10px 5px;
+
+.pinsearch-content {
+    float: left;
+    width: 82%;
+    padding:12px 10px 10px 5px;
+}
+
+.pinsearch-content h3{
+    font-size:20px;
+    font-weight:500;
+    }
+.pin-image {
+    float: left; 
+}
+.pin-image .pin-logo{
+    height: 84px;
+    padding: 20px 5px 10px 10px;
+    width: 107px;
+}
+.pinsearch-content a {
+    color: #0088cc;
+    font-size: 12px;
+    font-weight:600;
+    text-decoration: none;
+    display: block;
+}
+.pinsearch-content a:hover{
+            color:#00537c;
         }
-        
-        .pinsearch-content h3 {
-            font-size: 20px;
-            font-weight: 500;
-        }
-        
-        .pin-image {
-            float: left;
-        }
-        
-        .pin-image .pin-logo {
-            height: 84px;
-            padding: 18px 5px 10px 10px;
-            width: 107px;
-        }
-        
-        .pinsearch-content a {
-            color: #0088cc;
-            font-size: 12px;
-            font-weight: 600;
-            text-decoration: none;
-        }
-        /*Left Rail FilterBy section */
+ /*Left Rail FilterBy section */
         
         .solrSearch-wrapper {
             margin: 20px auto;
             overflow: hidden;
             width: 87%;
+    position: relative;
+    top: 70px;
         }
         
+
         .filter-component {
-            float: left;
-            width: 20%;
+            float: left; 
+            width: 22%; 
         }
         
         .filter-component ul {
@@ -236,6 +209,7 @@
             overflow-wrap: break-word;
         }
         
+                
         .filter-component .hidden {
             display: none;
         }
@@ -243,51 +217,76 @@
         .filter-component .visible {
             display: inline-block;
         }
+             
+        
         
         .filter-component .filter-list {
             margin-top: 10px;
         }
         
         .filter-component .filter-list .arrow-icon {
-            width: 16px;
-            cursor: pointer;
+                width: 6px;
+    padding-right: 10px;
+    cursor: pointer;
         }
-        /* Updated for adding nested levels */
         
-        .filetype-pdf img,
-        .filetype-page img,
-        .filetype-video img {
+
+
+        .filter-component .filter-list .filter-list-items {
             display: none;
+            padding-left: 10px;
+}    
+
+
+.filter-category-list .filter-list-item:hover{
+background-color:#eee;
+
         }
-        
-        .filetype-pdf .image-holder {
-            background-image: url('images/file.png');
-            background-position: top right;
-            background-size: 30% 46%;
-            background-repeat: no-repeat;
+.filter-category-list .filter-list-item{
+    padding-left:30px;
+    cursor:pointer;
+    position: relative;
+    margin-bottom:5px;
+
         }
-        
-        .filetype-page .image-holder {
-            background-image: url('images/internet.png');
-            background-position: top right;
-            background-size: 30% 46%;
-            background-repeat: no-repeat;
-        }
-        
-        .filetype-video .image-holder {
-            background-image: url('images/play.png');
-            background-position: top right;
-            background-size: 30% 46%;
-            background-repeat: no-repeat;
-        }
-        
-        .filter-component .filter-list>.filter-category-heading>.down-arrow {
+.filter-component .filter-list-item input[type="checkbox"] {
+  visibility: hidden;
+    position:absolute;
+}
+.filter-component .filter-list-item label{
+  cursor: pointer;
+    font-size: 14px;
+    word-break: break-word;
+}
+.filter-component .filter-list-item input[type="checkbox"] + label:before {
+   border: 1px solid #A9A9A9;
+    content: "\00a0";
+    display: inline-block;
+    font-size: 10px;
+    height: 12px;
+    margin: 4px 8px 0px 8px;
+    padding: 0;
+    vertical-align: top;
+    width: 12px;
+    position: absolute;
+     left: 0px;
+
+}
+.filter-component .filter-list-item input[type="checkbox"]:checked + label:before {
+  background: #0088cc;
+  color: #fff;
+  content: "\2714";
+  text-align: center;
+}
+
+
+.filter-component .filter-list>.filter-category-heading>.down-arrow {
             display: none;
         }
         
         .filter-component .filter-list>.filter-list-items {
             display: none;
-            padding-left: 20px;
+
         }
         
         .filter-component .filter-list.expanded>.filter-category-heading>.left-arrow {
@@ -301,75 +300,105 @@
         .filter-component .filter-list.expanded>.filter-list-items {
             display: block;
         }
-        /* Updated for adding nested levels */
-        
-        .filter-component .filter-list-item input[type="checkbox"] {
-            visibility: hidden;
-            position: absolute;
+
+.filter-list .filter-category-heading .category-name{
+                font-size:16px;
+            }
+.filter-list .filter-category-heading{
+            margin-bottom:5px;
         }
-        /* start version 3 changes */
-        
-        .filter-component .filter-list-item label {
-            cursor: pointer;
-            font-size: 18px;
-            word-break: break-word;
-        }
-        
-        .filter-component .filter-list-item input[type="checkbox"]+label:before {
-            border: 1px solid #A9A9A9;
-            content: "\00a0";
-            display: inline-block;
-            font-size: 10px;
-            height: 12px;
-            margin: 8px 6px 0px 0px;
-            padding: 0;
-            vertical-align: top;
-            width: 12px;
-            position: absolute;
-            left: 0px;
-        }
-        
-        .filter-component .filter-list-item input[type="checkbox"]:checked+label:before {
-            background: #0088cc;
-            color: #fff;
-            content: "\2714";
-            text-align: center;
-        }
-        
-        .filter-list-item {
-            padding-left: 20px;
-            position: relative;
-        }
-        
-        .did-you-mean {
-            width: 87%;
-            margin: 10px auto 0 auto;
-        }
-        /* end version 3 changes */
+
         /*Right Rail Search Results Section */
-        
         .results-wrapper {
             float: left;
             width: 75%;
             padding-left: 10px;
             border-left: 2px solid #eee;
+        margin-bottom: 50px;
         }
-        
         .searchResults-section {
             float: left;
             width: 100%;
             margin-bottom: 20px;
         }
-        
-        .search-content h4 {
-            font-size: 18px;
-            color: #0088cc;
+
+.search-content h4 {
+    font-size: 16px;
+    color: #0088cc;
+}
+        .searchResults-section .search-image {
+            float: left;
+            margin-right: 10px;
+            text-align: right;
+            width: 10%;
         }
         
-        .searchResults-section .non-video-content {
+        .searchResults-section .search-content {
+               float: left;
+                width: 85%; 
+           }
+
+        
+        .results-wrapper .pagination-module {
+            margin-left: 7%;
+        }
+        .results-wrapper .pagination-links li {
+            list-style: none;
+            float: left;
+            padding: 8px;
+            font-size:14px;
+        }
+        
+        .results-wrapper .pagination-links li a {
+            color: #0088cc;
+            text-decoration: none;
+            font-weight:bold;
+        }
+.results-wrapper .pagination-links li a:hover{
+        color:#00537c
+            }
+        .link-to-content{
+        color: #A9A9A9;
+    text-decoration: none;
+    }
+
+ .link-to-content:hover{
+color:#A9A9A9;
+    font-weight:bold;
+            }
+
+        .filetype-pdf img, .filetype-page img, .filetype-video img {
+            display: none;
+        }
+        
+        .search-image.filetype-pdf .image-holder {
+            background-image: url('images/file.png');
+            background-position: top right;
+            background-size: 28% 34%;
+            background-repeat: no-repeat;
+        }
+        .search-image.filetype-page .image-holder {
+            background-image: url('images/internet.png');
+            background-position: top right;
+            background-size: 30% 34%;
+            background-repeat: no-repeat;
+        }
+        .search-image.filetype-video .image-holder {
+            background-image: url('images/play.png');
+            background-position: top right;
+            background-size: 30% 32%;
+            background-repeat: no-repeat;
+        }
+.search-image .image-holder{
+       height: 63px;
+    width: 72px;
+    margin-top: 6px;
+        }
+
+.searchResults-section .non-video-content {
             display: block;
         }
-        
+
         .searchResults-section .video-content {
             display: none;
         }
@@ -381,34 +410,7 @@
         .searchResults-section.result-type-video .video-content {
             display: block;
         }
-        
-        .searchResults-section .search-image {
-            float: left;
-            margin-right: 20px;
-            text-align: right;
-            width: 10%;
-        }
-        
-        .searchResults-section .search-content {
-            float: left;
-            width: 85%;
-        }
-        
-        .results-wrapper .pagination-module {
-            margin-left: 7%;
-        }
-        
-        .results-wrapper .pagination-links li {
-            list-style: none;
-            float: left;
-            padding: 10px;
-        }
-        
-        .results-wrapper .pagination-links li a {
-            color: #0088cc;
-            text-decoration: none;
-        }
-        /* Small Devices, Tablets */
+  /* Small Devices, Tablets */
         
         @media only screen and (max-width: 768px) {
             .container {
@@ -420,21 +422,21 @@
             }
             .pinsearch-content {
                 width: 95%;
-                padding: 12px 10px 10px 15px
+                padding:12px 10px 10px 15px
             }
             .filterBy-section {
                 display: none;
             }
             .results-wrapper {
                 width: 100%;
-                border-left: none;
-                padding-left: 0px;
+                border-left:none;
+                padding-left:0px;
             }
             .search-image {
                 display: none;
             }
-            .solrSearch-wrapper .filter-component {
-                display: none;
+            .solrSearch-wrapper .filter-component{
+              display: none;
             }
             .searchResults-section .search-content {
                 width: 100%;
@@ -449,33 +451,34 @@
         /* Extra Small Devices, Phones */
         
         @media only screen and (max-width: 480px) {
-            .search-component .search-field .right-corner .clear-search a {
-                top: 12px;
-            }
-            .search-component .search-field .right-corner .clear-search a img {
-                height: 22px;
-                width: 22px;
-            }
-            .search-component .search-field .right-corner .btn-search a {
-                position: relative;
-                top: 12px;
-                left: 6px;
-            }
-            .search-component .search-field .right-corner .btn-search a img {
-                height: 26px;
-                width: 26px;
-            }
-            .search-component .search-field .right-corner .btn-search {
-                width: 40px;
-                height: 46px;
-            }
-            .pinsearch-content {
-                padding: 12px 10px 10px 15px;
-            }
-            .pinsearch-content h3 {
-                font-size: 26px;
-                font-weight: 600;
-            }
+          .search-component .search-field .right-corner .clear-search a{
+            top: 12px;
+          }
+          .search-component .search-field .right-corner .clear-search a img {
+              height: 22px;
+              width: 22px;
+          }
+          .search-component .search-field .right-corner .btn-search a {
+              position: relative;
+              top: 12px;
+              left: 6px;
+          }
+          .search-component .search-field .right-corner .btn-search a img {
+              height: 26px;
+              width: 26px;
+          }
+          .search-component .search-field .right-corner .btn-search { 
+              width: 40px;
+              height: 46px;
+          }
+           
+          .pinsearch-content{
+            padding: 12px 10px 10px 15px;
+          }
+          .pinsearch-content h3 {
+              font-size: 26px;
+              font-weight: 600;
+          }
         }
         
         @media only screen and (min-width: 1025px) {
@@ -489,7 +492,10 @@
 
 <body>
     <div class="container">
-        <!--Search Bar Module -->
+
+
+
+         <!--Search Bar Module -->
         <div class="search-component">
             <div class="search-field">
                 <input autocomplete="off" placeholder="Enter Search Keyword" role="textbox" type="text" class="search-input auto-suggestion" />
@@ -507,9 +513,18 @@
                 </div>
                 <ul class="search-suggestion hidden"> </ul>
             </div>
-            <div class="did-you-mean hidden">Did you mean: <span></span></div>
+            <div class="did-you-mean hidden">Did you mean: <span class="suggestion-text"></span></div>
         </div>
-        <!--End of Search Bar Module -->
+<!--End of Search Bar Module -->
+<!----Results not found -->
+<div class="results-not-found" style="position: relative;
+top: 80px;
+left: 70px;">
+  <p>Your search term is not found</p>
+  <ul>
+    <li>Serach for more suggestions</li>
+  </ul>
+</div>
         <!--Pin Search Module -->
         <div class="pin-search">
 
@@ -520,8 +535,10 @@
             <!--Left Rail Filter Module -->
 
             <div class=" filter-component hidden">
-                <h4 class="filter-section-heading">FILTER BY</h4>
-                <div class="filter-category-list"></div>
+                <h4 class="filter-section-heading">FILTER BY
+<a href="#"><span>RESET ALL FILTERS</span></a>
+                </h4>
+                <div class="filter-category-list"></div> 
             </div>
             <!--End of Left Rail Filter Module -->
             <!--Right Rail Search Results Module -->
@@ -532,12 +549,9 @@
                 <div class="pagination-module">
                     <ul class="pagination-links"> </ul>
                 </div>
-                <!--End of Pagination Module -->
-
             </div>
             <!--End of Right Rail Search Results Module -->
         </div>
-
 
     </div>
 
@@ -547,7 +561,9 @@
             <div class="filter-category-heading">
                 <img class="left-arrow arrow-icon" src="images/left.png" />
                 <img class="down-arrow arrow-icon" src="images/down.png" />
-                <span class="category-name"></span>
+                <span class="category-name">
+                  <a href="#"><span>Clear filters</span></a>
+                </span>
             </div>
             <div class="filter-list-items"></div>
         </div>
@@ -562,22 +578,22 @@
         </div>
         <div class="template-search-reult searchResults-section">
             <div class="search-image">
-                <div class="image-holder" style="height: 64px;width: 73px;margin-top:10px;">
+                <div class="image-holder">
                     <img src="images/polycom.jpg" alt="polycom-logo" style="width: 100%; height: 100%" />
                 </div>
             </div>
-            <div class="search-content">
+             <div class="search-content">
                 <h4 class="result-item-title"></h4>
                 <div class="non-video-content">
                     <p class="content-desc">
                     </p>
-                    <p style="color:grey">
+
                         <a class="link-to-content"></a>
-                    </p>
+                     
                 </div>
                 <div class="video-content" style="position: relative;">
-                    <div class="video-thumb" style="width: 70px;height: 54px;background-color: #eee;float: left;margin-right: 10px;">
-                        <img src="images/polycom-logo.jpeg" alt="polycom-logo" style="width: 100%; height: 100%" />
+                    <div class="video-thumb" style="width: 50px;height: 36px;background-color: #eee;float: left;margin-right: 10px;">
+                        <img src="images/video.png" alt="polycom-logo" style="width: 100%; height: 100%" />
                     </div>
                     <div>
                         <p class="content-desc">
@@ -586,24 +602,25 @@
                 </div>
             </div>
         </div>
-        <div class="pin-serach-item template">
+         <div class="pin-serach-item template">
             <div class="pin-image">
-                <img src="images/polycom.jpeg" alt="polycom-logo" class="pin-logo">
+                <a href="https://www.polycom.com"><img src="images/polycom.jpg" alt="polycom-logo" class="pin-logo"></a>
             </div>
             <div class="pinsearch-content">
-                <h3>Polycom TRIO 8800</h3>
+                <h3><a href="#">Polycom TRIO 8800</a></h3>
                 <p class="content-desc">The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When...
                 </p>
-                <a class="link-to-content" href="#">LEARN MORE &gt; </a>
+                <a class="content-link" href="#">LEARN MORE &gt; </a>
+                    <a class="content-link" href="#">MORE ABOUT &gt; </a>
             </div>
         </div>
     </div>
     <!-- END Templates -->
 
-
+     <script src="jquery-3.2.1.min.js"></script>
     <script>
-        var paginationConfig = {
-                resultsPerPage: 3,
+       var paginationConfig = {
+                resultsPerPage: 20,
                 noofpages: 10,
                 active: 1
             },
@@ -706,19 +723,14 @@
 
         var highliter = function(tagToHighlite, textToHighlite) {
             if (textToHighlite.indexOf('*') < 0) {
-               
-                if (tagToHighlite.each) {
-                    tagToHighlite.each(function() {
-                        var words = [];
-                        $(this).text().split(' ').forEach(wA => {
-                            var q = textToHighlite.toLowerCase();
-                            var regexp = new RegExp(q, 'ig');
-                            wA = wA.replace(regexp, '<span class="font-bold">$&</span>');
-                            words.push(wA);
-                        })
-                        $(this).html(words.join(' '));
-                    });
-                }
+                var words = [];
+                tagToHighlite.text().split(' ').forEach(wA => {
+                    var q = textToHighlite.toLowerCase();
+                    var regexp = new RegExp(q, 'ig');
+                    wA = wA.replace(regexp, '<span class="font-bold">$&</span>');
+                    words.push(wA);
+                })
+                tagToHighlite.html(words.join(' '));
             }
         };
 
@@ -736,7 +748,7 @@
                 }
             }
             $resultTemplate.find('.content-desc').html(ws + ' ...');
-            var urlToPoint = 'http://connect.polycom.com' + sItem.url;
+            var urlToPoint = 'http://www.polycom.com' + sItem.url;
             $resultTemplate.find('.link-to-content').attr('href', urlToPoint);
             var link = document.createElement('A');
             link.href = urlToPoint;
@@ -847,6 +859,8 @@
                 renderresultsWithPagination(filteredResults);
             });
 
+
+
             parsePinSearch();
         };
         var updateUrl = function() {
@@ -951,6 +965,7 @@
                         "docs": [{
                             "id": "/content/projectplan/expertise",
                             "title": ["Expertise"],
+                             "thumbnail": 'images/polycom.jpg',
                             "url": ["/content/projectplan/expertise.html"],
                             "description": 'The RealPresence TRIO expertise is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
                             "lastModified": ["2017-04-111T11:02:12Z"],
@@ -961,7 +976,7 @@
                         }, {
                             "id": "/content/projectplan/company",
                             "title": ["Company Test"],
-                            "videothumbnail": 'images/polycom-logo.jpeg',
+                            "videothumbnail": 'images/polycom.jpg',
                             "url": ["/content/projectplan/company.html"],
                             "description": 'The RealPresence TRIO  is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
                             "lastModified": ["2017-09-257T03:16:09Z"],
@@ -971,7 +986,7 @@
                         }, {
                             "id": "/content/projectplan/work",
                             "title": ["Work"],
-                            "thumbnail": 'images/polycom-logo.jpeg',
+
                             "url": ["/content/projectplan/work.html"],
                             "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
                             "lastModified": ["2017-04-111T11:01:08Z"],
@@ -980,16 +995,16 @@
                         }, {
                             "id": "/content/projectplan/blog",
                             "title": ["Blog"],
-                            "thumbnail": 'images/polycom-logo.jpeg',
+
                             "url": ["/content/projectplan/blog.html"],
                             "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
                             "lastModified": ["2017-04-111T11:02:03Z"],
-                            "contentType": ["video"],
+                            "contentType": ["pdf"],
                             "_version_": 1578946212985307136
                         }, {
                             "id": "/content/projectplan/careers",
                             "title": ["Careers"],
-                            "thumbnail": 'images/polycom-logo.jpeg',
+
                             "url": ["/content/projectplan/careers.html"],
                             "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
                             "lastModified": ["2017-04-111T11:01:44Z"],
@@ -998,7 +1013,7 @@
                         }, {
                             "id": "/content/projectplan",
                             "title": ["ProjectPlan"],
-                            "thumbnail": 'images/polycom-logo.jpeg',
+                            "thumbnail": 'images/polycom.jpg',
                             "url": ["/content/projectplan.html"],
                             "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
                             "lastModified": ["2017-07-194T01:21:54Z"],
@@ -1007,7 +1022,7 @@
                         }, {
                             "id": "/content/projectplan/news",
                             "title": ["News"],
-                            "thumbnail": 'images/polycom-logo.jpeg',
+                            "thumbnail": 'images/polycom.jpg',
                             "url": ["/content/projectplan/news.html"],
                             "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
                             "lastModified": ["2017-04-111T11:01:54Z"],
@@ -1067,9 +1082,77 @@
                             "lastModified": ["2017-04-111T11:01:54Z"],
                             "contentType": ["pdf"],
                             "_version_": 1578946213006278656
-                        }],
+                        },{
+                            "id": "/content/projectplan/expertise",
+                            "title": ["Expertise"],
+                             "thumbnail": 'images/polycom.jpg',
+                            "url": ["/content/projectplan/expertise.html"],
+                            "description": 'The RealPresence TRIO expertise is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:02:12Z"],
+                            "contentType": ["page"],
+                            "assetType": ["test"],
+                            "product": ["RealPresence Centro"],
+                            "_version_": 1578946212777689088
+                        }, {
+                            "id": "/content/projectplan/company",
+                            "title": ["Company Test"],
+                            "videothumbnail": 'images/polycom.jpg',
+                            "url": ["/content/projectplan/company.html"],
+                            "description": 'The RealPresence TRIO  is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-09-257T03:16:09Z"],
+                            "contentType": ["page"],
+                            "assetType": ["video"],
+                            "_version_": 1578946212946509824
+                        }, {
+                            "id": "/content/projectplan/work",
+                            "title": ["Work"],
+
+                            "url": ["/content/projectplan/work.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:08Z"],
+                            "contentType": ["page"],
+                            "_version_": 1578946212979015680
+                        }, {
+                            "id": "/content/projectplan/blog",
+                            "title": ["Blog"],
+
+                            "url": ["/content/projectplan/blog.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:02:03Z"],
+                            "contentType": ["pdf"],
+                            "_version_": 1578946212985307136
+                        }, {
+                            "id": "/content/projectplan/careers",
+                            "title": ["Careers"],
+
+                            "url": ["/content/projectplan/careers.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:44Z"],
+                            "contentType": ["page"],
+                            "_version_": 1578946212991598592
+                        }, {
+                            "id": "/content/projectplan",
+                            "title": ["ProjectPlan"],
+                            "thumbnail": 'images/polycom.jpg',
+                            "url": ["/content/projectplan.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-07-194T01:21:54Z"],
+                            "contentType": ["page"],
+                            "_version_": 1578946212999987200
+                        }, {
+                            "id": "/content/projectplan/news",
+                            "title": ["News"],
+                            "thumbnail": 'images/polycom.jpg',
+                            "url": ["/content/projectplan/news.html"],
+                            "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
+                            "lastModified": ["2017-04-111T11:01:54Z"],
+                            "contentType": ["pdf"],
+                            "_version_": 1578946213006278656
+                        },
+
+                                ],
                         "facet_pivot": [{
-                            name: 'Product',
+                            name: 'PRODUCT',
                             id: 'product',
                             items: [{
                                 name: 'RealPresence Centro'
@@ -1085,7 +1168,7 @@
                                 name: 'Soundstructure'
                             }]
                         }, {
-                            name: 'Content Type',
+                            name: 'CONTENT TYPE',
                             id: 'contentType',
                             items: [{
                                 name: 'pdf'
@@ -1097,7 +1180,7 @@
                                 name: 'video'
                             }]
                         }, {
-                            name: 'Asset Type',
+                            name: 'ASSET TYPE',
                             id: 'assetType',
                             items: [{
                                 name: 'Brochures'
