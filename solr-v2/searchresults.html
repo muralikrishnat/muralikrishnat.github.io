@@ -238,7 +238,7 @@ h5 {
 }    
 
 
-.filter-category-list .filter-list-item:hover{
+.filter-category-list .filter-list-item.no-items:hover{
 background-color:#eee;
 
         }
@@ -306,6 +306,19 @@ background-color:#eee;
             }
 .filter-list .filter-category-heading{
             margin-bottom:5px;
+            position: relative;
+        }
+        .link-clear-filter {
+            position: absolute;
+            top: 0;
+            right: 0;
+
+        }
+        .filter-list .filter-category-heading .link-clear-filter {
+            display: none;
+        }
+        .filter-list.expanded.checked .filter-category-heading .link-clear-filter {
+            display: inline;
         }
 
         /*Right Rail Search Results Section */
@@ -516,8 +529,8 @@ color:#A9A9A9;
             <div class="did-you-mean hidden">Did you mean: <span class="suggestion-text"></span></div>
         </div>
 <!--End of Search Bar Module -->
-<!----Results not found -->
-<div class="results-not-found" style="position: relative;
+<!--Results not found -->
+<div class="results-not-found hidden" style="position: relative;
 top: 80px;
 left: 70px;">
   <p>Your search term is not found</p>
@@ -535,9 +548,10 @@ left: 70px;">
             <!--Left Rail Filter Module -->
 
             <div class=" filter-component hidden">
-                <h4 class="filter-section-heading">FILTER BY
-<a href="#"><span>RESET ALL FILTERS</span></a>
-                </h4>
+                <div>
+                    <h4 class="filter-section-heading">FILTER BY</h4> 
+                    <a href="#" class="link-all-filters"><span>RESET ALL FILTERS</span></a>
+                </div>
                 <div class="filter-category-list"></div> 
             </div>
             <!--End of Left Rail Filter Module -->
@@ -562,7 +576,10 @@ left: 70px;">
                 <img class="left-arrow arrow-icon" src="images/left.png" />
                 <img class="down-arrow arrow-icon" src="images/down.png" />
                 <span class="category-name">
-                  <a href="#"><span>Clear filters</span></a>
+                  <a href="#"></a>
+                </span>
+                <span class="link-clear-filter">
+                    <a href="javascript:void(0);">Clear filters</a>
                 </span>
             </div>
             <div class="filter-list-items"></div>
@@ -589,15 +606,16 @@ left: 70px;">
                     </p>
 
                         <a class="link-to-content"></a>
-                     
+                    <p class="release-date"></p>
                 </div>
                 <div class="video-content" style="position: relative;">
                     <div class="video-thumb" style="width: 50px;height: 36px;background-color: #eee;float: left;margin-right: 10px;">
                         <img src="images/video.png" alt="polycom-logo" style="width: 100%; height: 100%" />
                     </div>
-                    <div>
+                    <div style="padding-left: 60px;">
                         <p class="content-desc">
                         </p>
+                        <p>Duration: <span class="duration"></span></p>
                     </div>
                 </div>
             </div>
@@ -636,22 +654,62 @@ left: 70px;">
             didYouMeanTerms = [];
         var configs = {
             hideFilterZeroresults: true,
-            updateUrl: true
+            updateUrl: false
+        };
+        var checkForFilterSelection = function() {
+            filterParams.filters = [];
+            $('.filter-component').find('.checkbox:checked').each((i, n) => {
+                filterParams.filters.push({
+                    key: $(n).attr('key'),
+                    value: $(n).attr('val')
+                });
+            });
+            paginationConfig.active = 1;
+            parseResults();
+        };
+
+        var resetClearLinks = function() {
+            $('.link-all-filters').addClass('hidden');
+            if ($('.filter-component').find('.checkbox:checked').length > 0) {
+                $('.link-all-filters').removeClass('hidden');
+            }
         };
         var bindFilterEvents = function() {
+            resetClearLinks();
             $('.arrow-icon').click(function() {
                 $(this).closest('.filter-list').toggleClass('expanded');
             });
             $('.filter-list-item').find('.checkbox').change(function() {
-                filterParams.filters = [];
-                $('.filter-list-item').find('.checkbox:checked').each((i, n) => {
-                    filterParams.filters.push({
-                        key: $(n).attr('key'),
-                        value: $(n).attr('val')
-                    });
+                resetClearLinks();
+                checkForFilterSelection();
+                var $container = $(this).closest('.filter-list');
+                $container.removeClass('checked');
+                if ($container.find('.checkbox:checked').length > 0) {
+                    $container.addClass('checked');
+                }
+            });
+
+            $('.link-clear-filter').find('a').click(function() {
+                var $container = $(this).closest('.filter-list');
+                $container.find('.checkbox:checked').each(function(){
+                    this.checked = false;
                 });
-                paginationConfig.active = 1;
-                parseResults();
+                resetClearLinks();
+                checkForFilterSelection();
+                $container.removeClass('checked');
+                if ($container.find('.checkbox:checked').length > 0) {
+                    $container.addClass('checked');
+                }
+            });
+
+            $('.link-all-filters').click(function(e) {
+                e.preventDefault();
+                var $container = $('.filter-component');
+                $container.find('.checkbox:checked').each(function(){
+                    this.checked = false;
+                });
+                resetClearLinks();
+                checkForFilterSelection();
             });
         };
         var getFilterItemHtml = function(filterItem, fi, category) {
@@ -660,8 +718,10 @@ left: 70px;">
             if (filterItem.items && filterItem.items.length > 0) {
                 $filterTemplate.html('');
                 let $templateHTML = getFilterCategory(filterItem);
+                
                 $filterTemplate.append($templateHTML);
             } else {
+                $filterTemplate.addClass('no-items');
                 $filterTemplate.find('.filter-item-name').text(filterItem.name);
                 let key = category.id;
                 if (!key) {
@@ -763,6 +823,12 @@ left: 70px;">
             let fileType = ''
             if (sItem.contentType && sItem.contentType instanceof Array) {
                 fileType = 'filetype-' + sItem.contentType[0];
+                if (sItem.contentType[0] === 'video' && sItem['duration']) {
+                    $resultTemplate.find('.duration').text(sItem['duration']);
+                }
+                if (sItem.contentType[0] === 'news' && sItem['releasedate']){
+                    $resultTemplate.find('.release-date').text(sItem['releasedate']);
+                }
             }
             if (!sItem.thumbnail) {
                 $resultTemplate.find('.search-image').addClass(fileType);
@@ -774,11 +840,24 @@ left: 70px;">
             highliter($resultTemplate.find('.link-to-content'), $('.auto-suggestion').val());
             $('.search-results-list').append($resultTemplate);
         };
-        var getPinSearchItem = function(pinItem) {
+        var getPinSearchItem = function(pinItem, opts) {
             var $pinSearch = $('.pin-serach-item.template').clone();
             $pinSearch.removeClass('template');
-            $pinSearch.find('.pinsearch-content').find('h3').html(pinItem.title);
-            $pinSearch.find('.pinsearch-content').find('.content-desc').html(pinItem.description);
+            if (opts && opts.headinglink) {
+                $pinSearch.find('.pinsearch-content').find('h3').html('<a href="javascript:void(0)">' + pinItem.title + '</a>');
+            } else {
+                $pinSearch.find('.pinsearch-content').find('h3').html(pinItem.title);
+            }
+            if (opts && opts.contentlink >= 0) {
+                var description = pinItem.description;
+                var words =description.split(' ');
+                if (words[opts.contentlink]) {
+                    words[opts.contentlink] = '<a style="display:inline;" href="javascript:void(0);">' + words[opts.contentlink] + '</a>';
+                }
+                $pinSearch.find('.pinsearch-content').find('.content-desc').html(words.join(' '));
+            } else {
+                $pinSearch.find('.pinsearch-content').find('.content-desc').html(pinItem.description);
+            }
             $pinSearch.find('.pinsearch-content').find('.link-to-content').attr('href', pinItem.url);
             return $pinSearch;
         };
@@ -786,9 +865,9 @@ left: 70px;">
             var $pinSearchContainer = $('.pin-search');
             $pinSearchContainer.html('');
             if (filteredResults.length > 0) {
-                $pinSearchContainer.append(getPinSearchItem(filteredResults[0]));
+                $pinSearchContainer.append(getPinSearchItem(filteredResults[0], { headinglink: true }));
                 if (filteredResults[1]) {
-                    $pinSearchContainer.append(getPinSearchItem(filteredResults[1]));
+                    $pinSearchContainer.append(getPinSearchItem(filteredResults[1], { contentlink: 16 }));
                 }
             }
         };
@@ -815,11 +894,7 @@ left: 70px;">
             if (paginationConfig.active > count) {
                 index = index + (paginationConfig.active - count);
             }
-            if (paginationConfig.active > 1) {
-                $('.pagination-links').append('<li>  <a href="#" data-dir="0" class="previous-link page-nav-link">   &lt; </a>  </li>');
-            } else {
-                $('.pagination-links').append('<li>  &lt; </li>');
-            }
+           
             for (var i = 0; i < count; i++) {
                 var $templatePage = $('.template-pagination-item').clone();
                 if (paginationConfig.active == (i + index)) {
@@ -829,19 +904,28 @@ left: 70px;">
                     links = links + $templatePage.html();
                 }
             }
-            if (filteredResults.length > 0) {
-                $('.pagination-links').append(links);
-            } else {
-                $('.pagination-links').html('');
-            }
+            if ( filteredResults.length > paginationConfig.resultsPerPage) {
+                if (paginationConfig.active > 1) {
+                    $('.pagination-links').append('<li>  <a href="#" data-dir="0" class="previous-link page-nav-link">   &lt; </a>  </li>');
+                } else {
+                    $('.pagination-links').append('<li>  &lt; </li>');
+                }
 
-            if (totalpages > paginationConfig.active && filteredResults.length > 0) {
-                $('.pagination-links').append('<li>  <a href="#" data-dir="1" class="next-link page-nav-link">   &gt; </a>  </li>');
-            } else {
                 if (filteredResults.length > 0) {
-                    $('.pagination-links').append('<li>    &gt;   </li>');
+                    $('.pagination-links').append(links);
+                } else {
+                    $('.pagination-links').html('');
+                }
+
+                if (totalpages > paginationConfig.active && filteredResults.length > 0) {
+                    $('.pagination-links').append('<li>  <a href="#" data-dir="1" class="next-link page-nav-link">   &gt; </a>  </li>');
+                } else {
+                    if (filteredResults.length > 0) {
+                        $('.pagination-links').append('<li>    &gt;   </li>');
+                    }
                 }
             }
+            
 
             $('.page-link').click(function(e) {
                 e.preventDefault();
@@ -900,17 +984,20 @@ left: 70px;">
                 updateUrl();
             }
             renderresultsWithPagination(filteredResults);
-
-            if (filteredResults.length === 0 && configs.hideFilterZeroresults) {
-                $('.filter-component').addClass('hidden');
+            $('.results-not-found').addClass('hidden');
+            if (filteredResults.length === 0 ) {
+                if(configs.hideFilterZeroresults){
+                    $('.filter-component').addClass('hidden');
+                }
                 $('.results-wrapper').addClass('hidden');
+                $('.results-not-found').removeClass('hidden');
             }
         };
 
         var renderResults = function(opts) {
             $('.results-wrapper').addClass('hidden');
             $('.search-results-list').html('');
-            $('.did-you-mean').addClass('hidden');
+            $('.did-you-mean, .results-not-found').addClass('hidden');
             $('.did-you-mean').find('span').html('');
             var text = $('.auto-suggestion').val();
             filterParams.textSelected = text;
@@ -920,6 +1007,7 @@ left: 70px;">
                 didYouMeanTerms = [];
                 parseResults();
                 renderFilterComponent();
+                
             } else {
                 getResults(text).then(function({
                     docs,
@@ -981,6 +1069,7 @@ left: 70px;">
                             "description": 'The RealPresence TRIO  is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
                             "lastModified": ["2017-09-257T03:16:09Z"],
                             "contentType": ["video"],
+                            "duration":"00:25:23",
                             "assetType": ["video"],
                             "_version_": 1578946212946509824
                         }, {
@@ -1026,7 +1115,8 @@ left: 70px;">
                             "url": ["/content/projectplan/news.html"],
                             "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
                             "lastModified": ["2017-04-111T11:01:54Z"],
-                            "contentType": ["pdf"],
+                            "contentType": ["news"],
+                            "releasedate": "November 10, 2015",
                             "_version_": 1578946213006278656
                         }, {
                             "id": "/content/projectplan/news",
@@ -1147,6 +1237,7 @@ left: 70px;">
                             "description": 'The RealPresence TRIO 8800 is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
                             "lastModified": ["2017-04-111T11:01:54Z"],
                             "contentType": ["pdf"],
+                            "test": ["demo"],
                             "_version_": 1578946213006278656
                         },
 
@@ -1193,7 +1284,15 @@ left: 70px;">
                                 }, {
                                     name: 'Sheets'
                                 }, {
-                                    name: 'test'
+                                    name: 'test',
+                                    items: [
+                                        {
+                                            name: 'seminar'
+                                        },
+                                        {
+                                            name: 'demo'
+                                        }
+                                    ]
                                 }]
                             }]
                         }]
@@ -1203,7 +1302,7 @@ left: 70px;">
                     var prevMatched = true,
                         lettersMatched = '';
                     for (let i = 0; i < q.length; i++) {
-                        if (q[i].toLowerCase() == t[i].toLowerCase() && prevMatched) {
+                        if (q[i] && t[i] && q[i].toLowerCase() == t[i].toLowerCase() && prevMatched) {
                             lettersMatched += t[i];
                             prevMatched = true;
                         } else {
@@ -1288,6 +1387,12 @@ left: 70px;">
                 $('.search-suggestion').html('');
                 $('.auto-suggestion').val('');
                 $('.search-suggestion').addClass('hidden');
+                facetPivot = [];
+                results = [];
+                didYouMeanTerms = [];
+                parseResults();
+                renderFilterComponent();
+                $('.results-not-found').addClass('hidden');
             });
 
             $('body').click(function(e) {
