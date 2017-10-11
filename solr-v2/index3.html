@@ -1024,6 +1024,11 @@ left: 70px;">
                         if (didYouMeanTerms.length > 0) {
                             $('.did-you-mean').find('span').append('<a href="javascript:void(0);" class="link-did-you-mean" >' + didYouMeanTerms.join(',') + '</a>');
                             $('.did-you-mean').removeClass('hidden');
+
+                            $('.link-did-you-mean').click(function() {
+                                $('.auto-suggestion').val($(this).text());
+                                renderResults();
+                            });
                         }
                     } else {
                         facetPivot = [];
