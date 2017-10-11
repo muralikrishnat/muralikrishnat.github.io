@@ -991,7 +991,9 @@ left: 70px;">
                     $('.filter-component').addClass('hidden');
                 }
                 $('.results-wrapper').addClass('hidden');
-                $('.results-not-found').removeClass('hidden');
+                if (filterParams.textSelected.length > 0) {
+                    $('.results-not-found').removeClass('hidden');
+                }
             }
         };
 
