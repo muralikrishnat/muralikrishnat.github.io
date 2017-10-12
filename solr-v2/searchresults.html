@@ -38,6 +38,7 @@ h5 {
     margin: 0px;
     padding: 0px;
 }
+h4 { font-weight: normal;}
 .font-bold { font-weight: bold; }
 
 /* Search Module Styles */
@@ -317,7 +318,7 @@ background-color:#eee;
         .filter-list .filter-category-heading .link-clear-filter {
             display: none;
         }
-        .filter-list.expanded.checked .filter-category-heading .link-clear-filter {
+        .filter-list.expanded.checked>.filter-category-heading .link-clear-filter {
             display: inline;
         }
 
@@ -500,6 +501,33 @@ color:#A9A9A9;
                 margin: 0 auto;
             }
         }
+
+        .filter-list-items>.filter-list-item:nth-child(n+6){
+            display: none;
+        }
+        .filter-list-items.show-more>.filter-list-item:nth-child(n+6){
+            display: none;
+        }
+        .filter-list-items.show-less>.filter-list-item:nth-child(n+6){
+            display: block;
+        }
+
+        .show-more-filters, .show-less-filters {
+            display: none;
+        }
+        .filter-list-items.show-more > .show-more-filters {
+            display: block;
+        }
+        .filter-list-items.show-more > .show-less-filters {
+            display: none;
+        }
+        .filter-list-items.show-less > .show-less-filters {
+            display: block;
+        }
+        .filter-list-items.show-less > .show-more-filters {
+            display: none;
+        }
+
     </style>
 </head>
 
@@ -638,7 +666,7 @@ left: 70px;">
      <script src="jquery-3.2.1.min.js"></script>
     <script>
        var paginationConfig = {
-                resultsPerPage: 20,
+                resultsPerPage: 12,
                 noofpages: 10,
                 active: 1
             },
@@ -697,6 +725,7 @@ left: 70px;">
                 resetClearLinks();
                 checkForFilterSelection();
                 $container.removeClass('checked');
+                $container.find('.checked').removeClass('checked');
                 if ($container.find('.checkbox:checked').length > 0) {
                     $container.addClass('checked');
                 }
@@ -758,6 +787,8 @@ left: 70px;">
                     $filterItem = getFilterItemHtml(filterItem, fi, category);
                     $templateHTML.find('.filter-list-items').append($filterItem);
                 });
+                $templateHTML.find('>.filter-list-items').append('<div class="show-more-filters"><a href="#" >show more</a></div>');
+                $templateHTML.find('>.filter-list-items').append('<div  class="show-less-filters"><a href="#">show less</a></div>');
             }
             return $templateHTML;
         };
@@ -773,6 +804,21 @@ left: 70px;">
                     $('.filter-category-list').append($templateHTML);
                 });
                 $('.filter-component').removeClass('hidden');
+
+                $('.filter-list-items').each(function(){
+                    if($(this).find('>.filter-list-item ').length > 5) { 
+                        $(this).addClass('show-more');
+                    }
+                });
+
+                $('.show-more-filters').click(function(e){
+                    e.preventDefault();
+                    $(this).closest('.filter-list-items').removeClass('show-more').addClass('show-less');
+                });
+                $('.show-less-filters').click(function(e){
+                    e.preventDefault();
+                    $(this).closest('.filter-list-items').removeClass('show-less').addClass('show-more');
+                });
             }
             bindFilterEvents();
 
@@ -784,14 +830,18 @@ left: 70px;">
 
         var highliter = function(tagToHighlite, textToHighlite) {
             if (textToHighlite.indexOf('*') < 0) {
-                var words = [];
-                tagToHighlite.text().split(' ').forEach(wA => {
-                    var q = textToHighlite.toLowerCase();
-                    var regexp = new RegExp(q, 'ig');
-                    wA = wA.replace(regexp, '<span class="font-bold">$&</span>');
-                    words.push(wA);
-                })
-                tagToHighlite.html(words.join(' '));
+                if (tagToHighlite.each) {
+                    tagToHighlite.each(function() {
+                        var words = [];
+                        $(this).text().split(' ').forEach(wA => {
+                            var q = textToHighlite.toLowerCase();
+                            var regexp = new RegExp(q, 'ig');
+                            wA = wA.replace(regexp, '<span class="font-bold">$&</span>');
+                            words.push(wA);
+                        })
+                        $(this).html(words.join(' '));
+                    });
+                }
             }
         };
 
@@ -873,6 +923,7 @@ left: 70px;">
             }
         };
         var renderresultsWithPagination = function(filteredResults) {
+            $(window).scrollTop(0);
             $('.search-results-list').html('');
             if (filteredResults.length > 0) {
                 $('.results-wrapper').removeClass('hidden');
@@ -1060,7 +1111,7 @@ left: 70px;">
                         "start": 0,
                         "docs": [{
                             "id": "/content/projectplan/expertise",
-                            "title": ["Expertise"],
+                            "title": ["Expertise the test"],
                              "thumbnail": 'images/polycom.jpg',
                             "url": ["/content/projectplan/expertise.html"],
                             "description": 'The RealPresence TRIO expertise is the first smart hub for group collaboration that transforms the iconic-three-point phone into a modular voice, video and content sharing system for any team environment, large or small. When',
