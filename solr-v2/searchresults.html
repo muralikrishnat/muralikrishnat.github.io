@@ -528,6 +528,15 @@ color:#A9A9A9;
             display: none;
         }
 
+        .overlay {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: white;
+            opacity: 0.6;
+        }
     </style>
 </head>
 
@@ -752,7 +761,7 @@ left: 70px;">
                 $filterTemplate.append($templateHTML);
             } else {
                 $filterTemplate.addClass('no-items');
-                $filterTemplate.find('.filter-item-name').text(filterItem.name);
+                $filterTemplate.find('>.filter-item-name').text(filterItem.name);
                 let key = category.id;
                 if (!key) {
                     key = category.name.toLowerCase().replace(' ', '');
@@ -785,7 +794,7 @@ left: 70px;">
             if (category.items && category.items.length > 0) {
                 category.items.forEach(function(filterItem, fi) {
                     $filterItem = getFilterItemHtml(filterItem, fi, category);
-                    $templateHTML.find('.filter-list-items').append($filterItem);
+                    $templateHTML.find('>.filter-list-items').append($filterItem);
                 });
                 $templateHTML.find('>.filter-list-items').append('<div class="show-more-filters"><a href="#" >show more</a></div>');
                 $templateHTML.find('>.filter-list-items').append('<div  class="show-less-filters"><a href="#">show less</a></div>');
@@ -923,7 +932,7 @@ left: 70px;">
             }
         };
         var renderresultsWithPagination = function(filteredResults) {
-            $(window).scrollTop(0);
+            
             $('.search-results-list').html('');
             if (filteredResults.length > 0) {
                 $('.results-wrapper').removeClass('hidden');
@@ -983,6 +992,7 @@ left: 70px;">
                 e.preventDefault();
                 paginationConfig.active = parseInt($(this).text());
                 renderresultsWithPagination(filteredResults);
+                $(window).scrollTop(0);
             });
 
             $('.page-nav-link').click(function(e) {
@@ -993,6 +1003,7 @@ left: 70px;">
                     paginationConfig.active = paginationConfig.active - 1;
                 }
                 renderresultsWithPagination(filteredResults);
+                $(window).scrollTop(0);
             });
 
 
@@ -1063,11 +1074,13 @@ left: 70px;">
                 renderFilterComponent();
                 
             } else {
+                loader();
                 getResults(text).then(function({
                     docs,
                     facet,
                     didYouMean
                 }) {
+                    loader(true);
                     if (docs.length > 0) {
                         results = docs;
                         facetPivot = facet;
@@ -1091,9 +1104,28 @@ left: 70px;">
             }
         };
 
+       
+        var loader = function(hide) {
+            if ($('.overlay').length === 0) {
+                var $loader = $('<div/>');
+                $loader.addClass('overlay');
+                var $modal = $('<div style="position: fixed; left:20%; top:25%;"/>');
+                $modal.html('Loading...');
+                $loader.append($modal);
+                $('body').append($loader);
+            }
+            if (hide) {
+                $('.overlay').addClass('hidden');
+            } else {
+                $('.overlay').removeClass('hidden');
+            }
+            
+        };
+
         var timeout,
             promiseObject;
         var getResults = function(q) {
+            
             // return $.get('/conent/results?q=' + q);
             promiseObject = new Promise(function(res, rej) {
                 var resp = {
@@ -1343,10 +1375,19 @@ left: 70px;">
                                 }, {
                                     name: 'Sheets'
                                 }, {
-                                    name: 'test',
+                                    name: 'test test',
+                                    id: 'test',
                                     items: [
                                         {
-                                            name: 'seminar'
+                                            name: 'seminar',
+                                            items: [
+                                                {
+                                                    name: 'test'
+                                                },
+                                                {
+                                                    name: 'test2'
+                                                }
+                                            ]
                                         },
                                         {
                                             name: 'demo'
@@ -1389,12 +1430,15 @@ left: 70px;">
                         return true;
                     }
                     return false;
-                })
-                res({
-                    docs,
-                    facet: resp.response.facet_pivot,
-                    didYouMean: didYouMean
                 });
+
+                setTimeout(function() {
+                    res({
+                        docs,
+                        facet: resp.response.facet_pivot,
+                        didYouMean: didYouMean
+                    });
+                }, 700);
             });
             return promiseObject;
         };
@@ -1425,7 +1469,7 @@ left: 70px;">
                                 sItem.title.forEach(function(r) {
                                     var rL = r.toLowerCase();
                                     var textL = text.toLowerCase();
-                                    if (r.toLowerCase().indexOf(text.toLowerCase()) == 0 && suggestions.indexOf(r) < 0) {
+                                    if (suggestions.length < 6 && r.toLowerCase().indexOf(text.toLowerCase()) == 0 && suggestions.indexOf(r) < 0) {
                                         suggestions.push(r);
                                         $('.search-suggestion').append('<li class="suggestion-item" val="' +
                                             r + '">' + (rL.substr(rL.indexOf(textL), textL.length) + '<span class="font-bold">' + rL.substr(rL.indexOf(textL) + textL.length, rL.length) + '</span>') + '</li>');
@@ -1442,9 +1486,10 @@ left: 70px;">
         var bindAutoSuggestionEvents = function() {
             $('.btn-clear-search').click(function(e) {
                 e.preventDefault();
+                $('.clear-search').addClass('hidden');
                 $('.search-suggestion').html('');
                 $('.auto-suggestion').val('');
-                $('.search-suggestion').addClass('hidden');
+                $('.search-suggestion, .did-you-mean').addClass('hidden');
                 facetPivot = [];
                 results = [];
                 didYouMeanTerms = [];
@@ -1460,6 +1505,12 @@ left: 70px;">
             });
             $('.auto-suggestion').keyup(function(e) {
                 var value = $(this).val();
+                if (value.length > 0) {
+                    $('.clear-search').removeClass('hidden');
+                } else {
+                    $('.clear-search').addClass('hidden');
+                }
+                
                 if (e.keyCode == 27) {
                     $('.search-suggestion').addClass('hidden');
                     $('.search-suggestion').html('');
@@ -1511,6 +1562,7 @@ left: 70px;">
                 $('.search-suggestion').addClass('hidden');
                 paginationConfig.active = 1;
                 filterParams.filters = [];
+                
                 renderResults();
             });
         };
@@ -1552,10 +1604,13 @@ left: 70px;">
         $(document).ready(function() {
             bindAutoSuggestionEvents();
             processQueryString();
+            $('.clear-search').addClass('hidden');
             if (filterParams.textSelected && filterParams.textSelected.length > 0) {
+                $('.clear-search').removeClass('hidden');
                 $('.auto-suggestion').val(filterParams.textSelected);
                 renderResults();
             }
+            
         });
     </script>
 </body>
