@@ -1,0 +1,16 @@
+.usecases-module{
+	background-color:#f6ac41;
+	padding-right:20px;
+	padding-left: 20px;
+} 
+ .disclaimer{
+ 	 margin-top: 60px;
+    background-color: #F0E68C;
+    padding: 30px 40px 30px 40px;
+    font-size: 16px;
+    font-weight: 600;
+ }
+ .disclaimer ul{
+ 	list-style: none;
+ 	padding:0px;
+ }
