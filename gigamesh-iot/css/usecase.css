@@ -1,23 +1,27 @@
-.usecases-module{
-	background-color:#f6ac41;
-	padding-right:20px;
-	padding-left: 20px;
-} 
- .disclaimer{
- 	 margin-top: 60px;
+.usecases-module {
+    background-color: #f6ac41;
+    padding-right: 20px;
+    padding-left: 20px;
+}
+
+.disclaimer {
+    margin-top: 60px;
     background-color: #F0E68C;
     padding: 30px;
     font-size: 16px;
     font-weight: 600;
- }
-   ul{
- 	list-style: none;
- 	padding:0px;
- }
- /* Usecase-1*/
+}
 
- .button-group{
- 	background: #f2ad4b;
+ul {
+    list-style: none;
+    padding: 0px;
+}
+
+
+/* Usecase-1*/
+
+.button-group {
+    background: #f2ad4b;
     color: #fff !important;
     padding: 10px 30px;
     margin: 0 5px;
@@ -25,28 +29,34 @@
     font-weight: 600;
     cursor: pointer;
     line-height: 50px;
- }
- .description-module {
- 	background-color: #5a8f4b;
- 	padding:60px 50px;
- 	clear:both;
- }
- .display-cards{
- 	padding:0px 50px;
- }
- .image-cards{
- 	float: left;
+}
+
+.description-module {
+    background-color: #5a8f4b;
+    padding: 60px 50px;
+    clear: both;
+}
+
+.display-cards {
+    padding: 0px 50px;
+}
+
+.image-cards {
+    float: left;
     width: 47.5%;
     margin: 0 1% 2%;
-    background-color: #f6f6f6;  
- }
+    background-color: #f6f6f6;
+}
 
- /* usecase-2*/
- .main-module{
- 	background-color: #32a6ac;
- }
- .main-module h2{
- 	padding: 50px 0;
+
+/* usecase-2*/
+
+.main-module {
+    background-color: #32a6ac;
+}
+
+.main-module h2 {
+    padding: 50px 0;
     text-align: center;
     color: #fff;
     margin-bottom: 0;
@@ -54,25 +64,28 @@
     font-weight: 600;
     max-width: 1380px;
     margin: auto;
- }
- .slider-heading{
- 	padding: 20px 15px;
+}
+
+.slider-heading {
+    padding: 20px 15px;
     background-color: #efefef;
     line-height: 1.5;
     width: 85%;
     cursor: pointer;
     font-weight: 600;
- }
+}
 
 .slider-content ul li:before {
-  content: '✓';
-  padding-bottom: 10px;
+    content: '✓';
+    padding-bottom: 10px;
 }
-.highlight-heading{
-	background-color: #32a6ac;
-	padding:10px;
+
+.highlight-heading {
+    background-color: #32a6ac;
+    padding: 10px;
 }
-.slider-heading.active{
-	background-image:url('https://www.kaaproject.org/wp-content/themes/jupiter/images/auto_arr.png');
-	background-size:110% 100%;
+
+.slider-heading.active {
+    background-image: url('https://www.kaaproject.org/wp-content/themes/jupiter/images/auto_arr.png');
+    background-size: 110% 100%;
 }
