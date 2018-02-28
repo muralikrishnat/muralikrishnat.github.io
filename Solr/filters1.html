@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <script>
+
+        var filters = [
+            {
+                "path": "/etc/tags/solr/practice", "uid": "279461988"
+            },
+            {
+                "path": "/etc/tags/solr/practice/practice-child-one",
+                "value": "Practice Child One", "uid": "638383478"
+            },
+
+            {
+                "path": "/etc/tags/solr/practice/practice-child-two/practice-sub-child-one",
+                "value": "Practice Sub Child One", "uid": "2069429225"
+            },
+            {
+                "path": "/etc/tags/solr/practice/practice-child-two",
+                "value": "Practice Sub Child One", "uid": "2069429225"
+            }
+        ];
+
+        var results = [
+            {
+                tagPaths: [
+                    '/etc/tags/solr/practice',
+                    '/etc/tags/solr/practice/practice-child-one'
+                ]
+            },
+            {
+                tagPaths: [
+                    '/etc/tags/solr/practice',
+                    '/etc/tags/solr/practice/practice-child-two'
+                ]
+            },
+            {
+                tagPaths: [
+                    '/etc/tags/solr/practice'
+                ]
+            }
+        ];
+
+
+        var resultedFilters = []; 
+        var getListAndAddFlag = function (newPath) {
+            var isAdd = true;
+            var flist = resultedFilters.filter(function (addedPath) {
+                if (addedPath.indexOf(newPath) === 0) {
+                    isAdd = false;
+                }
+                if (newPath.indexOf(addedPath) === 0) {
+                    return false;
+                }
+                return true;
+            });
+            return {
+                list: flist,
+                isAdd: isAdd
+            }
+        };
+        filters.forEach(function (filter) {
+            var path = filter.path;
+            var ft = getListAndAddFlag(filter.path)
+            if (ft.isAdd) {
+                ft.list.push(path);
+            }
+            resultedFilters = ft.list;
+        });
+
+        console.log('resutled Filters', resultedFilters);
+    </script>
+</body>
+
+</html>

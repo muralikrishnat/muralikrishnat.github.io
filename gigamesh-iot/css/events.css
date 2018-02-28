@@ -1,0 +1,17 @@
+.events-module .event-item{ 
+	border:2px solid black;
+}
+.events-module .event-item h4{
+	background-color: white;
+	padding: 20px;
+}
+.events-module .event-item p{
+	padding: 20px;
+}
+.tabs-events ul li{
+	float:left;
+}
+.events-module .event-item h6{
+	padding:10px;
+	background-color: #ccc;
+}

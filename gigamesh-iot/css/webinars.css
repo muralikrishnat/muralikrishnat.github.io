@@ -1,0 +1,9 @@
+.webinars-module ul li{
+	background-color: #ccc;
+	padding:10px;
+	margin-bottom: 10px;	
+}
+.webinars-module .webinar-info{
+	background-color: #504f4e;
+	padding: 0px;
+}
