@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        let Config = {
+            maxCol: 3
+        }
+        let members = ['GSFDSASF', 'WERWER', 'HGHDGFG', 'AFSFDF', 'AADFSFDSF'];
+        members = members.sort();
+        
+        let Cols = [], colIndex = 0;
+        for (let i = 0; i < members.length; i++) {
+            if (!(colIndex < Config.maxCol)) {
+                colIndex = 0;
+            }
+
+            if (!(Cols[colIndex])) {
+                Cols[colIndex] = [];
+            }
+            Cols[colIndex].push({});
+            colIndex += 1;
+        }
+
+        
+
+        colIndex = 0;
+        let memIndex = 0;
+        for (let j = 0; j < members.length; j++) {
+            if (!(Cols[colIndex][memIndex])) {
+                colIndex += 1;
+                memIndex = 0;
+            }
+
+            Cols[colIndex][memIndex] = members[j];
+            memIndex += 1;
+        }
+
+        console.log(Cols);
+    </script>
+</body>
+
+</html>
