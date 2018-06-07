@@ -30,8 +30,30 @@
             margin-bottom: 0;
             position: relative;
         }
-        .scale-value {
+
+        .scale-tooltip {
             position: absolute;
+            height: 30px;
+            background-color: #eee;
+            padding: 0 5px;
+            border: 2px solid black;
+            left: 0;
+            margin-left: -10px;
+        }
+
+        .scale-tooltip::after {
+            content: ' ';
+            position: absolute;
+            border-width: 5px;
+            border-style: solid;
+            border-color: black transparent transparent transparent;
+            bottom: -12px;
+            left: 9px;
+        }
+
+        .scale-value {
+            width: 20px;
+            text-align: center;
         }
     </style>
 </head>
@@ -40,11 +62,11 @@
     <div class="container">
         <div class="scale-container">
             <div class="scale-value-bar">
-                <div class="scale-value">
-                    
+                <div class="scale-tooltip">
+                    <div class="scale-value"></div>
                 </div>
             </div>
-            <div class="scale-bar"> 
+            <div class="scale-bar">
 
             </div>
         </div>
@@ -72,7 +94,20 @@
                 color: 'green'
             }
         ];
-        var value = 5;
+        var appData = {};
+        var _score;
+
+        Object.defineProperty(appData, 'score', {
+            set(val) {
+                _score = val;
+                setValue();
+            },
+            get() {
+                return _score;
+            }
+        });
+
+
 
         var init = function () {
             let tParts = ranges[ranges.length - 1].max;
@@ -87,7 +122,18 @@
                 d.style.left = ((r.min / tParts) * 100) + '%';
                 bar.appendChild(d);
             });
+
+            appData.score = 5;
         };
+
+        var setValue = () => {
+            let tParts = ranges[ranges.length - 1].max;
+
+            document.querySelector('.scale-value').innerHTML = appData.score;
+            let l = (appData.score / tParts) * 100;
+            document.querySelector('.scale-tooltip').style.left = l + '%';
+        };
+
 
     </script>
 </body>
