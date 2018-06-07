@@ -1,0 +1,20 @@
+[
+	{
+		"id": "anniversary-jammu",
+		"title": "Image 1",
+		"image": "/static/img/anniversary-jammu/1.jpg",
+		"folder": "Anniversary Jammu"
+	},
+	{
+		"id": "1stanniversary-jammu",
+		"title": "Image 1",
+		"image": "/static/img/1stanniversary-jammu/1.jpg",
+		"folder": "Anniversary Jammu 2"
+	},
+	{
+		"id": "ramoji",
+		"title": "Ramoji",
+		"image": "/static/img/ramoji/1.jpg",
+		"folder": "Ramoji FilmCity"
+	}
+]

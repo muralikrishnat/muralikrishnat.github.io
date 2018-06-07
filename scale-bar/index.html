@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .scale-container {
+            position: relative;
+        }
+
+        .scale-bar {
+            height: 8px;
+            border-radius: 35px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .range {
+            position: absolute;
+            left: 0;
+            height: 100%;
+        }
+
+        .scale-value-bar {
+            height: 45px;
+            background-color: beige;
+            margin-bottom: 0;
+            position: relative;
+        }
+        .scale-value {
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body onload="init()">
+    <div class="container">
+        <div class="scale-container">
+            <div class="scale-value-bar">
+                <div class="scale-value">
+                    
+                </div>
+            </div>
+            <div class="scale-bar"> 
+
+            </div>
+        </div>
+    </div>
+    <script>
+        var ranges = [
+            {
+                min: 0,
+                max: 4,
+                color: 'red'
+            },
+            {
+                min: 4,
+                max: 10,
+                color: 'orange'
+            },
+            {
+                min: 10,
+                max: 13,
+                color: 'yellow'
+            },
+            {
+                min: 13,
+                max: 24,
+                color: 'green'
+            }
+        ];
+        var value = 5;
+
+        var init = function () {
+            let tParts = ranges[ranges.length - 1].max;
+            let bar = document.querySelector('.scale-bar');
+            ranges.forEach(r => {
+                let d = document.createElement('DIV');
+                d.className = 'range';
+                let w = ((r.max - r.min) / tParts) * 100;
+                console.log('width', r.max, (r.max / tParts) * 100);
+                d.style.width = w + '%';
+                d.style.backgroundColor = r.color;
+                d.style.left = ((r.min / tParts) * 100) + '%';
+                bar.appendChild(d);
+            });
+        };
+
+    </script>
+</body>
+
+</html>

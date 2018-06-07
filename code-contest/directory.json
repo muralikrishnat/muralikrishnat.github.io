@@ -1,0 +1,40 @@
+[
+	{
+		"id": 1,
+		"title": "1st Anniversary Jammu",
+		"pic": "/static/img/1stanniversary-jammu/1.jpg",
+		"folder": [
+			{
+				"image": "/static/img/1stanniversary-jammu/1.jpg"
+			},
+			{
+				"image": "/static/img/1stanniversary-jammu/2.jpg"
+			},
+			{
+				"image": "/static/img/1stanniversary-jammu/3.jpg"
+			},
+			{
+				"image": "/static/img/1stanniversary-jammu/4.jpg"
+			}
+		]
+	},
+	{
+		"id": 2,
+		"title": "Anniversary Hyderabad",
+		"pic": "/static/img/anniversary-jammu/1.jpg",
+		"folder": [
+			{
+				"image": "/static/img/anniversary-jammu/1.jpg"
+			},
+			{
+				"image": "/static/img/anniversary-jammu/2.jpg"
+			},
+			{
+				"image": "/static/img/anniversary-jammu/3.jpg"
+			},
+			{
+				"image": "/static/img/anniversary-jammu/4.jpg"
+			}
+		]
+	}
+]

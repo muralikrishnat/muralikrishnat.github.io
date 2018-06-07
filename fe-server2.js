@@ -8,26 +8,29 @@ var buildInProgress = false;
 var buildStatus = {};
 
 module.exports = function (options) {
+    console.log('options', options);
     var host = '127.0.0.1';
     if (options && options.host) {
         host = host;
     }
-    var baseUrl = ' ';
-    let origin = ' ';
+    var baseUrl = 'https://svd-up-dev-rest.azurewebsites.net';
+    let origin = 'http://localhost:4200';
     var buildparam = 'build-azuredev';
     if (options.endpoint) {
         if (options.endpoint.toLowerCase() === 'uat'.toLowerCase()) {
-            baseUrl = '';
-            origin = ' ';
+            baseUrl = 'https://svd-up-uat-rest.azurewebsites.net';
+            origin = 'https://svd-up-admin-uat-container.azurewebsites.net';
 
             buildparam = 'build-azureuat';
         } else if (options.endpoint.toLowerCase() === 'prod'.toLowerCase()) {
-            baseUrl = ' ';
-            origin = '';
+            baseUrl = 'http://svd-up-rest-uat-container.azurewebsites.net';
+            origin = 'https://svd-up-admin-uat-container.azurewebsites.net';
 
             buildparam = 'prod';
         }
     }
+
+
 
 
     var requestOptions = {
@@ -138,6 +141,53 @@ module.exports = function (options) {
                         details: buildStatus
                     }));
                     response.end();
+                    // exec('git fetch', (fetchError, fetcho, fetchse) => {
+                    //     if (!fetchError) {
+                    //         buildStatus['status'] = 'Git Fetch Completed';
+                    //         exec('git pull', (e, o, se) => {
+                    //             if (!e) {
+                    //                 buildStatus['status'] = 'Git Pull Completed';
+                    //                 exec('npm run ' + buildparam, { maxBuffer: 1024 * 1000 }, (err, stdout, stderr) => {
+                    //                     buildInProgress = false;
+                    //                     buildStatus['status'] = 'build Completed';
+                    //                     response.writeHead(200, {
+                    //                         'Content-Type': 'application/json'
+                    //                     });
+                    //                     if (err) {
+                    //                         buildStatus['status'] = 'Error in build';
+                    //                     }
+                    //                     response.write(JSON.stringify({
+                    //                         err: err ? "build Error" : "",
+                    //                         buildStatus: buildStatus
+                    //                     }));
+                    //                     response.end();
+                    //                 });
+                    //             } else {
+                    //                 buildInProgress = false;
+                    //                 buildStatus['status'] = 'Git pull Error';
+                    //                 response.writeHead(200, {
+                    //                     'Content-Type': 'application/json'
+                    //                 });
+                    //                 response.write(JSON.stringify({
+                    //                     err: e ? "Git pull Error" : "",
+                    //                     stdOut: ""
+                    //                 }));
+                    //                 response.end();
+                    //             }
+                    //         });
+                    //     } else {
+                    //         buildInProgress = false;
+                    //         response.writeHead(200, {
+                    //             'Content-Type': 'application/json'
+                    //         });
+                    //         buildStatus['status'] = 'Git fetch Error';
+                    //         response.write(JSON.stringify({
+                    //             err: fetchError ? "Git fetch Error" : "",
+                    //             stdOut: ""
+                    //         }));
+                    //         response.end();
+                    //     }
+                    // });
                 }
             } else {
                 if (buildInProgress) {
