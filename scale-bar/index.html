@@ -71,6 +71,10 @@
             </div>
         </div>
     </div>
+    <div style="display:flex;margin-top:20px;">
+        <label>Enter numbers and enter : </label>
+        <input type="text" class="txtscore" />
+    </div>
     <script>
         var ranges = [
             {
@@ -124,6 +128,10 @@
             });
 
             appData.score = 5;
+
+            document.querySelector('.txtscore').addEventListener('change', function(){
+                appData.score = parseInt(document.querySelector('.txtscore').value);
+            });
         };
 
         var setValue = () => {
