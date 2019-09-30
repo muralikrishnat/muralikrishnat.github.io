@@ -1,0 +1,177 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    min-height: 100%;
+}
+.flex {
+    display: flex;
+}
+.flex-col {
+    flex-direction: column;
+}
+.flex-center {
+    justify-content: center;
+}
+
+.flex-end {
+    justify-content: flex-end;
+}
+.flex-sb {
+    justify-content: space-between;
+}
+.flex-align-center {
+    align-items: center;
+}
+
+.flex-1 {
+    flex: 1 1 auto;
+}
+.flex-5 {
+    flex: 5 5 auto;
+}
+
+.page {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    position: relative;
+}
+
+.tower-container {
+    width: 100%;
+    padding: 0 10px;
+}
+
+.tower-board {
+    display: flex;
+    height: 100%;
+    &__tower {
+        flex: 1 1 auto;
+        border: 1px solid #c2c2c2;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: flex-end;
+    }
+
+    &[data-count="3"] {
+        .tower-board__tower {
+            flex: 1 1 33.33%;
+            width: 33.33%
+        }
+    }
+}
+
+.disk {
+    background-color: transparent;
+    height: 40px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    &__item {
+        background-color: #2f2f2f;
+        height: 100%;
+        color: white;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 20px;
+    }
+}
+
+.loop(@counter) when (@counter > 0) {
+    .loop((@counter - 1));
+    .size-@{counter} {
+        padding-left: (5px * @counter);
+        padding-right: (5px * @counter);
+    }
+    .p-@{counter} {
+        padding: (5px * @counter); 
+    }
+    .m-@{counter} {
+        margin: (5px * @counter); 
+    }
+
+    .p-@{counter}-top {
+        padding-top: (5px * @counter); 
+    }
+    .p-@{counter}-right {
+        padding-right: (5px * @counter); 
+    }
+    .p-@{counter}-bottom {
+        padding-bottom: (5px * @counter); 
+    }
+    .p-@{counter}-left {
+        padding-left: (5px * @counter); 
+    }
+    .m-@{counter}-top {
+        margin-top: (5px * @counter); 
+    }
+    .m-@{counter}-right {
+        margin-right: (5px * @counter); 
+    }
+    .m-@{counter}-bottom {
+        margin-bottom: (5px * @counter); 
+    }
+    .m-@{counter}-left {
+        margin-left: (5px * @counter); 
+    }
+}
+
+.loop(8);
+
+
+
+.mask {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    &__bg {
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    .modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        &__content {
+            background-color: white;
+            padding: 20px;
+        }
+    }
+}
+
+.hidden {
+    display: none;
+}
+
+button {
+    background-color: black;
+    padding: 10px 20px;
+    color: white;
+    cursor: pointer;
+}
+
+.warning-message {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    text-align: center;
+    background-color: orangered;
+    padding: 10px 0px;
+    color: white;
+}
