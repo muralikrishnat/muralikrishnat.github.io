@@ -6,8 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Towers of Hanoi</title>
-  <!-- <link rel="stylesheet/less" href="/css/style.less" /> -->
-  <!-- <script src="/js/vendor/less.min.js"></script> -->
   <style>
     * {
       margin: 0;
@@ -77,6 +75,7 @@
       flex-direction: column;
       height: 100%;
       justify-content: flex-end;
+      width: 33.33%;
     }
     
     .tower-board[data-count="3"] .tower-board__tower {
@@ -496,6 +495,10 @@
       display: none;
     }
     
+    .vis-hidden {
+      visibility: hidden;
+    }
+    
     button {
       background-color: black;
       padding: 10px 20px;
@@ -523,12 +526,12 @@
             Start
         </button>
         <div>
-          Moves: <span m-bind="noOfMoves"></span>
+          Moves: <span class="noOfMoves"></span>
         </div>
       </div>
     </div>
     <div class="page__content flex-5 tower-container">
-      <div class="tower-container__board tower-board hidden">
+      <div class="tower-container__board tower-board">
         <div class="tower-board__tower tower1" data-tower="1"></div>
         <div class="tower-board__tower tower2" data-tower="2"></div>
         <div class="tower-board__tower tower3" data-tower="3"></div>
@@ -560,98 +563,193 @@
     You can't move disk on top of lower weights
   </div>
 
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  <script src="http://code.jquery.com/ui/1.8.21/jquery-ui.min.js"></script>
   <script>
-    var gameEngine = (function() {
-      var _defaults = {
-        noOfDisks: 3,
-        timeLimit: 1 * 60 * 1000,
-        allowedMoves: 18,
-        noOfTowers: 3
-      };
-      var noOfMoves = 0;
-      var towersData = [];
-      var dragData = {
-        dragStartIndex: null,
-        dragEndIndex: null
-      };
-      var colorStack = ['#787878', '#D2691E', '#DC143C', '#006400', '#999', '#aaa', '#ccc', '#eee', '#fff'];
-      var timeoutTimer = null;
-      var score = 0;
-      var getDisk = function(diskData) {
-        var diskElem = document.createElement("DIV");
-        diskElem.classList.add('disk');
-        diskElem.classList.add('size-' + diskData.size);
-        var diskItem = document.createElement("DIV");
-        diskItem.classList.add("disk__item");
-        diskItem.style.backgroundColor = diskData.color;
-        diskItem.innerHTML = diskData.diskName;
-        diskElem.appendChild(diskItem);
-        return diskElem;
-      };
-      var renderToDom = function() {
-        for (var i = 0; i < towersData.length; i++) {
-          var towerElem = document.querySelector('.tower' + (i + 1));
-          if (towerElem) {
-            towerElem.innerHTML = "";
-            for (let j = towersData[i].disks.length - 1; j >= 0; j--) {
-              towerElem.appendChild(getDisk(towersData[i].disks[j], j));
-            }
-          }
-        }
-        document.querySelector('[m-bind="noOfMoves"]').innerHTML = noOfMoves + '';
-      };
-      var resetDisks = function() {
-        towersData = [];
-        noOfMoves = 0;
-        score = 0;
-        for (let i = 0; i < _defaults.noOfTowers; i++) {
-          towersData.push({
-            towerIndex: (i + 1),
-            disks: []
-          });
-        }
-        var disks = [];
-        for (let j = 0; j < _defaults.noOfDisks; j++) {
-          disks.push({
-            size: (j + 1),
-            diskName: _defaults.noOfDisks - (j),
-            color: colorStack[j]
-          });
-        }
-        towersData[0].disks = disks;
-        document.querySelector('.tower-board').setAttribute('data-count', towersData.length);
-      };
-      var doneDragJob = function() {
-        if (dragData.dragStartIndex != dragData.dragEndIndex) {
-          var towerStart = towersData.filter(item => item.towerIndex === dragData.dragStartIndex);
-          if (towerStart) {
-            towerStart = towerStart[0];
-          }
+    /*
+     * jQuery UI Touch Punch 0.2.2
+     *
+     * Copyright 2011, Dave Furfero
+     * Dual licensed under the MIT or GPL Version 2 licenses.
+     *
+     * Depends:
+     *  jquery.ui.widget.js
+     *  jquery.ui.mouse.js
+     */
+    (function(b) {
+      b.support.touch = "ontouchend" in document;
+      if (!b.support.touch) {
+        return;
+      }
+      var c = b.ui.mouse.prototype,
+        e = c._mouseInit,
+        a;
 
-          var towerEnd = towersData.filter(item => item.towerIndex === dragData.dragEndIndex);
-          if (towerEnd) {
-            towerEnd = towerEnd[0];
-          }
+      function d(g, h) {
+        if (g.originalEvent.touches.length > 1) {
+          return;
+        }
+        g.preventDefault();
+        var i = g.originalEvent.changedTouches[0],
+          f = document.createEvent("MouseEvents");
+        f.initMouseEvent(h, true, true, window, 1, i.screenX, i.screenY, i.clientX, i.clientY, false, false, false, false, 0, null);
+        g.target.dispatchEvent(f);
+      }
+      c._touchStart = function(g) {
+        var f = this;
+        if (a || !f._mouseCapture(g.originalEvent.changedTouches[0])) {
+          return;
+        }
+        a = true;
+        f._touchMoved = false;
+        d(g, "mouseover");
+        d(g, "mousemove");
+        d(g, "mousedown");
+      };
+      c._touchMove = function(f) {
+        if (!a) {
+          return;
+        }
+        this._touchMoved = true;
+        d(f, "mousemove");
+      };
+      c._touchEnd = function(f) {
+        if (!a) {
+          return;
+        }
+        d(f, "mouseup");
+        d(f, "mouseout");
+        if (!this._touchMoved) {
+          d(f, "click");
+        }
+        a = false;
+      };
+      c._mouseInit = function() {
+        var f = this;
+        f.element.bind("touchstart", b.proxy(f, "_touchStart")).bind("touchmove", b.proxy(f, "_touchMove")).bind("touchend", b.proxy(f, "_touchEnd"));
+        e.call(f);
+      };
+    })(jQuery);
+  </script>
 
-          if (towerStart && towerEnd) {
-            var fromDisks = towerStart.disks;
-            if (fromDisks.length > 0) {
-              var isAllowed = false;
-              if (towerEnd.disks.length === 0) {
-                isAllowed = true;
-              } else {
-                var sDisk = fromDisks[fromDisks.length - 1];
-                var dDisk = towerEnd.disks[towerEnd.disks.length - 1];
-                if (sDisk && sDisk && dDisk.size < sDisk.size) {
-                  isAllowed = true;
-                }
-              }
-              if (isAllowed) {
-                var moveDisk = fromDisks.pop();
-                towerEnd.disks.push(moveDisk);
+  <script>
+    var _defaults = {
+      noOfDisks: 4,
+      timeLimit: 1 * 60 * 1000,
+      allowedMoves: 18,
+      noOfTowers: 3
+    };
+    var score = 0;
+    var noOfMoves = 0;
+    var towersData = [];
+    var disks = [];
+    var timeoutTimer = null;
+    var colorStack = ['#787878', '#D2691E', '#DC143C', '#006400', '#999', '#aaa', '#ccc', '#eee', '#fff'];
+    var resetDisks = function() {
+      towersData = [];
+      noOfMoves = 0;
+      score = 0;
+      disks = [];
+      for (let j = 0; j < _defaults.noOfDisks; j++) {
+        disks.push({
+          size: (j + 1),
+          diskName: _defaults.noOfDisks - (j),
+          color: colorStack[j]
+        });
+      }
+      document.querySelector('.tower-board').setAttribute('data-count', towersData.length);
+    };
+    var showWarning = function(msg) {
+      var warningMessage = document.querySelector('.warning-message');
+      warningMessage.innerHTML = msg;
+      warningMessage.classList.remove('hidden');
+      setTimeout(function() {
+        warningMessage.classList.add('hidden');
+      }, 2 * 1000);
+    };
+
+    var renderDisks = function() {
+      $('.tower1, .tower2, .tower3').html('');
+      for (let j = disks.length - 1; j >= 0; j--) {
+        $('.tower1').append('<div class="disk size-' + (j + 1) + '" data-disk-size="' + (j + 1) + '"><div class="disk__item" style="background-color:' + (disks[j].color) + '">' + (_defaults.noOfDisks - (j)) + '</div></div>');
+      }
+    };
+
+    var startGame = function() {
+      resetDisks();
+      renderDisks();
+      bindEvents();
+      toggleExceedWarning(false);
+      $('.noOfMoves').html(noOfMoves);
+      if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+      }
+      timeoutTimer = setTimeout(function() {
+        toggleExceedWarning(true, "You have reached time limit of 1 minute ");
+      }, _defaults.timeLimit);
+    }
+    var checkScore = function() {
+      $('.noOfMoves').html(noOfMoves);
+      if ($('.tower3').find('.disk').length === _defaults.noOfDisks) {
+        clearTimeout(timeoutTimer);
+        score = 100;
+        toggleExceedWarning(true, "Well done!!!! you did it....");
+      }
+    };
+
+    var toggleExceedWarning = function(show, msg) {
+      var errorModal = document.querySelector('.error-modal');
+      if (errorModal) {
+        if (show) {
+          errorModal.querySelector('.error-message').innerHTML = msg;
+          errorModal.querySelector('.score-card').innerHTML = score + '';
+          errorModal.classList.remove('hidden');
+        } else {
+          errorModal.classList.add('hidden');
+        }
+      }
+    };
+    var bindEvents = function() {
+      $('.disk').draggable({
+        start: function(event) {
+          var $target = $(event.target);
+          $target.data({
+            'ol': $target.css('left'),
+            'ot': $target.css('top')
+          })
+          dragData.dragElement = $target;
+          dragData.parentTower = event.target.parentNode;
+          dragData.towerIndex = parseInt(event.target.parentNode.getAttribute('data-tower'))
+        },
+        drag: function(event) {
+          if (Array.from(event.target.parentNode.children).indexOf(event.target) === 0) {
+            return true;
+          }
+          showWarning("You can't move lower disks");
+          return false;
+        },
+        stop: function(event) {
+
+        },
+        containment: '.tower-board'
+      });
+
+      $('.tower-board__tower').droppable({
+        drop: function(event) {
+          var towerIndex = parseInt(event.target.getAttribute('data-tower'));
+          if (towerIndex === dragData.towerIndex) {
+            dragData.dragElement.animate({
+              'left': dragData.dragElement.data('ol'),
+              'top': dragData.dragElement.data('ot')
+            }, 'fast');
+          } else {
+            var isAllowed = true;
+            if ($('.tower' + towerIndex).find('.disk:first').length > 0) {
+              var firstDisk = $('.tower' + towerIndex).find('.disk:first')[0];
+              if ("moving disk", dragData.dragElement.attr('data-disk-size') > parseInt(firstDisk.getAttribute('data-disk-size'))) {
                 if (noOfMoves < _defaults.allowedMoves) {
+                  dragData.dragElement.insertBefore($('.tower' + towerIndex).find('.disk:first'));
                   noOfMoves += 1;
-                  renderToDom();
                   checkScore();
                 } else {
                   toggleExceedWarning(true, "You have reached maximum allowed moves");
@@ -659,110 +757,36 @@
               } else {
                 showWarning("You can't move disk on top of lower weights");
               }
-            }
-          }
-        }
-      };
-      var toggleExceedWarning = function(show, msg) {
-        var errorModal = document.querySelector('.error-modal');
-        if (errorModal) {
-          if (show) {
-            errorModal.querySelector('.error-message').innerHTML = msg;
-            errorModal.querySelector('.score-card').innerHTML = score + '';
-            errorModal.classList.remove('hidden');
-          } else {
-            errorModal.classList.add('hidden');
-          }
-        }
-      };
-
-      var showWarning = function(msg) {
-        var warningMessage = document.querySelector('.warning-message');
-        warningMessage.innerHTML = msg;
-        warningMessage.classList.remove('hidden');
-        setTimeout(function() {
-          warningMessage.classList.add('hidden');
-        }, 2 * 1000);
-      };
-
-      var checkScore = function() {
-        var lastTower = towersData[towersData.length - 1];
-        if (lastTower) {
-          if (lastTower.disks.length === _defaults.noOfDisks) {
-            clearTimeout(timeoutTimer);
-            score = 100;
-            toggleExceedWarning(true, "Well done!!!! you did it....");
-          }
-        }
-      };
-      var E = function() {};
-      E.prototype.init = function(config) {
-        _defaults = Object.assign({}, config);
-        document.querySelector('.tower-board').addEventListener('touchstart', function(event) {
-          var targetElem = event.target;
-          var towerIndex = null;
-          if (targetElem.getAttribute('data-tower')) {
-            towerIndex = parseInt(targetElem.getAttribute('data-tower'));
-          } else {
-            var closestElem = targetElem.closest('[data-tower]');
-            if (closestElem.getAttribute('data-tower')) {
-              towerIndex = parseInt(closestElem.getAttribute('data-tower'));
-            }
-          }
-          dragData.dragStartIndex = towerIndex;
-        });
-        document.querySelector('.tower-board').addEventListener('touchend', function(event) {
-          var towerIndex = null;
-          var changedTouch = event.changedTouches[0];
-          var targetElem = document.elementFromPoint(changedTouch.clientX, changedTouch.clientY);
-          if (targetElem) {
-            if (targetElem.getAttribute('data-tower')) {
-              towerIndex = parseInt(targetElem.getAttribute('data-tower'));
             } else {
-              var closestElem = targetElem.closest('[data-tower]');
-              if (closestElem && closestElem.getAttribute('data-tower')) {
-                towerIndex = parseInt(closestElem.getAttribute('data-tower'));
+              if (noOfMoves < _defaults.allowedMoves) {
+                $('.tower' + towerIndex).append(dragData.dragElement);
+                noOfMoves += 1;
+                checkScore();
+              } else {
+                toggleExceedWarning(true, "You have reached maximum allowed moves");
               }
             }
-            if (towerIndex) {
-              dragData.dragEndIndex = towerIndex;
-              doneDragJob();
+            if (isAllowed) {
+              dragData.dragElement.css({
+                'left': 0
+              });
+              dragData.dragElement.animate({
+                'top': dragData.dragElement.data('ot')
+              }, 'fast');
             }
           }
-        });
-
-        document.querySelector('.tower-board').addEventListener('touchmove', function(event) {
-
-        });
-      };
-      E.prototype.start = function() {
-        document.querySelector('.tower-board').classList.remove('hidden');
-        toggleExceedWarning(false);
-        if (timeoutTimer) {
-          clearTimeout(timeoutTimer);
         }
-        timeoutTimer = setTimeout(function() {
-          toggleExceedWarning(true, "You have reached time limit of 1 minute ");
-        }, _defaults.timeLimit);
-        resetDisks();
-        renderToDom();
-      };
-      return new E();
-    })()
-
-    function bodyLoaded() {
-      gameEngine.init({
-        noOfDisks: 3,
-        timeLimit: 1 * 60 * 1000,
-        allowedMoves: 18,
-        noOfTowers: 3
       });
-
-      // gameEngine.start();
     }
 
-    function startGame() {
-      gameEngine.start();
+    var dragData = {
+      dragElement: null,
+      parentTower: null,
+      towerIndex: null
+    };
+
+    function bodyLoaded() {
+      startGame();
     }
   </script>
 </body>
