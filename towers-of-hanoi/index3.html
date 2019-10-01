@@ -522,7 +522,7 @@
   <div class="page flex-col">
     <div class="page__top flex-1 flex">
       <div class="p-2 flex flex-sb flex-align-center flex-1">
-        <button type="button" onclick="startGame()">
+        <button class="btn-start" type="button" onclick="startGame()">
             Start
         </button>
         <div>
@@ -552,9 +552,9 @@
         <div class="m-2-bottom">
           Score: <span class="score-card">0</span>
         </div>
-        <div class="flex flex-center">
+        <!-- <div class="flex flex-center">
           <button type="button" onclick="startGame()">Re Start</button>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -634,7 +634,7 @@
 
   <script>
     var _defaults = {
-      noOfDisks: 4,
+      noOfDisks: 3,
       timeLimit: 1 * 60 * 1000,
       allowedMoves: 18,
       noOfTowers: 3
@@ -676,6 +676,7 @@
     };
 
     var startGame = function() {
+      $('.btn-start').addClass('vis-hidden');
       resetDisks();
       renderDisks();
       bindEvents();
@@ -704,6 +705,7 @@
           errorModal.querySelector('.error-message').innerHTML = msg;
           errorModal.querySelector('.score-card').innerHTML = score + '';
           errorModal.classList.remove('hidden');
+          onGameEnd(score);
         } else {
           errorModal.classList.add('hidden');
         }
@@ -786,7 +788,12 @@
     };
 
     function bodyLoaded() {
-      startGame();
+      // startGame();
+    }
+
+    function onGameEnd(score) {
+      // ajax call
+      console.log("Game Score : ", score);
     }
   </script>
 </body>

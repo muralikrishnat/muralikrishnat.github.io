@@ -563,6 +563,7 @@
     You can't move disk on top of lower weights
   </div>
 
+  <!-- Start Vendor Files -->
   <script>
     /*! jQuery v1.7.2 jquery.com | jquery.org/license */
     (function(a, b) {
@@ -10207,10 +10208,11 @@
       };
     })(jQuery);
   </script>
+  <!-- End Vendor Files -->
 
   <script>
     var _defaults = {
-      noOfDisks: 4,
+      noOfDisks: 3,
       timeLimit: 1 * 60 * 1000,
       allowedMoves: 18,
       noOfTowers: 3
@@ -10252,6 +10254,7 @@
     };
 
     var startGame = function() {
+      $('.btn-start').addClass('vis-hidden');
       resetDisks();
       renderDisks();
       bindEvents();
@@ -10280,6 +10283,7 @@
           errorModal.querySelector('.error-message').innerHTML = msg;
           errorModal.querySelector('.score-card').innerHTML = score + '';
           errorModal.classList.remove('hidden');
+          onGameEnd(score);
         } else {
           errorModal.classList.add('hidden');
         }
@@ -10362,7 +10366,12 @@
     };
 
     function bodyLoaded() {
-//       startGame();
+      // startGame();
+    }
+
+    function onGameEnd(score) {
+      // ajax call
+      console.log("Game Score : ", score);
     }
   </script>
 </body>
