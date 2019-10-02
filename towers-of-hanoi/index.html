@@ -515,6 +515,12 @@
       padding: 10px 0px;
       color: white;
     }
+    body {
+      transition: all .1s linear;
+    }
+    body.timeout {
+      box-shadow: inset 0 0 30px 0px red;
+    }
   </style>
 </head>
 
@@ -525,6 +531,7 @@
         <button class="btn-start" type="button" onclick="startGame()">
             Start
         </button>
+        <div>Time: <span class="lbl-timer">00:00:00</span></div>
         <div>
           Moves: <span class="noOfMoves"></span>
         </div>
@@ -10208,9 +10215,10 @@
   <!-- End Vendor Files -->
 
   <script>
+    var noOfMinutes = 1;
     var _defaults = {
       noOfDisks: 4,
-      timeLimit: 1 * 60 * 1000,
+      timeLimit: noOfMinutes * 60 * 1000,
       allowedMoves: 18,
       noOfTowers: 3
     };
@@ -10219,6 +10227,9 @@
     var towersData = [];
     var disks = [];
     var timeoutTimer = null;
+    var timeToShow = new Date();
+    var showTimer = null;
+    var secondsCount = 60;
     var colorStack = ['#787878', '#D2691E', '#DC143C', '#006400', '#999', '#aaa', '#ccc', '#eee', '#fff'];
     var resetDisks = function() {
       towersData = [];
@@ -10249,7 +10260,6 @@
         $('.tower1').append('<div class="disk size-' + (j + 1) + '" data-disk-size="' + (j + 1) + '"><div class="disk__item" style="background-color:' + (disks[j].color) + '">' + (_defaults.noOfDisks - (j)) + '</div></div>');
       }
     };
-
     var startGame = function() {
       $('.btn-start').addClass('vis-hidden');
       resetDisks();
@@ -10260,9 +10270,28 @@
       if (timeoutTimer) {
         clearTimeout(timeoutTimer);
       }
+      timeToShow = new Date();
+      if (showTimer) {
+        clearInterval(showTimer);
+      }
+      timeToShow.setHours(0, noOfMinutes, 0, 0);
+      updateTimer();
+      showTimer = setInterval(function(){
+        secondsCount -= 1;
+        timeToShow.setSeconds(timeToShow.getSeconds() - 1);
+        updateTimer();
+      }, 1000);
       timeoutTimer = setTimeout(function() {
         toggleExceedWarning(true, "You have reached time limit of 1 minute ");
+        clearInterval(showTimer);
+        $('.lbl-timer').html('00:00:00');
       }, _defaults.timeLimit);
+    }
+    var updateTimer = function() {
+      if (secondsCount < 10) {
+        $('body').toggleClass('timeout');
+      }
+      $('.lbl-timer').html(timeToShow.toTimeString().substr(0, 8));
     }
     var checkScore = function() {
       $('.noOfMoves').html(noOfMoves);
