@@ -10298,6 +10298,7 @@
       if ($('.tower3').find('.disk').length === _defaults.noOfDisks) {
         clearTimeout(timeoutTimer);
         score = 100;
+        clearInterval(showTimer);
         toggleExceedWarning(true, "Well done!!!! you did it....");
       }
     };

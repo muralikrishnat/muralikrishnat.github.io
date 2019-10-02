@@ -1,7 +1,7 @@
-let port = 80,
-    folder = 'dist',
+let port = 3435,
+    folder = 'towers-of-hanoi',
     endpoint = "dev",
-    ssl = true,
+    ssl = false,
     host = '127.0.0.1';
 if (process.argv) {
     process.argv.forEach((p) => {
