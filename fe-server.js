@@ -66,79 +66,10 @@ module.exports = function (options) {
                 try {
                     body = JSON.parse(body);
                 } catch (e) { }
-                requestOptions.url = baseUrl + request.url;
-                requestOptions.body = body;
-                if (request.url.indexOf('notifications') >= 0) {
-                    console.log('device Token Body : ', JSON.stringify(body));
-                }
-                requestOptions.method = request.method;
-                if (request.headers['authorization']) {
-                    requestOptions.headers['authorization'] = request.headers['authorization'];
-                }
-                if (request.headers['Authorization']) {
-                    requestOptions.headers['Authorization'] = request.headers['Authorization'];
-                }
-
-                if (request.headers['X-API-Key']) {
-                    requestOptions.headers['X-API-Key'] = request.headers['X-API-Key'];
-                }
-
-                if (request.headers['X-API-Key'.toLowerCase()]) {
-                    requestOptions.headers['X-API-Key'] = request.headers['X-API-Key'.toLowerCase()];
-                }
-                console.log(`[LOG ${requestOptions.method} ] : ${requestOptions.url}`);
-                console.log(`[Request Details] : ` + JSON.stringify(requestOptions.headers));
-
-                rootRequest(requestOptions, (err, resp, rootBody) => {
-                    response.setHeader('Access-Control-Allow-Origin', '*');
-                    response.setHeader('Access-Control-Expose-Headers', 'Authorization, Location, authorization');
-                    response.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,PATCH');
-                    if (resp) {
-                        console.log('[LOG Response]')
-                        if (resp.headers['authorization']) {
-                            response.setHeader('authorization', resp.headers['authorization']);
-                        }
-                        if (resp.headers['Authorization']) {
-                            response.setHeader('Authorization', resp.headers['Authorization']);
-                        }
-
-                        response.writeHead(resp.statusCode, {
-                            'Content-Type': 'application/json'
-                        });
-                    } else {
-                        console.log('[LOG Error] : ', err);
-                        response.writeHead(400, {
-                            'Content-Type': 'application/json'
-                        });
-                    }
-                    if (rootBody) {
-                        response.write(JSON.stringify(rootBody))
-                    }
-                    response.end();
-                });
-            } else if (request.url.indexOf('build') >= 0) {
-                if (buildInProgress) {
-                    response.writeHead(200, {
-                        'Content-Type': 'application/json'
-                    });
-                    response.write(JSON.stringify({
-                        msg: 'Build in prgoresssssss',
-                        details: buildStatus
-                    }));
-                    response.end();
-                } else {
-                    const { exec } = require('child_process');
-                    buildStatus = {};
-                    buildInProgress = false;
-                    response.writeHead(200, {
-                        'Content-Type': 'application/json'
-                    });
-                    response.write(JSON.stringify({
-                        msg: 'Build process is moved to web interface',
-                        details: buildStatus
-                    }));
-                    response.end();
-                }
+                response.end(JSON.stringify({
+                    msg: 'Build in prgoresssssss',
+                    details: buildStatus
+                }));
             } else {
                 if (buildInProgress) {
                     response.writeHead(200, { 'content-type': 'text/html' });

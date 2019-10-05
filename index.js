@@ -1,5 +1,5 @@
 let port = 3435,
-    folder = 'towers-of-hanoi',
+    folder = 'expo-fun-games',
     endpoint = "dev",
     ssl = false,
     host = '127.0.0.1';

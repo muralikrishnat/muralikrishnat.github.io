@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>:: Welcome to Expo ::</title>
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+
+<body onload="bodyLoaded()">
+  <div class="page flex-col">
+
+  </div>
+
+  <div class="mask message-modal hidden">
+    <div class="mask__bg"></div>
+    <div class="mask__modal modal">
+      <div class="modal__content">
+        
+      </div>
+    </div>
+  </div>
+  <script id="welcome" type="text/template">
+    <div class="step">
+      <div class="step__title">${title}</div>
+      <div class="step__actions">
+        <button type="button" onclick="nextStep()"> Next </button>
+      </div>
+    </div>
+  </script>
+
+  <script id="registration" type="text/template">
+    <div class="step">
+      <div class="step__title">${title}</div>
+      <div class="form-container">
+        <div class="form-field">
+          <label for="firstName"> First Name </label>
+          <input type="text" id="firstName" name="firstName" data-validate-required="true" data-validate-reactive="true" />
+          <span class="error-message required">This field is required</span>
+        </div>
+        <div class="form-field">
+          <label for="lastName"> Last Name </label>
+          <input type="text" id="lastName" name="lastName" data-validate-required="true" data-validate-reactive="true" />
+          <span class="error-message required">This field is required</span>
+        </div>
+        <div class="form-field">
+          <label for="lastName"> Phone </label>
+          <input type="text" id="phone" name="phone" data-validate-required="true" data-validate-reactive="true" />
+          <span class="error-message required">This field is required</span>
+        </div>
+      </div>
+      <div>
+        <button type="button" onclick="nextStep()"> Next </button>
+      </div>
+    </div>
+  </script>
+
+  <script id="scan" type="text/template">
+    <div class="step">
+      <div>
+        <input type="file" accept="image/*" capture="environment" onchange="openQRCamera(this);">
+        <input type="hidden" class="qr-text" name="qrText" />
+      </div>
+      <div>
+        <img class="img-qa-scan" />
+      </div>
+      <div class="">
+        <div class="step-error"></div>
+      </div>
+      <div class="step__actions">
+        <button type="button" onclick="nextStep()"> Next </button>
+      </div>
+    </div>
+  </script>
+
+  <script id="game" type="text/template">
+    <div class="step image-grid-puzzle">
+      <div class="step__content game-container">
+        <div>Image</div>
+        <div class="game-container__bg"></div>
+      </div>
+      <div class="step__actions">
+        <button type="button" onclick="nextStep()"> Next </button>
+      </div>
+    </div>
+  </script>
+
+
+  <script id="game2" type="text/template">
+    <div class="step">
+      <div class="step__content" id="collage">
+        <div>Image</div>
+        <div id="playPanel" style="display:none;">
+          <div>
+            <ul id="sortable" class="sortable"></ul>
+          </div>
+        </div>
+      </div>
+      <div class="step__actions">
+        <button type="button" onclick="nextStep()"> Next </button>
+      </div>
+    </div>
+  </script>
+
+  <script id="success-modal-content" type="text/template">
+    <div class="modal-content">
+      <div>${title}</div>
+      <div>
+          ${content}
+      </div>
+      <div>
+          <button type="button" onclick="nextStep()"> Next </button>
+      </div>
+    </div>
+  </script>
+
+
+  <script src="js/vendor/jquery-2.1.1.min.js"></script>
+  <script src="js/vendor/jquery-ui.js"></script>
+  <script src="js/vendor/jquery-ui.touch-punch.min.js"></script>
+  <script src="js/vendor/qr-packed.min.js"></script>
+  <script src="js/image-puzzle.js"></script>
+  <script src="js/workflow.service.js"></script>
+  <script src="js/image-grid-game.js"></script>
+  <script src="js/index.js"></script>
+  <script src="js/vendor/lighdator.js"></script>
+  <script>
+    var workflow = [{
+      stepName: "welcome",
+      title: "Welcome to Expo",
+      nextStep: "registration"
+    }, {
+      stepName: "registration",
+      title: "Register",
+      nextStep: "scan"
+    }, {
+      stepName: "scan"
+    }, {
+      stepName: "game"
+    }];
+    var availableGames = [imageGridGame];
+
+    var dataManager = (function() {
+      window.appData = {
+        currentStep: "",
+        clues: []
+      };
+      var D = function() {};
+      D.prototype.save = function(opts) {
+        appData = Object.assign({}, appData, opts);
+      };
+      D.prototype.get = function(path) {
+        return appData[path];
+      };
+      D.prototype.updateLastClue = function(clueData) {
+        var lastClue = {}, lastClueIndex = 0;
+        if (appData.clues.length > 0) {
+          lastClueIndex = appData.clues.length - 1;
+          lastClue = appData['clues'][lastClueIndex];
+
+        }
+        appData['clues'][lastClueIndex] = Object.assign({}, lastClue, clueData);
+      };
+      D.prototype.addClue = function(clueData) {
+        appData['clues'].push(clueData);
+      };
+      D.prototype.getLastClue = function() {
+        return appData['clues'][appData['clues'].length - 1];
+      };
+      return new D();
+    })();
+
+    var makeRequest = function(opts) {
+      return fetch(opts.url, {
+        method: opts.method,
+        data: JSON.stringify(opts.data)
+      }).then(resp => {
+        return resp.json();
+      });
+    };
+    var getStepData = function(elemRef) {
+      var rootScope = {},
+        mergeObjects = function(src, target) {
+          var keys = [].concat(Object.keys(src), Object.keys(target)).reduce((a, b) => {
+            if (a.indexOf(b) < 0) {
+              a.push(b);
+            }
+            return a;
+          }, []);
+          var tmp = {};
+          keys.forEach(key => {
+            if (typeof src[key] === 'object' && typeof target[key] === 'object') {
+              tmp[key] = mergeObjects(src[key], target[key]);
+            } else if (src[key] && !target[key]) {
+              tmp[key] = src[key];
+            } else if (!src[key] && target[key]) {
+              tmp[key] = target[key];
+            } else {
+              if (typeof src[key] === 'string' || typeof target[key] === 'string') {
+                tmp[key] = src[key] || target[key];
+              } else if (typeof src[key] === 'undefined' && typeof target[key] === 'undefined') {
+                tmp[key] = "";
+              } else {
+                tmp[key] = Object.assign({}, src[key], target[key]);
+              }
+
+              if (typeof tmp[key] === 'undefined') {
+                tmp[key] = "";
+              }
+            }
+          });
+          return Object.assign({}, tmp);
+        };
+      Array.from(elemRef.querySelectorAll("input, select, textarea"))
+        .forEach(function(elem) {
+          let name = elem.getAttribute("name");
+          if (!(elem.tagName === 'INPUT' && elem.type === 'file') && name) {
+            var fieldName = name.split('.').reverse().reduce(function(a, b) {
+              var obj = {};
+              if (a === null) {
+                if (elem.tagName === "INPUT" && elem.type === "checkbox") {
+                  obj[b] = elem.checked + '';
+                } else {
+                  obj[b] = elem.value;
+                }
+              } else {
+                obj[b] = a;
+              }
+              return obj;
+            }, null);
+            rootScope = mergeObjects(rootScope, fieldName);
+          }
+        });
+      return rootScope;
+    }
+    var renderStep = function(stepName, gameIndex) {
+      var stepData = workflow.filter(function(flowItem) {
+        return flowItem.stepName === stepName;
+      });
+      if (stepData && stepData.length > 0) {
+        dataManager.save({
+          currentStep: stepName
+        });
+        stepData = stepData[0];
+        let stepHtml = document.querySelector('#' + stepName).innerHTML;
+        document.querySelector('.page').innerHTML = stepHtml;
+        applyScope(document.querySelector('.page'), stepData);
+        setTimeout(function() {
+          if (gameIndex >= 0 && availableGames[gameIndex]) {
+            availableGames[gameIndex].startGame(1);
+          }
+        }, 0);
+      }
+    }
+    var bodyLoaded = function() {
+      renderStep("welcome");
+    }
+    var nextStep = function() {
+      toggleModal(true);
+      if (document.querySelector('.step-error')) {
+        document.querySelector('.step-error').innerHTML = "";
+      }
+      var currentStep = dataManager.get('currentStep');
+      var workflowStep = workflowService[currentStep];
+      var stepData = workflow.filter(function(flowItem) {
+        return flowItem.stepName === currentStep;
+      });
+      if (stepData && stepData.length > 0) {
+        stepData = stepData[0];
+      }
+      if (stepData) {
+        var pageData = getStepData(document.querySelector('.page'));
+        if (workflowStep && workflowStep.handlePayload) {
+          workflowStep.handlePayload(pageData, dataManager);
+        }
+        if (workflowStep && workflowStep.getNextStepData) {
+          var nextData = workflowStep.getNextStepData(pageData, stepData, availableGames);
+          if (nextData.errors && nextData.errors.length > 0) {
+            if (document.querySelector('.step-error')) {
+              document.querySelector('.step-error').innerHTML = nextData.errors[0].message;
+            }
+          } else {
+            renderStep(nextData.nextStep, nextData.gameIndex);
+          }
+        } else {
+          renderStep(stepData.nextStep);
+        }
+      }
+    }
+
+    function toggleModal(hide) {
+      if (hide) {
+        $('.message-modal').addClass('hidden')
+      } else {
+        $('.message-modal').removeClass('hidden')
+      }
+    }
+
+    function gameDone(gameScore) {
+      if (gameScore.passed) {
+          let stepHtml = document.querySelector('#success-modal-content').innerHTML;
+          $('.message-modal').find('.modal__content').html(stepHtml);
+          var clueContent = "";
+          var lastClue = dataManager.getLastClue();
+          if (lastClue) {
+            clueContent = lastClue.clueText;
+          }
+          applyScope(document.querySelector('.modal__content'), {
+            title: "Next Clue",
+            content: clueContent
+          });
+      }
+      $('.message-modal').removeClass('hidden')
+    }
+
+    function openQRCamera(node) {
+      if (document.querySelector('.step-error')) {
+        document.querySelector('.step-error').innerHTML = "";
+      }
+      var reader = new FileReader();
+      document.querySelector('.qr-text').value = "";
+      reader.onload = function() {
+        node.value = "";
+        qrcode.callback = function(res) {
+          if (res instanceof Error) {
+            if (document.querySelector('.step-error')) {
+              document.querySelector('.step-error').innerHTML = "No QR code found. Please make sure the QR code is within the camera's frame and try again.";
+            }
+          } else {
+            document.querySelector('.qr-text').value = res;
+          }
+        };
+        document.querySelector('.img-qa-scan').src = reader.result;
+        qrcode.decode(reader.result);
+      };
+      reader.readAsDataURL(node.files[0]);
+    }
+  </script>
+</body>
+
+</html>
