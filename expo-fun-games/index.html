@@ -95,6 +95,7 @@
       <div class="step__content game-container">
         <div>Image Puzzle</div>
         <div class="game-container__bg"></div>
+        <input type="hidden" name="gamePuzzle" />
       </div>
       <div class="">
         <div class="step-error"></div>
@@ -111,7 +112,7 @@
         <div>Arthemetic Puzzle</div>
         <div>
           <ul id="challenges"></ul>
-          <input type="hidden" name="game2Puzzle" />
+          <input type="hidden" name="gamePuzzle" />
         </div>
       </div>
       <div class="">
@@ -149,6 +150,7 @@
             <div class="flex-1"></div>
           </div>
         </div>
+        <input type="hidden" name="gamePuzzle" />
       </div>
       <div class="">
         <div class="step-error"></div>
@@ -220,7 +222,7 @@
     }, {
       stepName: "game2",
       nextStep: "scan3"
-    },{
+    }, {
       stepName: "scan3",
       templateName: "scan",
       nextStep: "game3"
@@ -400,20 +402,33 @@
     }
 
     function gameDone(gameScore) {
+      let stepHtml = document.querySelector('#success-modal-content').innerHTML;
+      $('.message-modal').find('.modal__content').html(stepHtml);
+      var clueContent = "",
+        stepScope = {
+          title: "Next Clue",
+          content: ''
+        };
       if (gameScore.passed) {
-        let stepHtml = document.querySelector('#success-modal-content').innerHTML;
-        $('.message-modal').find('.modal__content').html(stepHtml);
-        var clueContent = "";
         var lastClue = dataManager.getLastClue();
         if (lastClue) {
           clueContent = lastClue.clueText;
         }
-        applyScope(document.querySelector('.modal__content'), {
+        stepScope = {
           title: "Next Clue",
           content: clueContent
-        });
+        };
         $('[name="game2Puzzle"]').val('passed');
+        $('[name="gamePuzzle"]').val('passed');
+      } else {
+        stepScope = {
+          title: "Puzzle Failed",
+          content: ""
+        };
+        $('[name="game2Puzzle"]').val('');
+        $('[name="gamePuzzle"]').val('');
       }
+      applyScope(document.querySelector('.modal__content'), stepScope);
       $('.message-modal').removeClass('hidden')
     }
 

@@ -39,19 +39,43 @@ var workflowService = {
     game: {
         getNextStepData: function() {
             var errors = [], nextStep = "scan2";
+            if ($('[name="gamePuzzle"]').val().length === 0) {
+                errors.push({
+                    message: "Please Complete the puzzle to move"
+                });
+            }
             return { errors: errors, nextStep: nextStep };
         }
     },
     scan2: {
-        getNextStepData: function() {
+        getNextStepData: function(pageData) {
             var errors = [], nextStep = "game2";
+            if (pageData['qrText'].length === 0) {
+                errors.push({
+                    message: "Please scan for QR code"
+                });
+            }
             return { errors: errors, nextStep: nextStep, isGame: true, gameIndex: 1  };
         }
     },
     game2: {
         getNextStepData: function() {
             var errors = [], nextStep = "scan3";
-            if ($('[name="game2Puzzle"]').val().length === 0) {
+            if ($('[name="gamePuzzle"]').val().length === 0) {
+                errors.push({
+                    message: "Please Complete the puzzle to move"
+                });
+            }
+            return {
+                errors: errors,
+                nextStep: nextStep
+            }
+        }
+    },
+    game3: {
+        getNextStepData: function() {
+            var errors = [], nextStep = "statuspage";
+            if ($('[name="gamePuzzle"]').val().length === 0) {
                 errors.push({
                     message: "Please Complete the puzzle to move"
                 });
@@ -63,8 +87,13 @@ var workflowService = {
         }
     },
     scan3: {
-        getNextStepData: function() {
+        getNextStepData: function(pageData) {
             var errors = [], nextStep = "game3";
+            if (pageData['qrText'].length === 0) {
+                errors.push({
+                    message: "Please scan for QR code"
+                });
+            }
             return { errors: errors, nextStep: nextStep, isGame: true, gameIndex: 2  };
         }
     }
