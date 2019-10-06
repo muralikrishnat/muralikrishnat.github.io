@@ -359,9 +359,11 @@
     }
     var nextStep = function(stepPageName, participatetype) {
       toggleModal(true);
-      dataManager.save({
-        participatetype: participatetype
-      });
+      if (stepPageName === 'participatetype') {
+        dataManager.save({
+          participatetype: participatetype
+        });
+      }
       if (document.querySelector('.step-error')) {
         document.querySelector('.step-error').innerHTML = "";
       }
@@ -423,9 +425,8 @@
       } else {
         stepScope = {
           title: "Puzzle Failed",
-          content: ""
+          content: "You have failed puzzle"
         };
-        $('[name="game2Puzzle"]').val('');
         $('[name="gamePuzzle"]').val('');
       }
       applyScope(document.querySelector('.modal__content'), stepScope);
