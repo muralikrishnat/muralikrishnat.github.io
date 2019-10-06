@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>:: Welcome to Expo ::</title>
   <link rel="stylesheet" href="css/global.css">
@@ -19,15 +19,29 @@
     <div class="mask__bg"></div>
     <div class="mask__modal modal">
       <div class="modal__content">
-        
+
       </div>
     </div>
   </div>
   <script id="welcome" type="text/template">
     <div class="step">
-      <div class="step__title">${title}</div>
+      <div class="step__title">Welcome</div>
       <div class="step__actions">
         <button type="button" onclick="nextStep()"> Next </button>
+      </div>
+    </div>
+  </script>
+
+  <script id="participatetype" type="text/template">
+    <div class="step">
+      <div>Participate as?</div>
+      <div class="step__actions">
+        <div>
+          <button type="button" onclick="nextStep('participatetype', 'individual')"> Individual </button>
+        </div>
+        <div>
+          <button type="button" onclick="nextStep('participatetype', 'team')"> Team </button>
+        </div>
       </div>
     </div>
   </script>
@@ -79,8 +93,11 @@
   <script id="game" type="text/template">
     <div class="step image-grid-puzzle">
       <div class="step__content game-container">
-        <div>Image</div>
+        <div>Image Puzzle</div>
         <div class="game-container__bg"></div>
+      </div>
+      <div class="">
+        <div class="step-error"></div>
       </div>
       <div class="step__actions">
         <button type="button" onclick="nextStep()"> Next </button>
@@ -88,16 +105,53 @@
     </div>
   </script>
 
-
   <script id="game2" type="text/template">
     <div class="step">
-      <div class="step__content" id="collage">
-        <div>Image</div>
-        <div id="playPanel" style="display:none;">
-          <div>
-            <ul id="sortable" class="sortable"></ul>
+      <div class="step__content">
+        <div>Arthemetic Puzzle</div>
+        <div>
+          <ul id="challenges"></ul>
+          <input type="hidden" name="game2Puzzle" />
+        </div>
+      </div>
+      <div class="">
+        <div class="step-error"></div>
+      </div>
+      <div class="step__actions">
+        <button type="button" onclick="nextStep()"> Next </button>
+      </div>
+    </div>
+  </script>
+
+  <script id="game3" type="text/template">
+    <div class="step boxbot-game">
+      <div class="step__content">
+        <div>Box Bot Puzzle</div>
+        <div>
+          <canvas id="boxbot4k" width="448" height="384">
+            To play the game, your browser must support HTML5 Canvas.
+          </canvas>
+        </div>
+        <div>
+          <div class="flex">
+            <div class="flex-1"></div>
+            <div class="flex-1"><button class="button" id="up"></button></div>
+            <div class="flex-1"></div>
+          </div>
+          <div class="flex">
+            <div class="flex-1"><button class="button" id="left"></button></div>
+            <div class="flex-1"></div>
+            <div class="flex-1"><button class="button" id="right"></button></div>
+          </div>
+          <div class="flex">
+            <div class="flex-1"></div>
+            <div class="flex-1"><button class="button" id="down"></button></div>
+            <div class="flex-1"></div>
           </div>
         </div>
+      </div>
+      <div class="">
+        <div class="step-error"></div>
       </div>
       <div class="step__actions">
         <button type="button" onclick="nextStep()"> Next </button>
@@ -109,10 +163,23 @@
     <div class="modal-content">
       <div>${title}</div>
       <div>
-          ${content}
+        ${content}
       </div>
       <div>
-          <button type="button" onclick="nextStep()"> Next </button>
+        <button type="button" onclick="nextStep()"> Next </button>
+      </div>
+    </div>
+  </script>
+
+  <script id="statuspage" type="text/template">
+    <div class="step">
+      <div>
+        <div>Congrats!</div>
+        <div>You have successfully completed the treasure hunt!</div>
+        <div>Winners will be announced on the 10th of october @expo 2019</div>
+      </div>
+      <div>
+        <button type="button" onclick="nextStep()"> ClOSE & EXIT </button>
       </div>
     </div>
   </script>
@@ -122,26 +189,52 @@
   <script src="js/vendor/jquery-ui.js"></script>
   <script src="js/vendor/jquery-ui.touch-punch.min.js"></script>
   <script src="js/vendor/qr-packed.min.js"></script>
-  <script src="js/image-puzzle.js"></script>
   <script src="js/workflow.service.js"></script>
   <script src="js/image-grid-game.js"></script>
+  <script src="js/arthemetic-puzzle.js"></script>
+  <script src="js/boxbot-puzzle.js"></script>
   <script src="js/index.js"></script>
   <script src="js/vendor/lighdator.js"></script>
   <script>
     var workflow = [{
       stepName: "welcome",
-      title: "Welcome to Expo",
+      nextStep: "participatetype"
+    }, {
+      stepName: "participatetype",
       nextStep: "registration"
     }, {
       stepName: "registration",
-      title: "Register",
+      title: "Personal details",
       nextStep: "scan"
     }, {
-      stepName: "scan"
+      stepName: "scan",
+      templateName: "scan",
+      nextStep: "game"
     }, {
-      stepName: "game"
+      stepName: "game",
+      nextStep: "scan2"
+    }, {
+      stepName: "scan2",
+      templateName: "scan",
+      nextStep: "game2"
+    }, {
+      stepName: "game2",
+      nextStep: "scan3"
+    },{
+      stepName: "scan3",
+      templateName: "scan",
+      nextStep: "game3"
+    }, {
+      stepName: "game3",
+      nextStep: "statuspage"
+    }, {
+      stepName: "statuspage"
     }];
-    var availableGames = [imageGridGame];
+    var availableGames = [
+      imageGridGame,
+      arthemeticPuzzle,
+      boxBotPuzzle
+    ];
 
     var dataManager = (function() {
       window.appData = {
@@ -156,11 +249,11 @@
         return appData[path];
       };
       D.prototype.updateLastClue = function(clueData) {
-        var lastClue = {}, lastClueIndex = 0;
+        var lastClue = {},
+          lastClueIndex = 0;
         if (appData.clues.length > 0) {
           lastClueIndex = appData.clues.length - 1;
           lastClue = appData['clues'][lastClueIndex];
-
         }
         appData['clues'][lastClueIndex] = Object.assign({}, lastClue, clueData);
       };
@@ -236,7 +329,8 @@
         });
       return rootScope;
     }
-    var renderStep = function(stepName, gameIndex) {
+    var renderStep = function(stepName, isGame, gameIndex) {
+      var templateName = stepName;
       var stepData = workflow.filter(function(flowItem) {
         return flowItem.stepName === stepName;
       });
@@ -245,11 +339,14 @@
           currentStep: stepName
         });
         stepData = stepData[0];
-        let stepHtml = document.querySelector('#' + stepName).innerHTML;
+        if (stepData.templateName) {
+          templateName = stepData.templateName;
+        }
+        let stepHtml = document.querySelector('#' + templateName).innerHTML;
         document.querySelector('.page').innerHTML = stepHtml;
         applyScope(document.querySelector('.page'), stepData);
         setTimeout(function() {
-          if (gameIndex >= 0 && availableGames[gameIndex]) {
+          if (isGame && gameIndex >= 0 && availableGames[gameIndex]) {
             availableGames[gameIndex].startGame(1);
           }
         }, 0);
@@ -258,8 +355,11 @@
     var bodyLoaded = function() {
       renderStep("welcome");
     }
-    var nextStep = function() {
+    var nextStep = function(stepPageName, participatetype) {
       toggleModal(true);
+      dataManager.save({
+        participatetype: participatetype
+      });
       if (document.querySelector('.step-error')) {
         document.querySelector('.step-error').innerHTML = "";
       }
@@ -283,7 +383,7 @@
               document.querySelector('.step-error').innerHTML = nextData.errors[0].message;
             }
           } else {
-            renderStep(nextData.nextStep, nextData.gameIndex);
+            renderStep(nextData.nextStep, nextData.isGame, nextData.gameIndex);
           }
         } else {
           renderStep(stepData.nextStep);
@@ -301,17 +401,18 @@
 
     function gameDone(gameScore) {
       if (gameScore.passed) {
-          let stepHtml = document.querySelector('#success-modal-content').innerHTML;
-          $('.message-modal').find('.modal__content').html(stepHtml);
-          var clueContent = "";
-          var lastClue = dataManager.getLastClue();
-          if (lastClue) {
-            clueContent = lastClue.clueText;
-          }
-          applyScope(document.querySelector('.modal__content'), {
-            title: "Next Clue",
-            content: clueContent
-          });
+        let stepHtml = document.querySelector('#success-modal-content').innerHTML;
+        $('.message-modal').find('.modal__content').html(stepHtml);
+        var clueContent = "";
+        var lastClue = dataManager.getLastClue();
+        if (lastClue) {
+          clueContent = lastClue.clueText;
+        }
+        applyScope(document.querySelector('.modal__content'), {
+          title: "Next Clue",
+          content: clueContent
+        });
+        $('[name="game2Puzzle"]').val('passed');
       }
       $('.message-modal').removeClass('hidden')
     }

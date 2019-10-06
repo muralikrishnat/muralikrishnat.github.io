@@ -22,13 +22,12 @@ var workflowService = {
                     message: "Please scan for QR code"
                 });
             }
-            var nextStepIndex = Math.floor(Math.random() * availableGames.length);
-            nextStep = availableGames[nextStepIndex].getStepName();
+            nextStep = "game";
             dataManager.updateLastClue({
                 scanCompleted: true,
                 gameName: nextStep
             });
-            return { errors: errors, nextStep: nextStep, gameIndex: nextStepIndex };
+            return { errors: errors, nextStep: nextStep, isGame: true, gameIndex: 0 };
         },
         handlePayload: function(pageData, dataManager) {
             dataManager.addClue({
@@ -39,7 +38,34 @@ var workflowService = {
     },
     game: {
         getNextStepData: function() {
-            return { errors: [], nextStep: "scan" };
+            var errors = [], nextStep = "scan2";
+            return { errors: errors, nextStep: nextStep };
+        }
+    },
+    scan2: {
+        getNextStepData: function() {
+            var errors = [], nextStep = "game2";
+            return { errors: errors, nextStep: nextStep, isGame: true, gameIndex: 1  };
+        }
+    },
+    game2: {
+        getNextStepData: function() {
+            var errors = [], nextStep = "scan3";
+            if ($('[name="game2Puzzle"]').val().length === 0) {
+                errors.push({
+                    message: "Please Complete the puzzle to move"
+                });
+            }
+            return {
+                errors: errors,
+                nextStep: nextStep
+            }
+        }
+    },
+    scan3: {
+        getNextStepData: function() {
+            var errors = [], nextStep = "game3";
+            return { errors: errors, nextStep: nextStep, isGame: true, gameIndex: 2  };
         }
     }
 };
