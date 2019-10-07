@@ -89,19 +89,19 @@
                     if (validationHandler) {
                         if (!validationHandler(elem.value, validations[validation])) {
                             if (errors.length === 0) {
-                                elem.parentNode.classList.add(validation);
+                                elem.parentNode.parentNode.classList.add(validation);
                             }
                             errors.push(validation);
                         } else {
-                            elem.parentNode.classList.remove(validation);
+                            elem.parentNode.parentNode.classList.remove(validation);
                         }
                     }
                 });
             }
             if (errors.length > 0) {
-                elem.parentNode.classList.add("invalid");
+                elem.parentNode.parentNode.classList.add("invalid");
             } else {
-                elem.parentNode.classList.remove("invalid");
+                elem.parentNode.parentNode.classList.remove("invalid");
             }
             return {
                 valid: errors.length === 0,

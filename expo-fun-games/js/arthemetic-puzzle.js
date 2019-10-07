@@ -340,7 +340,10 @@ Challenge.prototype = {
 		var form = $('<form>');
 		var input = $('<input type="number" tabindex="1" title="Answer">');
 		form.append(input);
-        this.input = input;
+		this.input = input;
+		this.input.bind('keyup', function(){
+			c.check(c.input.val(), true);
+		});
 		form.on('submit',function(e) {
             e.preventDefault(); 
             c.submit();
@@ -382,19 +385,17 @@ Challenge.prototype = {
         this.check(this.input.val());
     },
 
-	check: function(n) {
+	check: function(n, onkeyUp) {
 		if(this.correct) {
 			return;
 		}
 		if(n==this.result) {
 			this.correct = true;
 			this.end(true);
-			// game.new_challenge();
 		} else {
-            this.html.find('.result input').val('').focus();
-            gameDone({
-                passed: false
-            });
+			if (!onkeyUp) {
+				this.html.find('.result input').val('').focus();
+			}
 		}
 	},
 
@@ -407,12 +408,8 @@ Challenge.prototype = {
 		this.html.addClass('finished '+(correct?'correct':'out_of_time'));
 		this.html.find('.result input').attr('disabled',true);
 		this.stop_timing();
-        // game.end_game();
-        // gameDone({
-
-        // });
         gameDone({
-            passed: true
+            passed: this.correct
         });
 	}
 }

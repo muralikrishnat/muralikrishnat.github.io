@@ -10,6 +10,25 @@ body {
   min-height: 100%;
 }
 
+body {
+  background-color: #394263;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  border-radius: 0;
+  box-shadow: 0px 1px 10px 5px #272e45;
+}
+
+.expo-logo {
+  background-image: url("/images/logo.jpg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 150px;
+}
+
 .flex {
   display: flex;
 }
@@ -49,6 +68,16 @@ body {
   position: relative;
 }
 
+#boxbot4k {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  border: 4px solid #727392;
+  display: block;
+  height: auto;
+  margin: 0 auto;
+  max-height: 392px;
+  max-width: 456px;
+  width: 100%;
+}
 
 .vis-hidden {
     visibility: hidden;
@@ -373,6 +402,14 @@ body {
   margin-left: 40px;
 }
 
+.m-0 {
+  margin: 0;
+}
+
+.p-0 {
+  padding: 0;
+}
+
 .form-field .error-message {
   display: none;
   color: red;
@@ -388,24 +425,15 @@ body {
   display: inline;
 }
 
+video {
+  object-fit: cover;
+  border: 1px solid #ddd;
+  height: 300px;
+  width: 300px;
+}
+
 .hidden {
   display: none;
-}
-
-button {
-  padding: 5px 5px;
-  line-height: 12px;
-  font-size: 12px;
-  border: 1px solid #e2e2e2;
-  margin-left: 10px;
-}
-
-.page {
-  padding: 20px;
-}
-
-.form-field input {
-  border: 1px solid #111;
 }
 
 img.img-qa-scan {
@@ -469,16 +497,16 @@ img.img-qa-scan {
   border: 1px solid #cce;
   display: inline;
   font-size: 14px;
-  height: auto;
-  width: auto;
   padding: 3px 8px;
 }
 
-
-
-
 .image-grid-puzzle {
     width: 100%;
+}
+.game-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 .game-container__bg {
     position: relative;
@@ -531,10 +559,6 @@ img.img-qa-scan {
     padding: 20px;
 }
 
-
-
-
-
 .instructions {
 	font-size: 16px;
     margin: 1rem;
@@ -553,6 +577,30 @@ div#options {
     }
 }
 
+@media (max-width: 575px) {
+  .form-field label {
+    text-align: left;
+  }
+}
+
+@media (max-width: 320px) {
+  video {
+    width: 100%;
+  }
+
+  .container {
+    padding: 0;
+    height: 100%;
+  }
+
+  .card {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: inherit;
+  }
+}
+
 #options p {
     margin: 1rem;
 }
@@ -564,15 +612,6 @@ div#options {
 
 #time_limit {
     width: 100%;
-}
-
-button {
-    font-size: 1rem;
-    background: #ccc;
-    border: none;
-    padding: 0.5rem;
-    width: 100%;
-    cursor: pointer;
 }
 #reset:hover {
     background: red;
@@ -598,7 +637,7 @@ button {
 	opacity: 0.3;
 }
 
-@media screen and (min-width: 400px) {
+/* @media screen and (min-width: 400px) {
     .challenge {
         width: 20rem;
     }
@@ -615,7 +654,7 @@ button {
     .challenge {
         width: 60rem;
     }
-}
+} */
 
 .bit {
 	box-sizing: border-box;

@@ -86,14 +86,18 @@ var imageGridGame = (function() {
         gridSize = 3;
         var percentage = 100 / (gridSize - 1);
         var imageToRender = images[Math.floor(Math.random() * (images.length - 0) + 0)];
+        var containerWidth = 0;
+        var containerHeight = 0;
         blankIndex = (gridSize * gridSize) - 1;
         shuffleImage();
-        var containerWidth = parseFloat(getComputedStyle(document.querySelector('.game-container'), null).width);
+        containerWidth = parseFloat(getComputedStyle(document.querySelector('.game-container'), null).width);
+        containerHeight = 300;
+        containerWidth = 300;
         $('.game-container__bg').css({
-            width: '100%',
-            height: containerWidth + 'px'
+            width: containerWidth + 'px',
+            height: containerHeight + 'px'
         });
-        gridWidth = (containerWidth / 3);
+        gridWidth = (containerWidth / 3);        
         for (var i = 0; i < gridSize * gridSize; i++) {
             var $gridItem = $('<div/>');
             var xpos = (percentage * (i % gridSize)) + '%';

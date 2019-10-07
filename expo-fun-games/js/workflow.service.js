@@ -5,8 +5,9 @@ var workflowService = {
         },
         handlePayload: function(pageData, dataManager) {
             dataManager.save({
-                firstName: pageData.firstName,
-                lastName: pageData.lastName,
+                teamName: pageData.teamName,
+                firstName: pageData.name,
+                lastName: pageData.email,
                 phone: pageData.phone
             });
         }
@@ -17,7 +18,7 @@ var workflowService = {
     scan: {
         getNextStepData: function(pageData, stepData, availableGames) {
             var errors = [], nextStep;
-            if (pageData['qrText'].length === 0) {
+            if (pageData['qrText'] && pageData['qrText'].length === 0) {
                 errors.push({
                     message: "Please scan for QR code"
                 });
