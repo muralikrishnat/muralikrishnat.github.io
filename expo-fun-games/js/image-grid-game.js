@@ -100,6 +100,7 @@ var imageGridGame = (function() {
             var ypos = (percentage * Math.floor(i / gridSize)) + '%';
             $gridItem.addClass('grid__item').addClass('pos-' + i).addClass('vis-hidden');
             $gridItem.attr('data-actual', i);
+            
             $gridItem.attr('data-index', i);
             var bStyles = {
                 height: (containerWidth / 3),
@@ -116,6 +117,7 @@ var imageGridGame = (function() {
                 $gridItem.append('<div class="grid-mask"></div>');
                 $gridItem.attr('data-black', 'true');
             }
+            $gridItem.append('<div class="actual-number">' + (i + 1) + '</div>');
             $gridItem.css(bStyles);
             $gridItem.click(handleClickGridItem);
             $('.game-container__bg').append($gridItem);

@@ -812,3 +812,12 @@ button.new-challenge {
 #right {
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAMAAAC67D+PAAAABlBMVEVyc5IAAABKtqY1AAAAIElEQVR4AWNgYGCEAgYQgDHhHAYYgDAxAaYCdMMQVgAACLYAKZ5+6WMAAAAASUVORK5CYII=');
 }
+
+.grid__item .actual-number {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  color: white;
+  font-size: 27px;
+  text-shadow: 0 2px 2px black;
+}

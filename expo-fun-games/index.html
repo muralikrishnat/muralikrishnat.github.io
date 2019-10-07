@@ -51,23 +51,23 @@
       <div class="step__title">${title}</div>
       <div class="form-container">
         <div class="form-field">
-          <label for="firstName"> First Name </label>
-          <input type="text" id="firstName" name="firstName" data-validate-required="true" data-validate-reactive="true" />
+          <label for="firstName"> Name*</label>
+          <input type="text" id="name" name="name" data-validate-required="true" data-validate-reactive="true" />
           <span class="error-message required">This field is required</span>
         </div>
         <div class="form-field">
-          <label for="lastName"> Last Name </label>
-          <input type="text" id="lastName" name="lastName" data-validate-required="true" data-validate-reactive="true" />
+          <label for="lastName"> Email*</label>
+          <input type="text" id="email" name="email" data-validate-required="true" data-validate-reactive="true" />
           <span class="error-message required">This field is required</span>
         </div>
         <div class="form-field">
           <label for="lastName"> Phone </label>
-          <input type="text" id="phone" name="phone" data-validate-required="true" data-validate-reactive="true" />
+          <input type="text" id="phone" name="phone" />
           <span class="error-message required">This field is required</span>
         </div>
       </div>
       <div>
-        <button type="button" onclick="nextStep()"> Next </button>
+        <button type="button" onclick="nextStep('registration', '.form-container')"> Next </button>
       </div>
     </div>
   </script>
@@ -351,46 +351,59 @@
           if (isGame && gameIndex >= 0 && availableGames[gameIndex]) {
             availableGames[gameIndex].startGame(1);
           }
+
+          if (stepName === 'registration') {
+            lighdator.bindValidation();
+          }
         }, 0);
       }
     }
     var bodyLoaded = function() {
       renderStep("welcome");
     }
-    var nextStep = function(stepPageName, participatetype) {
+    var nextStep = function(stepPageName, param1) {
       toggleModal(true);
+      var nextAllowed = true;
       if (stepPageName === 'participatetype') {
         dataManager.save({
-          participatetype: participatetype
+          participatetype: param1
         });
       }
-      if (document.querySelector('.step-error')) {
-        document.querySelector('.step-error').innerHTML = "";
-      }
-      var currentStep = dataManager.get('currentStep');
-      var workflowStep = workflowService[currentStep];
-      var stepData = workflow.filter(function(flowItem) {
-        return flowItem.stepName === currentStep;
-      });
-      if (stepData && stepData.length > 0) {
-        stepData = stepData[0];
-      }
-      if (stepData) {
-        var pageData = getStepData(document.querySelector('.page'));
-        if (workflowStep && workflowStep.handlePayload) {
-          workflowStep.handlePayload(pageData, dataManager);
+      if (stepPageName === 'registration') {
+        var errors = lighdator.validateForm(document.querySelector(param1));
+        if (!errors.valid) {
+          nextAllowed = false;
         }
-        if (workflowStep && workflowStep.getNextStepData) {
-          var nextData = workflowStep.getNextStepData(pageData, stepData, availableGames);
-          if (nextData.errors && nextData.errors.length > 0) {
-            if (document.querySelector('.step-error')) {
-              document.querySelector('.step-error').innerHTML = nextData.errors[0].message;
+      }
+      if (nextAllowed) {
+        if (document.querySelector('.step-error')) {
+          document.querySelector('.step-error').innerHTML = "";
+        }
+        var currentStep = dataManager.get('currentStep');
+        var workflowStep = workflowService[currentStep];
+        var stepData = workflow.filter(function(flowItem) {
+          return flowItem.stepName === currentStep;
+        });
+        if (stepData && stepData.length > 0) {
+          stepData = stepData[0];
+        }
+        if (stepData) {
+          var pageData = getStepData(document.querySelector('.page'));
+          if (workflowStep && workflowStep.handlePayload) {
+            workflowStep.handlePayload(pageData, dataManager);
+          }
+          if (workflowStep && workflowStep.getNextStepData) {
+            var nextData = workflowStep.getNextStepData(pageData, stepData, availableGames);
+            if (nextData.errors && nextData.errors.length > 0) {
+              if (document.querySelector('.step-error')) {
+                document.querySelector('.step-error').innerHTML = nextData.errors[0].message;
+              }
+            } else {
+              renderStep(nextData.nextStep, nextData.isGame, nextData.gameIndex);
             }
           } else {
-            renderStep(nextData.nextStep, nextData.isGame, nextData.gameIndex);
+            renderStep(stepData.nextStep);
           }
-        } else {
-          renderStep(stepData.nextStep);
         }
       }
     }
