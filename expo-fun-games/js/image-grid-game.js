@@ -2,6 +2,21 @@ var imageGridGame = (function() {
     var images = [{
         title: "Image 1",
         src: "https://picsum.photos/id/772/500/500"
+    }, {
+        title: "Image 2",
+        src: "https://picsum.photos/id/265/500/500"
+    },{
+        title: "Image 3",
+        src: "https://picsum.photos/id/472/500/500"
+    },{
+        title: "Image 4",
+        src: "https://picsum.photos/id/379/500/500"
+    },{
+        title: "Image 5",
+        src: "https://picsum.photos/id/213/500/500"
+    },{
+        title: "Image 6",
+        src: "https://picsum.photos/id/347/500/500"
     }];
     var blankIndex = 8;
     var allowedIndex = [5, 7];
@@ -17,8 +32,6 @@ var imageGridGame = (function() {
     var shuffleMoves = [-1, -3, +1, -3, -1];
     var shuffleImage = function() {
         shuffleMoves = canMoveInto[Math.floor(Math.random() * (canMoveInto.length - 0) + 0)];
-        shuffleMoves = [-1];
-        console.log("shuffle Moves", shuffleMoves);
     };
 
     var score = {
@@ -32,7 +45,7 @@ var imageGridGame = (function() {
     var checkScore = function() {
         var isgameDone = true;
         var gridItems = document.querySelectorAll('.grid__item');
-        for(var i = 0; i < gridItems.length; i++) {
+        for (var i = 0; i < gridItems.length; i++) {
             var gridItem = gridItems[i];
             if (gridItem.getAttribute('data-index') !== gridItem.getAttribute('data-actual')) {
                 isgameDone = false;
@@ -72,7 +85,7 @@ var imageGridGame = (function() {
     E.prototype.startGame = function(noOfMinutes) {
         gridSize = 3;
         var percentage = 100 / (gridSize - 1);
-        var imageToRender = images[0];
+        var imageToRender = images[Math.floor(Math.random() * (images.length - 0) + 0)];
         blankIndex = (gridSize * gridSize) - 1;
         shuffleImage();
         var containerWidth = parseFloat(getComputedStyle(document.querySelector('.game-container'), null).width);
