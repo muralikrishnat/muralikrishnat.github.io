@@ -1,9 +1,10 @@
 var workflowService = {
     registration: {
         getPageErrors: function() {
-            return [];   
+            return [];
         },
         handlePayload: function(pageData, dataManager) {
+            console.log("dsfsf", pageData);
             dataManager.save({
                 teamName: pageData.teamName,
                 firstName: pageData.name,
@@ -12,12 +13,53 @@ var workflowService = {
             });
         }
     },
+    participate: {
+        getNextStepData: function(pageData, stepData, availableGames) {
+            var errors = [],
+                nextStep = "individual";
+            var appData = dataManager.get();
+            if (appData && appData.participateType === 'team') {
+                nextStep = 'team';
+            }
+            return { errors: errors, nextStep: nextStep };
+        }
+    },
+    team: {
+        handlePayload: function(pageData, dataManager) {
+            dataManager.save({
+                name: pageData['name'],
+                email: pageData['email'],
+                phone: pageData['phone'],
+                teamName: pageData['teamName']
+            });
+        },
+        getNextStepData: function(pageData, stepData, availableGames) {
+            var errors = [],
+                nextStep = "scan";
+            return { errors: errors, nextStep: nextStep };
+        }
+    },
+    individual: {
+        handlePayload: function(pageData, dataManager) {
+            dataManager.save({
+                name: pageData['name'],
+                email: pageData['email'],
+                phone: pageData['phone']
+            });
+        },
+        getNextStepData: function(pageData, stepData, availableGames) {
+            var errors = [],
+                nextStep = "scan";
+            return { errors: errors, nextStep: nextStep };
+        }
+    },
     welcome: {
 
     },
     scan: {
         getNextStepData: function(pageData, stepData, availableGames) {
-            var errors = [], nextStep;
+            var errors = [],
+                nextStep;
             if (pageData['qrText'] && pageData['qrText'].length === 0) {
                 errors.push({
                     message: "Please scan for QR code"
@@ -39,7 +81,8 @@ var workflowService = {
     },
     game: {
         getNextStepData: function() {
-            var errors = [], nextStep = "scan2";
+            var errors = [],
+                nextStep = "scan2";
             if ($('[name="gamePuzzle"]').val().length === 0) {
                 errors.push({
                     message: "Please Complete the puzzle to move"
@@ -50,18 +93,20 @@ var workflowService = {
     },
     scan2: {
         getNextStepData: function(pageData) {
-            var errors = [], nextStep = "game2";
+            var errors = [],
+                nextStep = "game2";
             if (pageData['qrText'].length === 0) {
                 errors.push({
                     message: "Please scan for QR code"
                 });
             }
-            return { errors: errors, nextStep: nextStep, isGame: true, gameIndex: 1  };
+            return { errors: errors, nextStep: nextStep, isGame: true, gameIndex: 1 };
         }
     },
     game2: {
         getNextStepData: function() {
-            var errors = [], nextStep = "scan3";
+            var errors = [],
+                nextStep = "scan3";
             if ($('[name="gamePuzzle"]').val().length === 0) {
                 errors.push({
                     message: "Please Complete the puzzle to move"
@@ -75,7 +120,8 @@ var workflowService = {
     },
     game3: {
         getNextStepData: function() {
-            var errors = [], nextStep = "statuspage";
+            var errors = [],
+                nextStep = "statuspage";
             if ($('[name="gamePuzzle"]').val().length === 0) {
                 errors.push({
                     message: "Please Complete the puzzle to move"
@@ -89,13 +135,14 @@ var workflowService = {
     },
     scan3: {
         getNextStepData: function(pageData) {
-            var errors = [], nextStep = "game3";
+            var errors = [],
+                nextStep = "game3";
             if (pageData['qrText'].length === 0) {
                 errors.push({
                     message: "Please scan for QR code"
                 });
             }
-            return { errors: errors, nextStep: nextStep, isGame: true, gameIndex: 2  };
+            return { errors: errors, nextStep: nextStep, isGame: true, gameIndex: 2 };
         }
     }
 };

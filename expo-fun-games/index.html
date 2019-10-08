@@ -1,569 +1,583 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>:: Welcome to Expo ::</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="manifest" href="manifest.json">
-  </head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>:: Welcome to Expo ::</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="manifest" href="manifest.json">
+</head>
 
-  <body onload="bodyLoaded()">
-    <div class="container">
-      <div class="card text-center" id='page'>
+<body onload="bodyLoaded()">
+  <div class="container">
+    <div class="card text-center" id='page'>
+
+    </div>
+  </div>
+
+  <div class="mask message-modal hidden">
+    <div class="mask__bg"></div>
+    <div class="mask__modal modal">
+      <div class="modal__content">
 
       </div>
     </div>
+  </div>
 
-    <div class="mask message-modal hidden">
-      <div class="mask__bg"></div>
-      <div class="mask__modal modal">
-        <div class="modal__content">
-
+  <script id="welcome" type="text/template">
+    <div class="card-body">
+      <h5 class="card-title">
+        Welcome To Expo 2019
+      </h5>
+      <h5 class="card-title">
+        Treasure Hunt
+      </h5>
+      <div class='expo-logo'></div>
+      <div class="step">
+        <div class="step__actions">
+          <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep()"> Enter </button>
         </div>
       </div>
     </div>
+    </div>
+  </script>
 
-    <script id="welcome" type="text/template">
-      <div class="card-body">
-        <h5 class="card-title">
-          Welcome To Expo 2019
-        </h5>
-        <h5 class="card-title">
-            Treasure Hunt
-        </h5>
-        <div class='expo-logo'></div>
-        <div class="step">
-            <div class="step__actions">
-              <button type="button" class="btn btn-primary text-uppercase"  onclick="nextStep()"> Enter </button>
-            </div>
+  <script id="participate" type="text/template">
+    <div class='card-body'>
+      <h5 class="card-title">Participate as?</h5>
+      <div class="step">
+        <div class="step__actions">
+          <div class="m-5-bottom">
+            <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('participatetype', 'individual')"> Individual </button>
           </div>
-        </div>
-      </div>    
-    </script>
-
-    <script id="participate" type="text/template">
-      <div class='card-body'>
-        <h5 class="card-title">Participate as?</h5>
-        <div class="step">
-          <div class="step__actions">
-            <div class="m-5-bottom">
-              <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('participatetype', 'individual')"> Individual </button>
-            </div>
-            <div>
-              <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('participatetype', 'team')"> Team </button>
-            </div>
+          <div>
+            <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('participatetype', 'team')"> Team </button>
           </div>
         </div>
       </div>
-    </script>
+    </div>
+  </script>
 
-    <script id="individual" type="text/template">
-      <div class='card-body'>
-        <h5 class='card-title'>${title}</h5>
-        <div class="step">
-          <div class="form-container">
-            <div class="form-field row m-2-bottom">
-              <label for="name" class='col-xs-12 col-sm-2'>Name*</label>
-              <div class='col-xs-12 col-sm-10 text-left'>
-                <input type="text" id="name" name="name" class='form-control' data-validate-required="true" data-validate-reactive="true" />
-                <span class="error-message required">This field is required</span>
-              </div>
+  <script id="individual" type="text/template">
+    <div class='card-body'>
+      <h5 class='card-title'>${title}</h5>
+      <div class="step">
+        <div class="form-container">
+          <div class="form-field row m-2-bottom">
+            <label for="name" class='col-xs-12 col-sm-2'>Name*</label>
+            <div class='col-xs-12 col-sm-10 text-left'>
+              <input type="text" id="name" name="name" class='form-control' data-validate-required="true" data-validate-reactive="true" />
+              <span class="error-message required">This field is required</span>
             </div>
-            <div class="form-field row m-2-bottom">
-              <label for="email" class='col-xs-12 col-sm-2'>Email*</label>
-              <div class='col-xs-12 col-sm-10 text-left'>
+          </div>
+          <div class="form-field row m-2-bottom">
+            <label for="email" class='col-xs-12 col-sm-2'>Email*</label>
+            <div class='col-xs-12 col-sm-10 text-left'>
               <input type="text" id="email" name="email" class='form-control' data-validate-required="true" data-validate-reactive="true" />
               <span class="error-message required">This field is required</span>
-              </div>
             </div>
-            <div class="form-field row m-2-bottom">
-              <label for="lastName" class='col-xs-12 col-sm-2'>Phone</label>
-              <div class='col-xs-12 col-sm-10 text-left'>
+          </div>
+          <div class="form-field row m-2-bottom">
+            <label for="lastName" class='col-xs-12 col-sm-2'>Phone</label>
+            <div class='col-xs-12 col-sm-10 text-left'>
               <input type="text" id="phone" name="phone" class='form-control' />
               <span class="error-message required">This field is required</span>
-              </div>
             </div>
-          </div>
-          <div>
-            <button type="button" class="btn btn-primary text-uppercase" onclick="backToParticipateAs()">Back</button>
-            <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('scan', '.form-container')">Next</button>
           </div>
         </div>
-      </div>      
-    </script>
+        <div>
+          <button type="button" class="btn btn-primary text-uppercase" onclick="backToParticipateAs()">Back</button>
+          <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('scan', '.form-container')">Next</button>
+        </div>
+      </div>
+    </div>
+  </script>
 
-    <script id="team" type="text/template">
-      <div class='card-body'>
-        <h5 class='card-title'>${title}</h5>
-        <div class="step">
-          <div class="form-container">
-            <div class="form-field row m-2-bottom">
-              <label for="teamName" class='col-xs-12 col-sm-2'>Team Name*</label>
-              <div class='col-xs-12 col-sm-10 text-left'>
-                <input type="text" id="name" name="teamName" class='form-control' data-validate-required="true" data-validate-reactive="true" />
-                <span class="error-message required">This field is required</span>
-              </div>
+  <script id="team" type="text/template">
+    <div class='card-body'>
+      <h5 class='card-title'>${title}</h5>
+      <div class="step">
+        <div class="form-container">
+          <div class="form-field row m-2-bottom">
+            <label for="teamName" class='col-xs-12 col-sm-2'>Team Name*</label>
+            <div class='col-xs-12 col-sm-10 text-left'>
+              <input type="text" id="name" name="teamName" class='form-control' data-validate-required="true" data-validate-reactive="true" />
+              <span class="error-message required">This field is required</span>
             </div>
-            <div class="form-field row m-2-bottom">
-              <label for="name" class='col-xs-12 col-sm-2'>Name*</label>
-              <div class='col-xs-12 col-sm-10 text-left'>
-                <input type="text" id="name" name="name" class='form-control' data-validate-required="true" data-validate-reactive="true" />
-                <span class="error-message required">This field is required</span>
-              </div>
+          </div>
+          <div class="form-field row m-2-bottom">
+            <label for="name" class='col-xs-12 col-sm-2'>Name*</label>
+            <div class='col-xs-12 col-sm-10 text-left'>
+              <input type="text" id="name" name="name" class='form-control' data-validate-required="true" data-validate-reactive="true" />
+              <span class="error-message required">This field is required</span>
             </div>
-            <div class="form-field row m-2-bottom">
-              <label for="lastName" class='col-xs-12 col-sm-2'>Email*</label>
-              <div class='col-xs-12 col-sm-10 text-left'>
+          </div>
+          <div class="form-field row m-2-bottom">
+            <label for="lastName" class='col-xs-12 col-sm-2'>Email*</label>
+            <div class='col-xs-12 col-sm-10 text-left'>
               <input type="text" id="email" name="email" class='form-control' data-validate-required="true" data-validate-reactive="true" />
               <span class="error-message required">This field is required</span>
-              </div>
             </div>
-            <div class="form-field row m-2-bottom">
-              <label for="lastName" class='col-xs-12 col-sm-2'>Phone</label>
-              <div class='col-xs-12 col-sm-10 text-left'>
+          </div>
+          <div class="form-field row m-2-bottom">
+            <label for="lastName" class='col-xs-12 col-sm-2'>Phone</label>
+            <div class='col-xs-12 col-sm-10 text-left'>
               <input type="text" id="phone" name="phone" class='form-control' />
               <span class="error-message required">This field is required</span>
-              </div>
             </div>
           </div>
-          <div>
-            <button type="button" class="btn btn-primary text-uppercase" onclick="backToParticipateAs()">Back</button>
-            <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('scan', '.form-container')">Next</button>
-          </div>
         </div>
-      </div>      
-    </script>
-
-    <script id="scan" type="text/template">
-      <div class='card-body'>
-        <h5 class='card-title'>Scan Code</h5>
-        <input type="hidden" id="qr-text" name="qrText" />
-        <div class="step">
-          <div>
-            <video id="preview"></video>
-          </div>
-          <div class="step__actions">
-            <button type='button' class="btn btn-primary text-uppercase" onclick='openQRReader()'>Scan</button>
-          </div>
+        <div>
+          <button type="button" class="btn btn-primary text-uppercase" onclick="backToParticipateAs()">Back</button>
+          <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('scan', '.form-container')">Next</button>
         </div>
-      </div>      
-    </script>
+      </div>
+    </div>
+  </script>
 
-    <script id="game" type="text/template">
-      <div class='card-body p-0'>
-        <h5 class='card-title'>Image Puzzle</h5>
-        <div class="step image-grid-puzzle">
-          <div class="step__content game-container">
-            <div class="game-container__bg"></div>
+  <script id="scan" type="text/template">
+    <div class='card-body'>
+      <h5 class='card-title'>Scan Code</h5>
+      <input type="hidden" id="qr-text" name="qrText" />
+      <div class="step">
+        <div>
+          <video id="preview"></video>
+        </div>
+        <div class="step__actions">
+          <button type='button' class="btn btn-primary text-uppercase" onclick='openQRReader()'>Scan</button>
+        </div>
+      </div>
+    </div>
+  </script>
+
+  <script id="game" type="text/template">
+    <div class='card-body p-0'>
+      <h5 class='card-title'>Image Puzzle</h5>
+      <div class="step image-grid-puzzle">
+        <div class="step__content game-container">
+          <div class="game-container__bg"></div>
+          <input type="hidden" id='game-puzzle' name="gamePuzzle" />
+        </div>
+        <div class="">
+          <div class="step-error"></div>
+        </div>
+        <div class="step__actions">
+          <button type="button" class="btn btn-primary text-uppercase m-2-bottom" onclick="nextStep()"> Next </button>
+        </div>
+      </div>
+    </div>
+  </script>
+
+  <script id="game2" type="text/template">
+    <div class='card-body'>
+      <h5 class='card-title'>Arthemetic Puzzle</h5>
+      <div class="step">
+        <div class="step__content">
+          <div>
+            <ul id="challenges"></ul>
             <input type="hidden" id='game-puzzle' name="gamePuzzle" />
           </div>
-          <div class="">
-            <div class="step-error"></div>
-          </div>
-          <div class="step__actions">
-            <button type="button" class="btn btn-primary text-uppercase m-2-bottom" onclick="nextStep()"> Next </button>
-          </div>
+        </div>
+        <div class="">
+          <div class="step-error"></div>
+        </div>
+        <div class="step__actions">
+          <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep()"> Next </button>
         </div>
       </div>
-    </script>
+    </div>
+  </script>
 
-    <script id="game2" type="text/template">
-      <div class='card-body'>
-        <h5 class='card-title'>Arthemetic Puzzle</h5>
-        <div class="step">
-          <div class="step__content">
-            <div>
-              <ul id="challenges"></ul>
-              <input type="hidden" id='game-puzzle' name="gamePuzzle" />
-            </div>
-          </div>
-          <div class="">
-            <div class="step-error"></div>
-          </div>
-          <div class="step__actions">
-            <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep()"> Next </button>
-          </div>
-        </div>
-      </div>      
-    </script>
-
-    <script id="game3" type="text/template">
-      <div class='card-body p-0'>
-        <h5 class='card-title'>Box Bot Puzzle</h5>
-        <div class="step boxbot-game">
-          <div class="step__content">
-            <div>
-              <canvas id="boxbot4k" width="448" height="384">
+  <script id="game3" type="text/template">
+    <div class='card-body p-0'>
+      <h5 class='card-title'>Box Bot Puzzle</h5>
+      <div class="step boxbot-game">
+        <div class="step__content">
+          <div>
+            <canvas id="boxbot4k" width="448" height="384">
                 To play the game, your browser must support HTML5 Canvas.
               </canvas>
+          </div>
+          <div class='m-2-top'>
+            <div class="flex">
+              <div class="flex-1"></div>
+              <div class="flex-1"><button class="button" id="up"></button></div>
+              <div class="flex-1"></div>
             </div>
-            <div class='m-2-top'>
-              <div class="flex">
-                <div class="flex-1"></div>
-                <div class="flex-1"><button class="button" id="up"></button></div>
-                <div class="flex-1"></div>
-              </div>
-              <div class="flex">
-                <div class="flex-1"><button class="button" id="left"></button></div>
-                <div class="flex-1"></div>
-                <div class="flex-1"><button class="button" id="right"></button></div>
-              </div>
-              <div class="flex">
-                <div class="flex-1"></div>
-                <div class="flex-1"><button class="button" id="down"></button></div>
-                <div class="flex-1"></div>
-              </div>
+            <div class="flex">
+              <div class="flex-1"><button class="button" id="left"></button></div>
+              <div class="flex-1"></div>
+              <div class="flex-1"><button class="button" id="right"></button></div>
             </div>
-            <input type="hidden" id='game-puzzle' name="gamePuzzle" />
+            <div class="flex">
+              <div class="flex-1"></div>
+              <div class="flex-1"><button class="button" id="down"></button></div>
+              <div class="flex-1"></div>
+            </div>
           </div>
-          <div class="">
-            <div class="step-error"></div>
-          </div>
-          <div class="step__actions">
-            <button type="button" class="btn btn-primary text-uppercase m-2-top" onclick="nextStep()"> Next </button>
-          </div>
+          <input type="hidden" id='game-puzzle' name="gamePuzzle" />
         </div>
-      </div>      
-    </script>
-
-    <script id="success-modal-content" type="text/template">
-      <div class="text-center">
-        <h5>${title}</h5>
-        <div>
-          ${content}
+        <div class="">
+          <div class="step-error"></div>
         </div>
-        <div>
+        <div class="step__actions">
           <button type="button" class="btn btn-primary text-uppercase m-2-top" onclick="nextStep()"> Next </button>
         </div>
       </div>
-    </script>
+    </div>
+  </script>
 
-    <script id="statuspage" type="text/template">
-      <div class='card-body'>
-        <h5 class='card-title'>Congrats!</h5>
-        <div class="step">        
-          <div>You have successfully completed the treasure hunt!</div>
-          <div>Winners will be announced on the 10th of october @expo 2019</div>
-          <div>
-            <button type="button" class="btn btn-primary text-uppercase m-5-top" onclick="closeAndExit()"> ClOSE & EXIT </button>
-          </div>
+  <script id="success-modal-content" type="text/template">
+    <div class="text-center">
+      <h5>${title}</h5>
+      <div>
+        ${content}
+      </div>
+      <div>
+        <button type="button" class="btn btn-primary text-uppercase m-2-top" onclick="nextStep()"> Next </button>
+      </div>
+    </div>
+  </script>
+
+  <script id="statuspage" type="text/template">
+    <div class='card-body'>
+      <h5 class='card-title'>Congrats!</h5>
+      <div class="step">
+        <div>You have successfully completed the treasure hunt!</div>
+        <div>Winners will be announced on the 10th of october @expo 2019</div>
+        <div>
+          <button type="button" class="btn btn-primary text-uppercase m-5-top" onclick="closeAndExit()"> ClOSE & EXIT </button>
         </div>
-      </div>      
-    </script>
+      </div>
+    </div>
+  </script>
 
-    <script src="js/vendor/jquery-2.1.1.min.js"></script>
-    <script src="js/vendor/jquery-ui.js"></script>
-    <script src="js/vendor/jquery-ui.touch-punch.min.js"></script>
-    <script src="js/workflow.service.js"></script>
-    <script src="js/image-grid-game.js"></script>
-    <script src="js/arthemetic-puzzle.js"></script>
-    <script src="js/boxbot-puzzle.js"></script>
-    <script src="js/index.js"></script>
-    <script src="js/vendor/lighdator.js"></script>
-    <script src="js/instascan.min.js"></script>
-    <script>
-      var workflow = [{
-        stepName: "welcome",
-        nextStep: "participate"
-      }, {
-        stepName: "participate",
-        nextStep: "participatetype"
-      }, {
-        stepName: "participatetype",
-        nextStep: "scan",
-        templateName: "individual",
-        title: "Personal details",
-      },{
-        stepName: "participatetype",
-        nextStep: "scan",
-        templateName: "team",
-        title: "Personal details",
-      }, {
-        stepName: "scan",
-        templateName: "scan",
-        nextStep: "game"
-      }, {
-        stepName: "game",
-        nextStep: "scan2"
-      }, {
-        stepName: "scan2",
-        templateName: "scan",
-        nextStep: "game2"
-      }, {
-        stepName: "game2",
-        nextStep: "scan3"
-      }, {
-        stepName: "scan3",
-        templateName: "scan",
-        nextStep: "game3"
-      }, {
-        stepName: "game3",
-        nextStep: "statuspage"
-      }, {
-        stepName: "statuspage"
-      }];
-      var availableGames = [
-        imageGridGame,
-        arthemeticPuzzle,
-        boxBotPuzzle
-      ];
+  <script src="js/vendor/jquery-2.1.1.min.js"></script>
+  <script src="js/vendor/jquery-ui.js"></script>
+  <script src="js/vendor/jquery-ui.touch-punch.min.js"></script>
+  <script src="js/workflow.service.js"></script>
+  <script src="js/image-grid-game.js"></script>
+  <script src="js/arthemetic-puzzle.js"></script>
+  <script src="js/boxbot-puzzle.js"></script>
+  <script src="js/index.js"></script>
+  <script src="js/vendor/lighdator.js"></script>
+  <script src="js/instascan.min.js"></script>
+  <script>
+    var workflow = [{
+      stepName: "welcome",
+      nextStep: "participate"
+    }, {
+      stepName: "participate",
+      nextStep: "participatetype"
+    }, {
+      stepName: "individual",
+      nextStep: "scan",
+      templateName: "individual",
+      title: "Personal details",
+    }, {
+      stepName: "team",
+      nextStep: "scan",
+      templateName: "team",
+      title: "Personal details",
+    }, {
+      stepName: "scan",
+      templateName: "scan",
+      nextStep: "game"
+    }, {
+      stepName: "game",
+      nextStep: "scan2"
+    }, {
+      stepName: "scan2",
+      templateName: "scan",
+      nextStep: "game2"
+    }, {
+      stepName: "game2",
+      nextStep: "scan3"
+    }, {
+      stepName: "scan3",
+      templateName: "scan",
+      nextStep: "game3"
+    }, {
+      stepName: "game3",
+      nextStep: "statuspage"
+    }, {
+      stepName: "statuspage"
+    }];
+    var availableGames = [
+      imageGridGame,
+      arthemeticPuzzle,
+      boxBotPuzzle
+    ];
 
-      var dataManager = (function () {
-        window.appData = {
-          currentStep: "",
-          clues: []
-        };
-        var D = function () {};
-        D.prototype.save = function (opts) {
-          appData = Object.assign({}, appData, opts);
-        };
-        D.prototype.get = function (path) {
-          return appData[path];
-        };
-        D.prototype.updateLastClue = function (clueData) {
-          var lastClue = {},
-            lastClueIndex = 0;
-          if (appData.clues.length > 0) {
-            lastClueIndex = appData.clues.length - 1;
-            lastClue = appData['clues'][lastClueIndex];
-          }
-          appData['clues'][lastClueIndex] = Object.assign({}, lastClue, clueData);
-        };
-        D.prototype.addClue = function (clueData) {
-          appData['clues'].push(clueData);
-        };
-        D.prototype.getLastClue = function () {
-          return appData['clues'][appData['clues'].length - 1];
-        };
-        return new D();
-      })();
-
-      var makeRequest = function (opts) {
-        return fetch(opts.url, {
-          method: opts.method,
-          data: JSON.stringify(opts.data)
-        }).then(resp => {
-          return resp.json();
-        });
+    var dataManager = (function() {
+      window.appData = {
+        currentStep: "",
+        clues: []
       };
-      var getStepData = function (elemRef) {
-        var rootScope = {},
-          mergeObjects = function (src, target) {
-            var keys = [].concat(Object.keys(src), Object.keys(target)).reduce((a, b) => {
-              if (a.indexOf(b) < 0) {
-                a.push(b);
-              }
-              return a;
-            }, []);
-            var tmp = {};
-            keys.forEach(key => {
-              if (typeof src[key] === 'object' && typeof target[key] === 'object') {
-                tmp[key] = mergeObjects(src[key], target[key]);
-              } else if (src[key] && !target[key]) {
-                tmp[key] = src[key];
-              } else if (!src[key] && target[key]) {
-                tmp[key] = target[key];
-              } else {
-                if (typeof src[key] === 'string' || typeof target[key] === 'string') {
-                  tmp[key] = src[key] || target[key];
-                } else if (typeof src[key] === 'undefined' && typeof target[key] === 'undefined') {
-                  tmp[key] = "";
-                } else {
-                  tmp[key] = Object.assign({}, src[key], target[key]);
-                }
+      var D = function() {};
+      D.prototype.save = function(opts) {
+        appData = Object.assign({}, appData, opts);
+      };
+      D.prototype.get = function(path) {
+        if (path) {
+          return appData[path];
+        }
+        return appData;
+      };
+      D.prototype.updateLastClue = function(clueData) {
+        var lastClue = {},
+          lastClueIndex = 0;
+        if (appData.clues.length > 0) {
+          lastClueIndex = appData.clues.length - 1;
+          lastClue = appData['clues'][lastClueIndex];
+        }
+        appData['clues'][lastClueIndex] = Object.assign({}, lastClue, clueData);
+      };
+      D.prototype.addClue = function(clueData) {
+        appData['clues'].push(clueData);
+      };
+      D.prototype.getLastClue = function() {
+        return appData['clues'][appData['clues'].length - 1];
+      };
+      return new D();
+    })();
 
-                if (typeof tmp[key] === 'undefined') {
-                  tmp[key] = "";
-                }
+    var makeRequest = function(opts) {
+      return fetch(opts.url, {
+        method: opts.method,
+        body: JSON.stringify(opts.data),
+        headers: opts.headers
+      }).then(resp => {
+        return resp.json();
+      });
+    };
+    var getStepData = function(elemRef) {
+      var rootScope = {},
+        mergeObjects = function(src, target) {
+          var keys = [].concat(Object.keys(src), Object.keys(target)).reduce((a, b) => {
+            if (a.indexOf(b) < 0) {
+              a.push(b);
+            }
+            return a;
+          }, []);
+          var tmp = {};
+          keys.forEach(key => {
+            if (typeof src[key] === 'object' && typeof target[key] === 'object') {
+              tmp[key] = mergeObjects(src[key], target[key]);
+            } else if (src[key] && !target[key]) {
+              tmp[key] = src[key];
+            } else if (!src[key] && target[key]) {
+              tmp[key] = target[key];
+            } else {
+              if (typeof src[key] === 'string' || typeof target[key] === 'string') {
+                tmp[key] = src[key] || target[key];
+              } else if (typeof src[key] === 'undefined' && typeof target[key] === 'undefined') {
+                tmp[key] = "";
+              } else {
+                tmp[key] = Object.assign({}, src[key], target[key]);
               }
-            });
-            return Object.assign({}, tmp);
-          };
-        Array.from(elemRef.querySelectorAll("input, select, textarea"))
-          .forEach(function (elem) {
-            let name = elem.getAttribute("name");
-            if (!(elem.tagName === 'INPUT' && elem.type === 'file') && name) {
-              var fieldName = name.split('.').reverse().reduce(function (a, b) {
-                var obj = {};
-                if (a === null) {
-                  if (elem.tagName === "INPUT" && elem.type === "checkbox") {
-                    obj[b] = elem.checked + '';
-                  } else {
-                    obj[b] = elem.value;
-                  }
+
+              if (typeof tmp[key] === 'undefined') {
+                tmp[key] = "";
+              }
+            }
+          });
+          return Object.assign({}, tmp);
+        };
+      Array.from(elemRef.querySelectorAll("input, select, textarea"))
+        .forEach(function(elem) {
+          let name = elem.getAttribute("name");
+          if (!(elem.tagName === 'INPUT' && elem.type === 'file') && name) {
+            var fieldName = name.split('.').reverse().reduce(function(a, b) {
+              var obj = {};
+              if (a === null) {
+                if (elem.tagName === "INPUT" && elem.type === "checkbox") {
+                  obj[b] = elem.checked + '';
                 } else {
-                  obj[b] = a;
+                  obj[b] = elem.value;
                 }
-                return obj;
-              }, null);
-              rootScope = mergeObjects(rootScope, fieldName);
-            }
-          });
-        return rootScope;
+              } else {
+                obj[b] = a;
+              }
+              return obj;
+            }, null);
+            rootScope = mergeObjects(rootScope, fieldName);
+          }
+        });
+      return rootScope;
+    }
+    var renderStep = function(stepName, isGame, gameIndex) {
+      var templateName = stepName;
+      var stepData = null;
+      if (stepName === 'participatetype') {
+        templateName = dataManager.get(stepName);
+        stepData = workflow.filter(function(flowItem) {
+          return (flowItem.stepName === stepName && flowItem.templateName === templateName);
+        });
+      } else {
+        stepData = workflow.filter(function(flowItem) {
+          return flowItem.stepName === stepName;
+        });
       }
-      var renderStep = function (stepName, isGame, gameIndex) {
-        var templateName = stepName;
-        var stepData = null;
-        if(stepName === 'participatetype') {
-          templateName = dataManager.get(stepName);
-          stepData = workflow.filter(function (flowItem) {
-            return (flowItem.stepName === stepName && flowItem.templateName === templateName);
-          });
-        } else {
-          stepData = workflow.filter(function (flowItem) {
-            return flowItem.stepName === stepName;
-          });
+      if (stepData && stepData.length > 0) {
+        dataManager.save({
+          currentStep: stepName
+        });
+        stepData = stepData[0];
+        if (stepData.templateName) {
+          templateName = stepData.templateName;
         }
+        let stepHtml = document.querySelector('#' + templateName).innerHTML;
+        document.querySelector('#page').innerHTML = stepHtml;
+        applyScope(document.querySelector('#page'), stepData);
+        setTimeout(function() {
+          if (isGame && gameIndex >= 0 && availableGames[gameIndex]) {
+            availableGames[gameIndex].startGame(1);
+          }
+          if (stepName === 'scan') {
+            lighdator.bindValidation();
+          }
+        }, 0);
+      }
+    }
+    var bodyLoaded = function() {
+      renderStep("welcome");
+    }
+    var nextStep = function(stepPageName, param1) {
+      toggleModal(true);
+      var nextAllowed = true;
+      if (stepPageName === 'participatetype') {
+        dataManager.save({
+          participateType: param1
+        });
+      }
+      if (stepPageName === 'scan') {
+        var errors = lighdator.validateForm(document.querySelector(param1));
+        if (!errors.valid) {
+          nextAllowed = false;
+        }
+      }
+      if (nextAllowed) {
+        if (document.querySelector('.step-error')) {
+          document.querySelector('.step-error').innerHTML = "";
+        }
+        var currentStep = dataManager.get('currentStep');
+        var workflowStep = workflowService[currentStep];
+        var stepData = workflow.filter(function(flowItem) {
+          return flowItem.stepName === currentStep;
+        });
         if (stepData && stepData.length > 0) {
-          dataManager.save({
-            currentStep: stepName
-          });
           stepData = stepData[0];
-          if (stepData.templateName) {
-            templateName = stepData.templateName;
-          }
-          let stepHtml = document.querySelector('#' + templateName).innerHTML;
-          document.querySelector('#page').innerHTML = stepHtml;
-          applyScope(document.querySelector('#page'), stepData);
-          setTimeout(function () {
-            if (isGame && gameIndex >= 0 && availableGames[gameIndex]) {
-              availableGames[gameIndex].startGame(1);
-            }
-            if (stepName === 'scan') {
-              lighdator.bindValidation();
-            }
-          }, 0);
         }
-      }
-      var bodyLoaded = function () {
-        renderStep("welcome");
-      }
-      var nextStep = function (stepPageName, param1) {
-        toggleModal(true);
-        var nextAllowed = true;
-        if (stepPageName === 'participatetype') {
-          dataManager.save({
-            participatetype: param1
-          });
-        }
-        if (stepPageName === 'scan') {          
-          var errors = lighdator.validateForm(document.querySelector(param1));
-          if (!errors.valid) {
-            nextAllowed = false;
+        if (stepData) {
+          var pageData = getStepData(document.querySelector('#page'));
+          if (workflowStep && workflowStep.handlePayload) {
+            workflowStep.handlePayload(pageData, dataManager);
           }
-        }
-        if (nextAllowed) {
-          if (document.querySelector('.step-error')) {
-            document.querySelector('.step-error').innerHTML = "";
-          }
-          var currentStep = dataManager.get('currentStep');
-          var workflowStep = workflowService[currentStep];
-          var stepData = workflow.filter(function (flowItem) {
-            return flowItem.stepName === currentStep;
-          });
-          if (stepData && stepData.length > 0) {
-            stepData = stepData[0];
-          }
-          if (stepData) {
-            var pageData = getStepData(document.querySelector('#page'));
-            if (workflowStep && workflowStep.handlePayload) {
-              workflowStep.handlePayload(pageData, dataManager);
-            }
-            if (workflowStep && workflowStep.getNextStepData) {
-              var nextData = workflowStep.getNextStepData(pageData, stepData, availableGames);
-              if (nextData.errors && nextData.errors.length > 0) {
-                if (document.querySelector('.step-error')) {
-                  document.querySelector('.step-error').innerHTML = nextData.errors[0].message;
-                }
+          if (workflowStep && workflowStep.getNextStepData) {
+            var nextData = workflowStep.getNextStepData(pageData, stepData, availableGames);
+            if (nextData.errors && nextData.errors.length > 0) {
+              if (document.querySelector('.step-error')) {
+                document.querySelector('.step-error').innerHTML = nextData.errors[0].message;
+              }
+            } else {
+              if (currentStep === 'individual' || currentStep === 'team') {
+                makeRequest({
+                  url: 'http://expo19game-env.ukgk6vk2kz.us-east-1.elasticbeanstalk.com/expo19/treasurehunt/register',
+                  method: 'POST',
+                  data: dataManager.get(),
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
+                })
               } else {
                 renderStep(nextData.nextStep, nextData.isGame, nextData.gameIndex);
               }
-            } else {
-              renderStep(stepData.nextStep);
             }
-          }
-        }
-      }
-
-      function toggleModal(hide) {
-        if (hide) {
-          $('.message-modal').addClass('hidden')
-        } else {
-          $('.message-modal').removeClass('hidden')
-        }
-      }
-
-      function backToParticipateAs() {
-        dataManager.save({
-          'currentStep': 'welcome'
-        });
-        nextStep();
-      }
-
-      function closeAndExit() {
-        renderStep("welcome");
-      }
-
-      function gameDone(gameScore) {
-        let stepHtml = document.querySelector('#success-modal-content').innerHTML;
-        $('.message-modal').find('.modal__content').html(stepHtml);
-        var clueContent = "",
-          stepScope = {
-            title: "Next Clue",
-            content: ''
-          };
-        if (gameScore.passed) {
-          var lastClue = dataManager.getLastClue();
-          if (lastClue) {
-            clueContent = lastClue.clueText;
-          }
-          stepScope = {
-            title: "Next Clue",
-            content: clueContent
-          };
-          $('[name="game2Puzzle"]').val('passed');
-          $('[name="gamePuzzle"]').val('passed');
-        } else {
-          stepScope = {
-            title: "Puzzle Failed",
-            content: "You have failed puzzle"
-          };
-          $('[name="gamePuzzle"]').val('');
-        }
-        applyScope(document.querySelector('.modal__content'), stepScope);
-        $('.message-modal').removeClass('hidden');
-      }
-
-      function openQRReader() {
-        var scanner = new Instascan.Scanner({
-          video: document.getElementById('preview')
-        });
-        var camera = null;
-        scanner.addListener('scan', function (content) {
-          scanner.stop(camera);
-          var currentStep = dataManager.get('currentStep');
-          if(['scan', 'scan2', 'scan3'].indexOf(currentStep) > -1) {
-            document.querySelector('#qr-text').value = content;
-          }
-          nextStep();
-        });
-        Instascan.Camera.getCameras().then(function (cameras) {
-          if (cameras.length > 0) {
-            camera = cameras[0];
-            scanner.start(camera);
           } else {
-            console.error('No cameras found.');
+            renderStep(stepData.nextStep);
           }
-        }).catch(function (e) {
-          // console.error(e);
-        });
+        }
       }
-    </script>
-  </body>
+    }
+
+    function toggleModal(hide) {
+      if (hide) {
+        $('.message-modal').addClass('hidden')
+      } else {
+        $('.message-modal').removeClass('hidden')
+      }
+    }
+
+    function backToParticipateAs() {
+      dataManager.save({
+        'currentStep': 'welcome'
+      });
+      nextStep();
+    }
+
+    function closeAndExit() {
+      renderStep("welcome");
+    }
+
+    function gameDone(gameScore) {
+      let stepHtml = document.querySelector('#success-modal-content').innerHTML;
+      $('.message-modal').find('.modal__content').html(stepHtml);
+      var clueContent = "",
+        stepScope = {
+          title: "Next Clue",
+          content: ''
+        };
+      if (gameScore.passed) {
+        var lastClue = dataManager.getLastClue();
+        if (lastClue) {
+          clueContent = lastClue.clueText;
+        }
+        stepScope = {
+          title: "Next Clue",
+          content: clueContent
+        };
+        $('[name="game2Puzzle"]').val('passed');
+        $('[name="gamePuzzle"]').val('passed');
+      } else {
+        stepScope = {
+          title: "Puzzle Failed",
+          content: "You have failed puzzle"
+        };
+        $('[name="gamePuzzle"]').val('');
+      }
+      applyScope(document.querySelector('.modal__content'), stepScope);
+      $('.message-modal').removeClass('hidden');
+    }
+
+    function openQRReader() {
+      var scanner = new Instascan.Scanner({
+        video: document.getElementById('preview')
+      });
+      var camera = null;
+      scanner.addListener('scan', function(content) {
+        scanner.stop(camera);
+        var currentStep = dataManager.get('currentStep');
+        if (['scan', 'scan2', 'scan3'].indexOf(currentStep) > -1) {
+          document.querySelector('#qr-text').value = content;
+        }
+        nextStep();
+      });
+      Instascan.Camera.getCameras().then(function(cameras) {
+        if (cameras.length > 0) {
+          camera = cameras[0];
+          scanner.start(camera);
+        } else {
+          console.error('No cameras found.');
+        }
+      }).catch(function(e) {
+        // console.error(e);
+      });
+    }
+  </script>
+</body>
 
 </html>
