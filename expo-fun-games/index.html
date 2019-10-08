@@ -6,137 +6,174 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>:: Welcome to Expo ::</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/global.css">
   <link rel="manifest" href="manifest.json">
 </head>
 
 <body onload="bodyLoaded()">
-  <div class="container">
-    <div class="card text-center" id='page'>
+<div class="container">
+  <div class="card text-center" id='page'>
+
+  </div>
+</div>
+
+<div class="mask message-modal hidden">
+  <div class="mask__bg"></div>
+  <div class="mask__modal modal">
+    <div class="modal__content">
 
     </div>
   </div>
+</div>
 
-  <div class="mask message-modal hidden">
-    <div class="mask__bg"></div>
-    <div class="mask__modal modal">
-      <div class="modal__content">
-
+<script id="welcome" type="text/template">
+  <div class="card-body">
+    <h5 class="card-title">
+      Welcome To Expo 2019
+    </h5>
+    <h5 class="card-title">
+      Treasure Hunt
+    </h5>
+    <div class='expo-logo'></div>
+    <div class="step">
+      <div class="step__actions">
+        <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep()"> Enter </button>
       </div>
     </div>
   </div>
+  </div>
+</script>
 
-  <script id="welcome" type="text/template">
-    <div class="card-body">
-      <h5 class="card-title">
-        Welcome To Expo 2019
-      </h5>
-      <h5 class="card-title">
-        Treasure Hunt
-      </h5>
-      <div class='expo-logo'></div>
-      <div class="step">
-        <div class="step__actions">
-          <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep()"> Enter </button>
-        </div>
-      </div>
-    </div>
-    </div>
-  </script>
-
-  <script id="participate" type="text/template">
-    <div class='card-body'>
-      <h5 class="card-title">Participate as?</h5>
-      <div class="step">
-        <div class="step__actions">
-          <div class="m-5-bottom">
-            <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('participatetype', 'individual')"> Individual </button>
-          </div>
-          <div>
-            <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('participatetype', 'team')"> Team </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </script>
-
-  <script id="individual" type="text/template">
-    <div class='card-body'>
-      <h5 class='card-title'>${title}</h5>
-      <div class="step">
-        <div class="form-container">
-          <div class="form-field row m-2-bottom">
-            <label for="name" class='col-xs-12 col-sm-2'>Name*</label>
-            <div class='col-xs-12 col-sm-10 text-left'>
-              <input type="text" id="name" name="name" class='form-control' data-validate-required="true" data-validate-reactive="true" />
-              <span class="error-message required">This field is required</span>
-            </div>
-          </div>
-          <div class="form-field row m-2-bottom">
-            <label for="email" class='col-xs-12 col-sm-2'>Email*</label>
-            <div class='col-xs-12 col-sm-10 text-left'>
-              <input type="text" id="email" name="email" class='form-control' data-validate-required="true" data-validate-reactive="true" />
-              <span class="error-message required">This field is required</span>
-            </div>
-          </div>
-          <div class="form-field row m-2-bottom">
-            <label for="lastName" class='col-xs-12 col-sm-2'>Phone</label>
-            <div class='col-xs-12 col-sm-10 text-left'>
-              <input type="text" id="phone" name="phone" class='form-control' />
-              <span class="error-message required">This field is required</span>
-            </div>
-          </div>
+<script id="participate" type="text/template">
+  <div class='card-body'>
+    <h5 class="card-title">Participate as?</h5>
+    <div class="step">
+      <div class="step__actions">
+        <div class="m-5-bottom">
+          <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('participatetype', 'individual')"> Individual </button>
         </div>
         <div>
-          <button type="button" class="btn btn-primary text-uppercase" onclick="backToParticipateAs()">Back</button>
-          <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('scan', '.form-container')">Next</button>
+          <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('participatetype', 'team')"> Team </button>
         </div>
       </div>
     </div>
-  </script>
+  </div>
+</script>
 
-  <script id="team" type="text/template">
-    <div class='card-body'>
-      <h5 class='card-title'>${title}</h5>
-      <div class="step">
-        <div class="form-container">
-          <div class="form-field row m-2-bottom">
-            <label for="teamName" class='col-xs-12 col-sm-2'>Team Name*</label>
-            <div class='col-xs-12 col-sm-10 text-left'>
-              <input type="text" id="name" name="teamName" class='form-control' data-validate-required="true" data-validate-reactive="true" />
-              <span class="error-message required">This field is required</span>
-            </div>
-          </div>
-          <div class="form-field row m-2-bottom">
-            <label for="name" class='col-xs-12 col-sm-2'>Name*</label>
-            <div class='col-xs-12 col-sm-10 text-left'>
-              <input type="text" id="name" name="name" class='form-control' data-validate-required="true" data-validate-reactive="true" />
-              <span class="error-message required">This field is required</span>
-            </div>
-          </div>
-          <div class="form-field row m-2-bottom">
-            <label for="lastName" class='col-xs-12 col-sm-2'>Email*</label>
-            <div class='col-xs-12 col-sm-10 text-left'>
-              <input type="text" id="email" name="email" class='form-control' data-validate-required="true" data-validate-reactive="true" />
-              <span class="error-message required">This field is required</span>
-            </div>
-          </div>
-          <div class="form-field row m-2-bottom">
-            <label for="lastName" class='col-xs-12 col-sm-2'>Phone</label>
-            <div class='col-xs-12 col-sm-10 text-left'>
-              <input type="text" id="phone" name="phone" class='form-control' />
-              <span class="error-message required">This field is required</span>
-            </div>
+<script id="individual" type="text/template">
+  <div class='card-body'>
+    <h5 class='card-title'>${title}</h5>
+    <div class="step">
+      <div class="form-container">
+        <div class="form-field row m-2-bottom">
+          <label for="individualName" class='col-xs-12 col-sm-2'>Name*</label>
+          <div class='col-xs-12 col-sm-10 text-left'>
+            <input type="text" id="name" name="individualName" class='form-control' data-validate-required="true" data-validate-reactive="true" />
+            <span class="error-message required">This field is required</span>
           </div>
         </div>
-        <div>
-          <button type="button" class="btn btn-primary text-uppercase" onclick="backToParticipateAs()">Back</button>
-          <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('scan', '.form-container')">Next</button>
+        <div class="form-field row m-2-bottom">
+            <label for="emailId" class='col-xs-12 col-sm-2'>Publicis Email*</label>
+          <div class='col-xs-12 col-sm-10 text-left'>
+              <input type="text" id="email" name="emailId"  class='form-control'
+              data-validate-email="true"
+              data-validate-required="true" data-validate-reactive="true" />
+            <span class="error-message required">This field is required</span>
+              <span class="error-message email">Invalid email format. Must be publicis email.</span>
+          </div>
+        </div>
+        <div class="form-field row m-2-bottom">
+          <label for="phone" class='col-xs-12 col-sm-2'>Phone</label>
+          <div class='col-xs-12 col-sm-10 text-left'>
+            <input type="text" id="phone" name="phone" class='form-control' />
+            <span class="error-message required">This field is required</span>
+          </div>
         </div>
       </div>
+      <div>
+        <button type="button" class="btn btn-primary text-uppercase" onclick="backToParticipateAs()">Back</button>
+        <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('rules', '.form-container')">Next</button>
+      </div>
     </div>
-  </script>
+  </div>
+</script>
+
+<script id="team" type="text/template">
+  <div class='card-body'>
+    <h5 class='card-title'>${title}</h5>
+    <div class="step">
+      <div class="form-container">
+        <div class="form-field row m-2-bottom">
+          <label for="teamName" class='col-xs-12 col-sm-2'>Team Name*</label>
+          <div class='col-xs-12 col-sm-10 text-left'>
+            <input type="text" id="name" name="teamName" class='form-control' data-validate-required="true" data-validate-reactive="true" />
+            <span class="error-message required">This field is required</span>
+          </div>
+        </div>
+        <div class="form-field row m-2-bottom">
+            <label for="emailId" class='col-xs-12 col-sm-2'>Publicis Email*</label>
+          <div class='col-xs-12 col-sm-10 text-left'>
+              <input type="text" id="email" name="emailId" class='form-control'
+              data-validate-email="true"
+              data-validate-required="true" data-validate-reactive="true" />
+            <span class="error-message required">This field is required</span>
+              <span class="error-message email">Invalid email format. Must be publicis email.</span>
+          </div>
+        </div>
+        <div class="form-field row m-2-bottom">
+          <label for="memberName1" class='col-xs-12 col-sm-2'>Member1*</label>
+          <div class='col-xs-12 col-sm-10 text-left'>
+            <input type="text" id="name" name="memberName1" class='form-control' data-validate-required="true" data-validate-reactive="true" />
+            <span class="error-message required">This field is required</span>
+          </div>
+        </div>
+        <div class="form-field row m-2-bottom">
+          <label for="memberName2" class='col-xs-12 col-sm-2'>Member2*</label>
+          <div class='col-xs-12 col-sm-10 text-left'>
+              <input type="text" id="email2" name="memberName2" class='form-control' data-validate-required="true" data-validate-reactive="true" />
+            <span class="error-message required">This field is required</span>
+          </div>
+        </div>
+        <div class="form-field row m-2-bottom">
+          <label for="memberName3" class='col-xs-12 col-sm-2'>Member3</label>
+          <div class='col-xs-12 col-sm-10 text-left'>
+            <input type="text" id="phone" name="memberName3" class='form-control' />
+          </div>
+        </div>
+      </div>
+      <div>
+        <button type="button" class="btn btn-primary text-uppercase" onclick="backToParticipateAs()">Back</button>
+        <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('rules', '.form-container')">Next</button>
+      </div>
+    </div>
+  </div>
+</script>
+
+<script id='rules' type='text/template'>
+  <div class='card-body'>
+    <h5 class='card-title'>Rules</h5>
+      <div style="height: 75%; overflow-y: scroll">
+      <ul class="list-group">
+        <li class="list-group-item rulespage">If you are playing as a team then only one of the team members should register and the other members should only support.</li>
+        <li class="list-group-item rulespage">Please leave the place of the QR location as soon as you scan so that you dont leave clue for the other teams.</li>
+        <li class="list-group-item rulespage">Please keep in mind that the QR codes are never kept inside the following areas
+        <br>
+        1. Secure ODC's
+        2. Rest rooms
+        3. Cafetario vendor shops
+        4. Security kiosks
+        </li>
+        <li class="list-group-item rulespage">Fastest 2 teams to decipher all the clues and solve the final puzzle will be declared winners.</li>
+      </ul>
+      </div>
+    <div>
+      <b>This is your clue for the QR location: </b> <span><strong>${registerClue}</strong></span>
+    </div>
+    <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep('scan')">Next</button>
+  </div>
+</script>
 
   <script id="scan" type="text/template">
     <div class='card-body'>
@@ -146,6 +183,9 @@
         <div>
           <video id="preview"></video>
         </div>
+        <div class="">
+          <div class="step-error"></div>
+        </div>
         <div class="step__actions">
           <button type='button' class="btn btn-primary text-uppercase" onclick='openQRReader()'>Scan</button>
         </div>
@@ -153,119 +193,149 @@
     </div>
   </script>
 
-  <script id="game" type="text/template">
-    <div class='card-body p-0'>
-      <h5 class='card-title'>Image Puzzle</h5>
-      <div class="step image-grid-puzzle">
-        <div class="step__content game-container">
-          <div class="game-container__bg"></div>
+<script id="game" type="text/template">
+  <div class='card-body p-0'>
+    <h5 class='card-title'>Image Puzzle</h5>
+    <div class="step image-grid-puzzle">
+      <h6 class='card-title instructions'>Rules for playing:</h6>
+      <div class="rules"> 1. You need to click on the broken image pieces to swap it.</div>
+      <div class="rules"> 2. Only the pieces adjacent to the black grid can be moved</div>
+      <div class="rules"> 3. You need to swap them in a way that it forms the correct image</div>
+      <div class="rules"> 4. You only have 3 minutes to complete this game</div>
+      <div class="rules"> 5. Complete the game to get the clue to the next location</div>
+      <div class="rules p-2-bottom"> Time: <span class="game-timeout">00:03:00</span></div>
+    </div>
+    <div class="step image-grid-puzzle">
+      <div class="step__content game-container">
+        <div class="game-container__bg"></div>
+        <input type="hidden" id='game-puzzle' name="gamePuzzle" />
+      </div>
+      <div class="">
+        <div class="step-error"></div>
+      </div>
+      <div class="step__actions">
+        <button type="button" class="btn btn-primary text-uppercase m-2-bottom" onclick="nextStep()"> Next </button>
+      </div>
+    </div>
+  </div>
+</script>
+
+<script id="game2" type="text/template">
+  <div class='card-body'>
+    <h5 class='card-title'>Arthemetic Puzzle</h5>
+    <div class="step">
+      <h6 class='card-title instructions'>Rules for playing:</h6>
+      <div class="rules"> 1. Solve this maths puzzle in two minutes</div>
+      <div class="rules"> 2. Complete the game to get the clue to the next location</div>
+    </div>
+    <div class="step">
+      <div class="step__content">
+        <div>
+          <ul id="challenges"></ul>
           <input type="hidden" id='game-puzzle' name="gamePuzzle" />
         </div>
-        <div class="">
-          <div class="step-error"></div>
-        </div>
-        <div class="step__actions">
-          <button type="button" class="btn btn-primary text-uppercase m-2-bottom" onclick="nextStep()"> Next </button>
-        </div>
+      </div>
+      <div class="">
+        <div class="step-error"></div>
+      </div>
+      <div class="step__actions">
+        <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep()"> Next </button>
       </div>
     </div>
-  </script>
+  </div>
+</script>
 
-  <script id="game2" type="text/template">
-    <div class='card-body'>
-      <h5 class='card-title'>Arthemetic Puzzle</h5>
-      <div class="step">
-        <div class="step__content">
-          <div>
-            <ul id="challenges"></ul>
-            <input type="hidden" id='game-puzzle' name="gamePuzzle" />
-          </div>
-        </div>
-        <div class="">
-          <div class="step-error"></div>
-        </div>
-        <div class="step__actions">
-          <button type="button" class="btn btn-primary text-uppercase" onclick="nextStep()"> Next </button>
-        </div>
-      </div>
+<script id="game3" type="text/template">
+  <div class='card-body p-0'>
+    <h5 class='card-title'>Box Bot Puzzle</h5>
+    <div class="step">
+      <h6 class='card-title instructions'>Rules for playing:</h6>
+      <div class="rules"> 1. Help reach the boxes to their targets.</div>
+      <div class="rules"> 2. Use arrow keys to move the bot. Be careful the box can get stuck in the corners and you wont be able to move it back</div>
+      <div class="rules"> 3. When all the boxes have been moved to their targets you complete the game</div>
+      <div class="rules"> 4. Complete the game to get the clue to the next location</div>
     </div>
-  </script>
-
-  <script id="game3" type="text/template">
-    <div class='card-body p-0'>
-      <h5 class='card-title'>Box Bot Puzzle</h5>
-      <div class="step boxbot-game">
-        <div class="step__content">
-          <div>
-            <canvas id="boxbot4k" width="448" height="384">
-                To play the game, your browser must support HTML5 Canvas.
-              </canvas>
+    <div class="step boxbot-game">
+      <div class="step__content">
+        <div>
+          <canvas id="boxbot4k" width="448" height="384">
+            To play the game, your browser must support HTML5 Canvas.
+          </canvas>
+        </div>
+        <div class='m-2-top'>
+          <div class="flex">
+            <div class="flex-1"></div>
+            <div class="flex-1"><button class="button" id="up"></button></div>
+            <div class="flex-1"></div>
           </div>
-          <div class='m-2-top'>
-            <div class="flex">
-              <div class="flex-1"></div>
-              <div class="flex-1"><button class="button" id="up"></button></div>
-              <div class="flex-1"></div>
-            </div>
-            <div class="flex">
-              <div class="flex-1"><button class="button" id="left"></button></div>
-              <div class="flex-1"></div>
-              <div class="flex-1"><button class="button" id="right"></button></div>
-            </div>
-            <div class="flex">
-              <div class="flex-1"></div>
-              <div class="flex-1"><button class="button" id="down"></button></div>
-              <div class="flex-1"></div>
-            </div>
+          <div class="flex">
+            <div class="flex-1"><button class="button" id="left"></button></div>
+            <div class="flex-1"></div>
+            <div class="flex-1"><button class="button" id="right"></button></div>
           </div>
-          <input type="hidden" id='game-puzzle' name="gamePuzzle" />
+          <div class="flex">
+            <div class="flex-1"></div>
+            <div class="flex-1"><button class="button" id="down"></button></div>
+            <div class="flex-1"></div>
+          </div>
         </div>
-        <div class="">
-          <div class="step-error"></div>
-        </div>
-        <div class="step__actions">
-          <button type="button" class="btn btn-primary text-uppercase m-2-top" onclick="nextStep()"> Next </button>
-        </div>
+        <input type="hidden" id='game-puzzle' name="gamePuzzle" />
       </div>
-    </div>
-  </script>
-
-  <script id="success-modal-content" type="text/template">
-    <div class="text-center">
-      <h5>${title}</h5>
-      <div>
-        ${content}
+      <div class="">
+        <div class="step-error"></div>
       </div>
-      <div>
+      <div class="step__actions">
         <button type="button" class="btn btn-primary text-uppercase m-2-top" onclick="nextStep()"> Next </button>
       </div>
     </div>
-  </script>
+  </div>
+</script>
 
-  <script id="statuspage" type="text/template">
-    <div class='card-body'>
-      <h5 class='card-title'>Congrats!</h5>
-      <div class="step">
-        <div>You have successfully completed the treasure hunt!</div>
-        <div>Winners will be announced on the 10th of october @expo 2019</div>
-        <div>
-          <button type="button" class="btn btn-primary text-uppercase m-5-top" onclick="closeAndExit()"> ClOSE & EXIT </button>
-        </div>
-      </div>
+<script id="success-modal-content" type="text/template">
+  <div class="text-center">
+    <h5>${title}</h5>
+    <div>
+      ${content}
     </div>
-  </script>
+    <div>
+      <button type="button" class="btn btn-primary text-uppercase m-2-top" onclick="nextStep()"> Next </button>
+    </div>
+  </div>
+</script>
 
-  <script src="js/vendor/jquery-2.1.1.min.js"></script>
-  <script src="js/vendor/jquery-ui.js"></script>
-  <script src="js/vendor/jquery-ui.touch-punch.min.js"></script>
-  <script src="js/workflow.service.js"></script>
-  <script src="js/image-grid-game.js"></script>
-  <script src="js/arthemetic-puzzle.js"></script>
-  <script src="js/boxbot-puzzle.js"></script>
-  <script src="js/index.js"></script>
-  <script src="js/vendor/lighdator.js"></script>
-  <script src="js/instascan.min.js"></script>
-  <script>
+<script id="statuspage" type="text/template">
+  <div class='card-body'>
+    <h5 class='card-title'>Congrats!</h5>
+    <div class="step">
+      <div>You have successfully completed the treasure hunt!</div>
+      <div>Winners will be announced on the 10th of october @expo 2019</div>
+        <!-- <div>
+        <button type="button" class="btn btn-primary text-uppercase m-5-top" onclick="closeAndExit()"> ClOSE & EXIT </button>
+        </div> -->
+    </div>
+  </div>
+</script>
+
+<script id="failpage" type="text/template">
+  <div class='card-body'>
+    <h5 class='card-title'>Thank you</h5>
+    <div class="step">
+      <div>You could not complete the game, Thank you for participating the game.</div>
+    </div>
+  </div>
+</script>
+
+    <script src="js/vendor/jquery-2.1.1.min.js"></script>
+    <script src="js/vendor/jquery-ui.js"></script>
+    <script src="js/vendor/jquery-ui.touch-punch.min.js"></script>
+    <script src="js/workflow.service.js"></script>
+    <script src="js/image-grid-game.js"></script>
+    <script src="js/arthemetic-puzzle.js"></script>
+    <script src="js/boxbot-puzzle.js"></script>
+    <script src="js/index.js"></script>
+    <script src="js/vendor/lighdator.js"></script>
+    <script src="js/instascan.min.js"></script>
+<script>
     var workflow = [{
       stepName: "welcome",
       nextStep: "participate"
@@ -274,15 +344,18 @@
       nextStep: "participatetype"
     }, {
       stepName: "individual",
-      nextStep: "scan",
+      nextStep: "rules",
       templateName: "individual",
       title: "Personal details",
     }, {
       stepName: "team",
-      nextStep: "scan",
+      nextStep: "rules",
       templateName: "team",
-      title: "Personal details",
+      title: "Team details",
     }, {
+      stepName: "rules",
+      nextStep: "scan"
+    },{
       stepName: "scan",
       templateName: "scan",
       nextStep: "game"
@@ -305,12 +378,24 @@
       nextStep: "statuspage"
     }, {
       stepName: "statuspage"
+    }, {
+      stepName: "failpage"
     }];
     var availableGames = [
       imageGridGame,
       arthemeticPuzzle,
       boxBotPuzzle
     ];
+
+    var stepNumbers = {
+      'register': 0,
+      'scan': 1,
+      'game': 2,
+      'scan2': 3,
+      'game2': 4,
+      'scan3': 5,
+      'game3': 6
+    }
 
     var dataManager = (function() {
       window.appData = {
@@ -345,13 +430,21 @@
       return new D();
     })();
 
-    var makeRequest = function(opts) {
-      return fetch(opts.url, {
+    var makeRequest = function(opts, includeCookie) {
+      opts.url = 'https://treasurehunt.sapientexpo19.cf/expo19/treasurehunt/' + opts.url;
+      var fetchObj = {
         method: opts.method,
         body: JSON.stringify(opts.data),
         headers: opts.headers
-      }).then(resp => {
+      }
+      if(includeCookie) {
+        fetchObj.credentials = 'include';
+      }
+      return fetch(opts.url, fetchObj).then(resp => {
         return resp.json();
+      }).then(function(res){
+        console.log(res);
+        return res;
       });
     };
     var getStepData = function(elemRef) {
@@ -432,12 +525,15 @@
         }
         let stepHtml = document.querySelector('#' + templateName).innerHTML;
         document.querySelector('#page').innerHTML = stepHtml;
+        if (stepName === 'rules') {
+          stepData['registerClue'] = dataManager.get().registerClue;
+        }
         applyScope(document.querySelector('#page'), stepData);
         setTimeout(function() {
           if (isGame && gameIndex >= 0 && availableGames[gameIndex]) {
-            availableGames[gameIndex].startGame(1);
+            availableGames[gameIndex].startGame(3);
           }
-          if (stepName === 'scan') {
+          if (stepName === 'rules') {
             lighdator.bindValidation();
           }
         }, 0);
@@ -454,7 +550,7 @@
           participateType: param1
         });
       }
-      if (stepPageName === 'scan') {
+      if (stepPageName === 'rules') {
         var errors = lighdator.validateForm(document.querySelector(param1));
         if (!errors.valid) {
           nextAllowed = false;
@@ -484,17 +580,30 @@
                 document.querySelector('.step-error').innerHTML = nextData.errors[0].message;
               }
             } else {
-              if (currentStep === 'individual' || currentStep === 'team') {
-                makeRequest({
-                  url: 'http://expo19game-env.ukgk6vk2kz.us-east-1.elasticbeanstalk.com/expo19/treasurehunt/register',
-                  method: 'POST',
-                  data: dataManager.get(),
-                  headers: {
-                    'Content-Type': 'application/json'
-                  }
-                })
-              } else {
-                renderStep(nextData.nextStep, nextData.isGame, nextData.gameIndex);
+              var clue;
+              switch(currentStep){
+                case 'individual':
+                case 'team': {
+                  // renderStep(nextData.nextStep, nextData.isGame, nextData.gameIndex);
+                  register(pageData).then(function(res) {
+                    if(res.status==='SUCCESS') {
+                      document.cookie = 'sessionId=' + res.sessionId;
+                      clue = res.clue;
+                      dataManager.save({
+                        registerClue: clue
+                      });
+                      renderStep(nextData.nextStep, nextData.isGame, nextData.gameIndex);
+                    } else if (res.status === 'FAILURE' && res.errorObject.errorMsg === 'You have already finished the game. We got you :)') {
+                      renderStep("statuspage");
+                    }
+                  }).catch(function(){
+
+                  });
+                  break;
+                }
+                default: {
+                  renderStep(nextData.nextStep, nextData.isGame, nextData.gameIndex);
+                }
               }
             }
           } else {
@@ -542,15 +651,36 @@
         };
         $('[name="game2Puzzle"]').val('passed');
         $('[name="gamePuzzle"]').val('passed');
+        var currentStep = dataManager.get('currentStep');
+        var currentStepNumber = stepNumbers[currentStep];
+        gameProgress({
+          "currentStage": currentStepNumber,
+          "isCompleted":true
+        }).then(function(res) {
+          if(res.status === 'SUCCESS' && currentStepNumber !== 6) {
+            clueContent = res.clue;
+            stepScope = {
+              title: "Next Clue",
+              content: res.clue
+            };
+            applyScope(document.querySelector('.modal__content'), stepScope);
+            $('.message-modal').removeClass('hidden');
+          } else if (res.status === 'SUCCESS' && currentStepNumber === 6) {
+            nextStep();
+          } else if (res.status === 'FAILURE' && res.errorObject.errorMsg === 'You have already finished the game. We got you :)') {
+            renderStep("statuspage");
+          }
+        });
       } else {
-        stepScope = {
-          title: "Puzzle Failed",
-          content: "You have failed puzzle"
-        };
-        $('[name="gamePuzzle"]').val('');
+        // stepScope = {
+        //   title: "Puzzle Failed",
+        //   content: "You have failed puzzle"
+        // };
+        // $('[name="gamePuzzle"]').val('');
+        // applyScope(document.querySelector('.modal__content'), stepScope);
+        // $('.message-modal').removeClass('hidden');
+        renderStep("failpage");
       }
-      applyScope(document.querySelector('.modal__content'), stepScope);
-      $('.message-modal').removeClass('hidden');
     }
 
     function openQRReader() {
@@ -561,21 +691,74 @@
       scanner.addListener('scan', function(content) {
         scanner.stop(camera);
         var currentStep = dataManager.get('currentStep');
+        var currentStepNumber = stepNumbers[currentStep];
         if (['scan', 'scan2', 'scan3'].indexOf(currentStep) > -1) {
           document.querySelector('#qr-text').value = content;
+          validateQR({
+            qrId: content,
+            eventId: Math.floor(currentStepNumber/2) + 1
+          }).then(function(res){
+            if(res.status === 'SUCCESS') {
+              nextStep();
+            } else {
+              document.querySelector('.step-error').innerHTML = 'Invalid QR code. Please try again!';
+              openQRReader();
+            }
+          }).catch(function() {
+            document.querySelector('.step-error').innerHTML = 'Invalid QR code. Please try again!';
+            openQRReader();
+          });
         }
-        nextStep();
       });
       Instascan.Camera.getCameras().then(function(cameras) {
-        if (cameras.length > 0) {
-          camera = cameras[0];
-          scanner.start(camera);
-        } else {
-          console.error('No cameras found.');
+       if (cameras.length > 0) {
+         cameras.forEach(function(cam) {
+           if (cam.name.indexOf('back') !== -1) {
+             camera = cam;
+             return false;
+           }
+         });
+         if(!camera) camera = cameras[0];
+         scanner.start(camera);
+       } else {
+         console.error('No cameras found.');
+       }
+     }).catch(function(e) {
+       // console.error(e);
+     });
+    }
+
+    function register(requestData) {
+      return makeRequest({
+        url: 'register',
+        method: 'POST',
+        data: requestData,
+        headers: {
+          'Content-Type': 'application/json'
         }
-      }).catch(function(e) {
-        // console.error(e);
       });
+    }
+
+    function validateQR(requestData) {
+      return makeRequest({
+        url: 'validateQR',
+        method: 'POST',
+        data: requestData,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }, true);
+    }
+
+    function gameProgress(requestData) {
+      return makeRequest({
+        url: 'progress',
+        method: 'POST',
+        data: requestData,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }, true);
     }
   </script>
 </body>

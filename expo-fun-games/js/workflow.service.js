@@ -35,7 +35,7 @@ var workflowService = {
         },
         getNextStepData: function(pageData, stepData, availableGames) {
             var errors = [],
-                nextStep = "scan";
+                nextStep = "rules";
             return { errors: errors, nextStep: nextStep };
         }
     },
@@ -49,7 +49,7 @@ var workflowService = {
         },
         getNextStepData: function(pageData, stepData, availableGames) {
             var errors = [],
-                nextStep = "scan";
+                nextStep = "rules";
             return { errors: errors, nextStep: nextStep };
         }
     },

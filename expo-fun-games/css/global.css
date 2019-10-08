@@ -26,6 +26,7 @@ body {
   background-image: url("/images/logo.jpg");
   background-size: contain;
   background-repeat: no-repeat;
+  background-position: center;
   height: 150px;
 }
 
@@ -564,6 +565,12 @@ img.img-qa-scan {
     margin: 1rem;
 }
 
+.rulespage {
+    font-size: 12px;
+}
+.rules{
+    font-size: 10px;
+}
 
 div#options {
     background: #eee;

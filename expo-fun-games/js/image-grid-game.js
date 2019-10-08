@@ -151,6 +151,7 @@ var imageGridGame = (function() {
         }, noOfMinutes * 60 * 1000);
         gameTimer = setInterval(function() {
             timeToShow.setSeconds(timeToShow.getSeconds() - 1);
+            $('.game-timeout').html(timeToShow.toTimeString().substr(0, 8));
         }, 1000);
     };
     return new E();

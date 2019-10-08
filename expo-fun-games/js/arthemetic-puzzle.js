@@ -429,7 +429,7 @@ function Game() {
 }
 Game.prototype = {
 	version: 1,
-	time_limit: 30,
+	time_limit: 120,
 
 	set_time_limit: function(i) {
 		for(var j=0;j<times.length;j++) {
