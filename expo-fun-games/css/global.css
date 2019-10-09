@@ -867,3 +867,10 @@ button.new-challenge {
   font-size: 27px;
   text-shadow: 0 2px 2px black;
 }
+
+.game-pre-loader {
+  display: flex;
+  min-height: 200px;
+  justify-content: center;
+  align-items: center;
+}

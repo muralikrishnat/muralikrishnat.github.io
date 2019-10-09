@@ -210,6 +210,9 @@
         <div class="game-container__bg"></div>
         <input type="hidden" id='game-puzzle' name="gamePuzzle" />
       </div>
+      <div class="game-pre-loader">
+        <button type="button" class="btn btn-primary" onclick="startGame('game', '.game-pre-loader')"> Start Game </button>
+      </div>
       <div class="">
         <div class="step-error"></div>
       </div>
@@ -234,6 +237,9 @@
           <ul id="challenges"></ul>
           <input type="hidden" id='game-puzzle' name="gamePuzzle" />
         </div>
+      </div>
+      <div class="game-pre-loader">
+        <button type="button" class="btn btn-primary" onclick="startGame('game2', '.game-pre-loader')"> Start Game </button>
       </div>
       <div class="">
         <div class="step-error"></div>
@@ -530,7 +536,7 @@
         }
         applyScope(document.querySelector('#page'), stepData);
         setTimeout(function() {
-          if (isGame && gameIndex >= 0 && availableGames[gameIndex]) {
+          if (isGame && gameIndex >= 0 && availableGames[gameIndex] && gameIndex === 2) {
             availableGames[gameIndex].startGame(3);
           }
           if (stepName === 'rules') {
@@ -759,6 +765,16 @@
           'Content-Type': 'application/json'
         }
       }, true);
+    }
+
+    function startGame(game, hideElemSelector) {
+      if (game === 'game') {
+        availableGames[0].startGame(3);
+        $(hideElemSelector).hide();
+      } else if (game === 'game2') {
+        availableGames[1].startGame(3);
+        $(hideElemSelector).hide();
+      }
     }
   </script>
 </body>
