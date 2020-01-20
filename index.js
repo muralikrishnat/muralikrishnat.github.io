@@ -1,5 +1,5 @@
 let port = 3435,
-    folder = 'expo-fun-games',
+    folder = 'easy-css',
     endpoint = "dev",
     ssl = false,
     host = '127.0.0.1';
