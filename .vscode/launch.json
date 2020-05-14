@@ -1,0 +1,21 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/server.js",
+            "env": {
+                "VAPID_PUBLIC_KEY": "BNnw-DNo21TwXugTjkIWg7bgy_C7PnRGpnvLrrJxiSx39fqsap8NCu3kF2HWGyUDNc1c8pqVlvkXPedcS_7AuUg",
+                "VAPID_PRIVATE_KEY": "QTnV3rihU-cXe3gCNIdbLVcgCvs6icz2ELx_nN-ziOM"
+            }
+        }
+    ]
+}
