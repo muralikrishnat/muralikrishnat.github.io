@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Analytics & Usage Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        .status-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Navigation Bar -->
+    <nav class="sticky top-0 z-50 w-full glass-card border-b px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight text-slate-900">APIMonitor<span class="text-indigo-600">.io</span></h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">
+                <span class="w-2 h-2 bg-emerald-500 rounded-full status-pulse"></span>
+                System Live
+            </div>
+            <button onclick="refreshData()" class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6 space-y-8">
+        
+        <!-- Summary Stats Cards -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="glass-card p-6 rounded-2xl shadow-sm">
+                <p class="text-sm font-medium text-slate-500 mb-1">Total Requests</p>
+                <div class="flex items-baseline gap-2">
+                    <h3 id="totalRequests" class="text-3xl font-bold text-slate-900">--</h3>
+                    <span class="text-xs font-semibold text-emerald-500">+12%</span>
+                </div>
+                <div class="mt-4 h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-indigo-500 w-3/4"></div>
+                </div>
+            </div>
+            
+            <div class="glass-card p-6 rounded-2xl shadow-sm">
+                <p class="text-sm font-medium text-slate-500 mb-1">Avg Response Time</p>
+                <div class="flex items-baseline gap-2">
+                    <h3 id="avgLatency" class="text-3xl font-bold text-slate-900">--</h3>
+                    <span class="text-xs font-semibold text-rose-500">+4ms</span>
+                </div>
+                <div class="mt-4 h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-amber-500 w-1/2"></div>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl shadow-sm">
+                <p class="text-sm font-medium text-slate-500 mb-1">Total Data Transferred</p>
+                <div class="flex items-baseline gap-2">
+                    <h3 id="totalBandwidth" class="text-3xl font-bold text-slate-900">--</h3>
+                    <span class="text-xs font-semibold text-slate-400">Past 24h</span>
+                </div>
+                <div class="mt-4 h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-emerald-500 w-2/3"></div>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl shadow-sm">
+                <p class="text-sm font-medium text-slate-500 mb-1">Error Rate</p>
+                <div class="flex items-baseline gap-2">
+                    <h3 id="errorRate" class="text-3xl font-bold text-slate-900">--</h3>
+                    <span class="text-xs font-semibold text-emerald-500">-2%</span>
+                </div>
+                <div class="mt-4 h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-rose-500 w-[8%]"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 glass-card p-6 rounded-2xl shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-semibold text-slate-900">Traffic Volume Over Time</h2>
+                    <select class="bg-slate-50 border border-slate-200 text-sm rounded-lg p-1.5 focus:ring-indigo-500 outline-none">
+                        <option>Last 6 Hours</option>
+                        <option>Last 24 Hours</option>
+                        <option>Last 7 Days</option>
+                    </select>
+                </div>
+                <div class="h-72">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl shadow-sm">
+                <h2 class="text-lg font-semibold text-slate-900 mb-6">Response Distribution</h2>
+                <div class="h-72 flex items-center justify-center">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- API List Section -->
+        <section class="glass-card rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Endpoint Performance</h2>
+                    <p class="text-sm text-slate-500">Real-time metrics for all tracked API routes</p>
+                </div>
+                <div class="relative w-full sm:w-64">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </span>
+                    <input type="text" id="apiSearch" placeholder="Search endpoint..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+                            <th class="px-6 py-4">Method / Endpoint</th>
+                            <th class="px-6 py-4">Total Calls</th>
+                            <th class="px-6 py-4">Avg Latency</th>
+                            <th class="px-6 py-4">Data Transferred</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4">Success Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="apiTableBody" class="divide-y divide-slate-100">
+                        <!-- Rows injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 bg-slate-50/50 text-center">
+                <button class="text-sm font-medium text-indigo-600 hover:text-indigo-700">Export CSV Report</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Mock Data Generator
+        const apiData = [
+            { method: 'GET', path: '/v1/users/profile', calls: 14502, latency: 45, bandwidth: '1.2 GB', status: 'Healthy', success: 99.8, color: 'text-blue-600 bg-blue-50' },
+            { method: 'POST', path: '/v1/auth/login', calls: 8230, latency: 120, bandwidth: '450 MB', status: 'Healthy', success: 98.5, color: 'text-indigo-600 bg-indigo-50' },
+            { method: 'GET', path: '/v1/products', calls: 25900, latency: 85, bandwidth: '8.4 GB', status: 'Healthy', success: 99.9, color: 'text-blue-600 bg-blue-50' },
+            { method: 'PUT', path: '/v1/orders/update', calls: 1120, latency: 310, bandwidth: '120 MB', status: 'Degraded', success: 92.4, color: 'text-amber-600 bg-amber-50' },
+            { method: 'DELETE', path: '/v1/admin/cache', calls: 45, latency: 12, bandwidth: '2 KB', status: 'Healthy', success: 100, color: 'text-rose-600 bg-rose-50' },
+            { method: 'GET', path: '/v1/analytics/realtime', calls: 34100, latency: 550, bandwidth: '14.2 GB', status: 'Critical', success: 84.1, color: 'text-blue-600 bg-blue-50' },
+            { method: 'POST', path: '/v1/upload/media', calls: 560, latency: 1450, bandwidth: '42.1 GB', status: 'Healthy', success: 97.2, color: 'text-indigo-600 bg-indigo-50' }
+        ];
+
+        let trafficChart, distributionChart;
+
+        function initCharts() {
+            // Traffic Line Chart
+            const ctx1 = document.getElementById('trafficChart').getContext('2d');
+            trafficChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['12pm', '1pm', '2pm', '3pm', '4pm', '5pm', '6pm'],
+                    datasets: [{
+                        label: 'Requests/sec',
+                        data: [65, 78, 52, 95, 110, 85, 120],
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#4f46e5'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { display: false } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Distribution Doughnut Chart
+            const ctx2 = document.getElementById('distributionChart').getContext('2d');
+            distributionChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['2xx Success', '4xx Client Error', '5xx Server Error'],
+                    datasets: [{
+                        data: [94, 4, 2],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                    },
+                    cutout: '75%'
+                }
+            });
+        }
+
+        function renderTable(filter = '') {
+            const tbody = document.getElementById('apiTableBody');
+            tbody.innerHTML = '';
+
+            const filtered = apiData.filter(item => 
+                item.path.toLowerCase().includes(filter.toLowerCase()) || 
+                item.method.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            filtered.forEach(item => {
+                const statusClass = item.status === 'Healthy' ? 'text-emerald-600 bg-emerald-100' : 
+                                    item.status === 'Degraded' ? 'text-amber-600 bg-amber-100' : 'text-rose-600 bg-rose-100';
+                
+                const row = `
+                    <tr class="hover:bg-slate-50 transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${item.color}">${item.method}</span>
+                                <span class="text-sm font-medium text-slate-700 font-mono">${item.path}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-600">${item.calls.toLocaleString()}</td>
+                        <td class="px-6 py-4 text-sm font-medium text-slate-700">${item.latency}ms</td>
+                        <td class="px-6 py-4 text-sm text-slate-600">${item.bandwidth}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusClass}">
+                                ${item.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-emerald-500" style="width: ${item.success}%"></div>
+                                </div>
+                                <span class="text-xs font-medium text-slate-500">${item.success}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function refreshData() {
+            // Update summary cards with fake dynamic effect
+            document.getElementById('totalRequests').innerText = (Math.floor(Math.random() * 50000) + 100000).toLocaleString();
+            document.getElementById('avgLatency').innerText = (Math.floor(Math.random() * 20) + 40) + 'ms';
+            document.getElementById('totalBandwidth').innerText = (Math.random() * 50 + 20).toFixed(1) + ' GB';
+            document.getElementById('errorRate').innerText = (Math.random() * 2 + 0.5).toFixed(1) + '%';
+            
+            // Randomize chart data
+            trafficChart.data.datasets[0].data = trafficChart.data.datasets[0].data.map(() => Math.floor(Math.random() * 100) + 50);
+            trafficChart.update();
+        }
+
+        // Search functionality
+        document.getElementById('apiSearch').addEventListener('input', (e) => {
+            renderTable(e.target.value);
+        });
+
+        // Initialize everything
+        window.onload = () => {
+            initCharts();
+            renderTable();
+            refreshData();
+            
+            // Periodic update simulation
+            setInterval(refreshData, 5000);
+        };
+    </script>
+</body>
+</html>

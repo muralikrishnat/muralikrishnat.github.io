@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node.js API Project Generator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9', // Sky 500
+                            600: '#0284c7', // Sky 600
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Smooth transitions for conditional rendering */
+        .transition-height {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, margin 0.3s ease;
+            max-height: 500px;
+            opacity: 1;
+            overflow: hidden;
+        }
+        
+        .collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-green-500/10 p-2 rounded-lg">
+                        <i class="fa-brands fa-node text-green-600 text-2xl"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">NodeGen<span class="text-brand-500">UI</span></span>
+                </div>
+                <button onclick="generateProject()" class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-lg font-medium transition-all shadow-lg shadow-brand-500/30 flex items-center gap-2 transform active:scale-95">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    Generate Project
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <form id="generatorForm" onsubmit="event.preventDefault();">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Left Column: Core Info -->
+                <div class="lg:col-span-8 space-y-6">
+                    
+                    <!-- Section: General Information -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+                            <i class="fa-solid fa-cube text-slate-400"></i>
+                            <h2 class="font-semibold text-slate-700">General Information</h2>
+                        </div>
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <!-- Project Name -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Project Name</label>
+                                <input type="text" id="projectName" placeholder="e.g. Inventory Management API" 
+                                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all placeholder:text-slate-400"
+                                    oninput="updateProjectId()">
+                            </div>
+
+                            <!-- Project ID (Read Only) -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Project ID</label>
+                                <div class="relative">
+                                    <input type="text" id="projectId" readonly 
+                                        class="w-full pl-4 pr-10 py-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 font-mono text-sm cursor-not-allowed select-all">
+                                    <i class="fa-solid fa-lock absolute right-3 top-3 text-slate-300 text-xs"></i>
+                                </div>
+                            </div>
+
+                            <!-- Port -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Port</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-slate-400 font-mono text-sm">:</span>
+                                    <input type="number" id="port" value="3000" 
+                                        class="w-full pl-6 pr-4 py-2.5 rounded-lg border border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all font-mono">
+                                </div>
+                            </div>
+
+                            <!-- Keywords -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Keywords</label>
+                                <input type="text" id="keywords" placeholder="nodejs, api, rest, backend" 
+                                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all">
+                                <p class="text-xs text-slate-400 mt-1">Comma separated values</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Advanced Configuration -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-slate-400"></i>
+                            <h2 class="font-semibold text-slate-700">Advanced Configuration</h2>
+                        </div>
+                        <div class="p-6 space-y-6">
+
+                            <!-- File Upload Toggle -->
+                            <div class="space-y-3">
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="checkbox" id="fileUpload" class="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500 transition-all cursor-pointer" onchange="toggleSection('storageSection', this.checked)">
+                                    <span class="font-medium text-slate-700 group-hover:text-brand-600 transition-colors">Enable File Uploads</span>
+                                </label>
+
+                                <!-- Conditional Storage Choice -->
+                                <div id="storageSection" class="collapsed pl-8 border-l-2 border-slate-100 ml-2.5">
+                                    <label class="block text-sm font-medium text-slate-600 mb-2">Storage Provider</label>
+                                    <div class="grid grid-cols-2 gap-3 max-w-md">
+                                        <label class="relative cursor-pointer">
+                                            <input type="radio" name="storage" value="minio" checked class="peer sr-only">
+                                            <div class="p-3 rounded-lg border border-slate-200 bg-white peer-checked:border-brand-500 peer-checked:bg-brand-50 hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+                                                <i class="fa-solid fa-server text-slate-400 peer-checked:text-brand-600"></i>
+                                                <span class="text-sm font-medium peer-checked:text-brand-700">MinIO</span>
+                                            </div>
+                                        </label>
+                                        <label class="relative cursor-not-allowed opacity-60">
+                                            <input type="radio" name="storage" value="s3" disabled class="peer sr-only">
+                                            <div class="p-3 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center gap-2">
+                                                <i class="fa-brands fa-aws text-slate-400"></i>
+                                                <span class="text-sm font-medium text-slate-500">S3 Bucket</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Logging Toggle -->
+                            <div class="space-y-3">
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="checkbox" id="enableLogging" class="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500 transition-all cursor-pointer" onchange="toggleSection('loggingSection', this.checked)">
+                                    <span class="font-medium text-slate-700 group-hover:text-brand-600 transition-colors">Enable Logging</span>
+                                </label>
+
+                                <!-- Conditional Logging Level -->
+                                <div id="loggingSection" class="collapsed pl-8 border-l-2 border-slate-100 ml-2.5">
+                                    <label class="block text-sm font-medium text-slate-600 mb-2">Log Level</label>
+                                    <div class="flex flex-wrap gap-2">
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="logLevel" value="error" class="peer sr-only">
+                                            <span class="px-4 py-1.5 rounded-full border border-slate-200 text-sm font-medium text-slate-600 peer-checked:bg-red-50 peer-checked:text-red-600 peer-checked:border-red-200 transition-all hover:bg-slate-50">Error</span>
+                                        </label>
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="logLevel" value="info" checked class="peer sr-only">
+                                            <span class="px-4 py-1.5 rounded-full border border-slate-200 text-sm font-medium text-slate-600 peer-checked:bg-blue-50 peer-checked:text-blue-600 peer-checked:border-blue-200 transition-all hover:bg-slate-50">Info</span>
+                                        </label>
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="logLevel" value="debug" class="peer sr-only">
+                                            <span class="px-4 py-1.5 rounded-full border border-slate-200 text-sm font-medium text-slate-600 peer-checked:bg-yellow-50 peer-checked:text-yellow-600 peer-checked:border-yellow-200 transition-all hover:bg-slate-50">Debug</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CORS Toggle -->
+                            <div class="space-y-3">
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="checkbox" id="enableCors" class="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500 transition-all cursor-pointer" onchange="toggleSection('corsSection', this.checked)">
+                                    <span class="font-medium text-slate-700 group-hover:text-brand-600 transition-colors">Enable CORS</span>
+                                </label>
+
+                                <!-- Conditional Domains List -->
+                                <div id="corsSection" class="collapsed pl-8 border-l-2 border-slate-100 ml-2.5">
+                                    <label class="block text-sm font-medium text-slate-600 mb-2">Allowed Domains</label>
+                                    <div id="domainList" class="space-y-2">
+                                        <div class="flex gap-2">
+                                            <input type="text" placeholder="https://example.com" class="domain-input flex-1 px-3 py-2 rounded-lg border border-slate-300 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm">
+                                            <button type="button" onclick="removeDomain(this)" class="p-2 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-30" disabled>
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="addDomain()" class="mt-2 text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
+                                        <i class="fa-solid fa-plus circle"></i> Add another domain
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- API Tracking -->
+                            <label class="flex items-center gap-3 cursor-pointer group pt-2">
+                                <input type="checkbox" id="apiTracking" class="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500 transition-all cursor-pointer">
+                                <div>
+                                    <span class="block font-medium text-slate-700 group-hover:text-brand-600 transition-colors">Track API Usage</span>
+                                    <span class="block text-xs text-slate-400">Monitor request rates and endpoints</span>
+                                </div>
+                            </label>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Tech Stack & Security -->
+                <div class="lg:col-span-4 space-y-6">
+                    
+                    <!-- Section: Tech Stack -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+                            <i class="fa-solid fa-layer-group text-slate-400"></i>
+                            <h2 class="font-semibold text-slate-700">Tech Stack</h2>
+                        </div>
+                        <div class="p-6 space-y-5">
+                            
+                            <!-- Language -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Language</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="language" value="javascript" checked class="peer sr-only">
+                                        <div class="py-2 px-3 border rounded-lg text-center text-sm font-medium text-slate-600 peer-checked:bg-yellow-50 peer-checked:text-yellow-700 peer-checked:border-yellow-400 transition-all hover:bg-slate-50">
+                                            JS
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="language" value="typescript" class="peer sr-only">
+                                        <div class="py-2 px-3 border rounded-lg text-center text-sm font-medium text-slate-600 peer-checked:bg-blue-50 peer-checked:text-blue-700 peer-checked:border-blue-400 transition-all hover:bg-slate-50">
+                                            TS
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Database -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Database</label>
+                                <div class="space-y-2">
+                                    <label class="cursor-pointer block">
+                                        <input type="radio" name="database" value="mongodb" checked class="peer sr-only">
+                                        <div class="p-3 border rounded-lg flex items-center justify-between peer-checked:border-green-500 peer-checked:bg-green-50 peer-checked:text-green-800 transition-all">
+                                            <span class="font-medium text-sm">MongoDB</span>
+                                            <i class="fa-solid fa-leaf text-green-500"></i>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-not-allowed block opacity-50">
+                                        <input type="radio" name="database" value="postgres" disabled class="peer sr-only">
+                                        <div class="p-3 border rounded-lg flex items-center justify-between bg-slate-50">
+                                            <span class="font-medium text-sm text-slate-500">PostgreSQL</span>
+                                            <i class="fa-solid fa-database text-slate-400"></i>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Format -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">API Format</label>
+                                <div class="flex rounded-lg bg-slate-100 p-1">
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="format" value="rest" checked class="peer sr-only">
+                                        <div class="py-1.5 text-center text-sm font-medium rounded-md text-slate-500 peer-checked:bg-white peer-checked:text-brand-600 peer-checked:shadow-sm transition-all">REST</div>
+                                    </label>
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="format" value="graphql" class="peer sr-only">
+                                        <div class="py-1.5 text-center text-sm font-medium rounded-md text-slate-500 peer-checked:bg-white peer-checked:text-brand-600 peer-checked:shadow-sm transition-all">GraphQL</div>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Section: Security -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved text-slate-400"></i>
+                            <h2 class="font-semibold text-slate-700">Security</h2>
+                        </div>
+                        <div class="p-6">
+                            
+                            <!-- Auth Toggle -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-slate-700 mb-2">User Authentication</label>
+                                <div class="flex gap-4">
+                                    <label class="cursor-pointer flex items-center gap-2">
+                                        <input type="radio" name="auth" value="yes" checked class="text-brand-600 focus:ring-brand-500" onchange="toggleSection('encryptionSection', true)">
+                                        <span class="text-slate-600">Yes</span>
+                                    </label>
+                                    <label class="cursor-pointer flex items-center gap-2">
+                                        <input type="radio" name="auth" value="no" class="text-brand-600 focus:ring-brand-500" onchange="toggleSection('encryptionSection', false)">
+                                        <span class="text-slate-600">No</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Conditional Encryption -->
+                            <div id="encryptionSection" class="transition-height">
+                                <div class="pt-4 border-t border-slate-100">
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                                        <i class="fa-solid fa-key text-xs text-brand-500 mr-1"></i> Data Encryption
+                                    </label>
+                                    <div class="flex gap-4">
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="radio" name="encryption" value="yes" checked class="text-brand-600 focus:ring-brand-500">
+                                            <span class="text-slate-600">Yes</span>
+                                        </label>
+                                        <label class="cursor-pointer flex items-center gap-2">
+                                            <input type="radio" name="encryption" value="no" class="text-brand-600 focus:ring-brand-500">
+                                            <span class="text-slate-600">No</span>
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-slate-400 mt-2">Encrypts sensitive fields in MongoDB.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Output Modal (Hidden by default) -->
+        <div id="resultModal" class="fixed inset-0 bg-black/50 z-[100] hidden flex items-center justify-center backdrop-blur-sm opacity-0 transition-opacity duration-300">
+            <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 transform scale-95 transition-transform duration-300" id="resultContent">
+                <div class="p-6">
+                    <div class="flex items-center gap-3 mb-4 text-green-600">
+                        <i class="fa-regular fa-circle-check text-2xl"></i>
+                        <h3 class="text-xl font-bold text-slate-800">Configuration Ready!</h3>
+                    </div>
+                    <p class="text-slate-600 mb-4">Your project configuration JSON has been generated.</p>
+                    <pre id="jsonOutput" class="bg-slate-900 text-slate-100 p-4 rounded-lg text-xs font-mono overflow-auto max-h-60 mb-6"></pre>
+                    <div class="flex justify-end">
+                        <button onclick="closeModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 font-medium transition-colors">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // 1. Auto-generate Project ID
+        function updateProjectId() {
+            const name = document.getElementById('projectName').value;
+            // Lowercase, replace non-alphanumeric with dash, remove trailing dashes
+            const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+            document.getElementById('projectId').value = id;
+        }
+
+        // 2. Toggle Sections (Universal function for heights)
+        function toggleSection(elementId, show) {
+            const el = document.getElementById(elementId);
+            if (show) {
+                el.classList.remove('collapsed');
+            } else {
+                el.classList.add('collapsed');
+            }
+        }
+
+        // 3. CORS Domain Management
+        function addDomain() {
+            const container = document.getElementById('domainList');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2';
+            div.innerHTML = `
+                <input type="text" placeholder="https://another-domain.com" class="domain-input flex-1 px-3 py-2 rounded-lg border border-slate-300 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm">
+                <button type="button" onclick="removeDomain(this)" class="p-2 text-slate-400 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(div);
+            updateDeleteButtons();
+        }
+
+        function removeDomain(btn) {
+            const container = document.getElementById('domainList');
+            if (container.children.length > 1) {
+                btn.parentElement.remove();
+            }
+            updateDeleteButtons();
+        }
+
+        function updateDeleteButtons() {
+            const container = document.getElementById('domainList');
+            const buttons = container.querySelectorAll('button');
+            if (buttons.length === 1) {
+                buttons[0].disabled = true;
+                buttons[0].classList.add('opacity-30');
+            } else {
+                buttons.forEach(b => {
+                    b.disabled = false;
+                    b.classList.remove('opacity-30');
+                });
+            }
+        }
+
+        // 4. Generate & Display Logic
+        function generateProject() {
+            // Collect Data
+            const data = {
+                general: {
+                    name: document.getElementById('projectName').value,
+                    id: document.getElementById('projectId').value,
+                    port: document.getElementById('port').value,
+                    keywords: document.getElementById('keywords').value.split(',').map(k => k.trim()).filter(k => k)
+                },
+                stack: {
+                    language: document.querySelector('input[name="language"]:checked').value,
+                    database: document.querySelector('input[name="database"]:checked').value,
+                    format: document.querySelector('input[name="format"]:checked').value
+                },
+                security: {
+                    auth: document.querySelector('input[name="auth"]:checked').value === 'yes',
+                    encryption: document.querySelector('input[name="auth"]:checked').value === 'yes' 
+                        ? (document.querySelector('input[name="encryption"]:checked').value === 'yes') 
+                        : false
+                },
+                advanced: {
+                    fileUpload: {
+                        enabled: document.getElementById('fileUpload').checked,
+                        provider: document.getElementById('fileUpload').checked ? document.querySelector('input[name="storage"]:checked').value : null
+                    },
+                    logging: {
+                        enabled: document.getElementById('enableLogging').checked,
+                        level: document.getElementById('enableLogging').checked ? document.querySelector('input[name="logLevel"]:checked').value : null
+                    },
+                    cors: {
+                        enabled: document.getElementById('enableCors').checked,
+                        domains: document.getElementById('enableCors').checked 
+                            ? Array.from(document.querySelectorAll('.domain-input')).map(i => i.value).filter(v => v) 
+                            : []
+                    },
+                    tracking: document.getElementById('apiTracking').checked
+                }
+            };
+
+            // Display Modal
+            const modal = document.getElementById('resultModal');
+            const content = document.getElementById('resultContent');
+            const output = document.getElementById('jsonOutput');
+            
+            output.textContent = JSON.stringify(data, null, 2);
+            
+            modal.classList.remove('hidden');
+            // Small timeout to allow transition
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+            
+            console.log("Generated Config:", data);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('resultModal');
+            const content = document.getElementById('resultContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Initialize state
+        window.addEventListener('load', () => {
+           updateDeleteButtons();
+        });
+
+    </script>
+</body>
+</html>

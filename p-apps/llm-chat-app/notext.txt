@@ -1,0 +1,31 @@
+Build me a super UI rich web page using only HTML, CSS and javascript.
+
+
+
+Focus on UI look and feel and feature functionality, I wil take care of integration part and use functional approach for implementation so I should be able to integrate this page into React, use some dummy data to demo all functionalities.
+
+
+
+This web page is to chat with LLMs similar to Gemini UI.
+
+
+
+It should have below features:
+
+- See list of chat history in the left side which is collapsable
+
+- See chat window in the main section.
+
+- Able to start a new Chat thread
+
+- Able to choose the chat with option
+
+* Vendor (Google, OpenAI, Anthropic, Blackbox..etc.,)
+
+* LLM Model (Flash, O1, Claude ,..etc.,)
+
+* Agent Name (English teacher, Local Guide, Web developer...etc.,)
+
+- Able to delete the chat from history bulk delete.
+
+- Able to see chats as tabs in the top and able to switch between chats.

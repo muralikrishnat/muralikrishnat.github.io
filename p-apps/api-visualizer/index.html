@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Architecture Blueprint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+            overflow: hidden;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+
+        .node-active {
+            border-color: #22d3ee !important;
+            background-color: #0f172a !important;
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.15);
+            transform: translateX(4px);
+        }
+
+        .dimmed {
+            opacity: 0.25;
+            filter: grayscale(0.5) scale(0.98);
+        }
+
+        .path-active {
+            stroke: #22d3ee;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 5px #22d3ee);
+            stroke-dasharray: 8;
+            animation: dash 3s linear infinite;
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+
+        .detail-panel {
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .detail-panel.open {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="text-slate-300">
+
+    <!-- Header -->
+    <header class="h-16 border-b border-slate-800 bg-[#020617]/80 backdrop-blur-md px-6 flex items-center justify-between relative z-30">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-cyan-500/10 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/></svg>
+            </div>
+            <span class="text-white font-bold tracking-tight text-lg">API<span class="text-cyan-500">ENGINE</span></span>
+        </div>
+        <div class="hidden lg:flex gap-8 text-[10px] uppercase font-bold tracking-widest text-slate-500">
+            <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6]"></div> Endpoint</div>
+            <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div> Security</div>
+            <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1]"></div> Validation</div>
+            <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-pink-500 shadow-[0_0_8px_#ec4899]"></div> Persistence</div>
+        </div>
+    </header>
+
+    <!-- App Container -->
+    <main class="flex h-[calc(100vh-64px)] relative overflow-x-auto overflow-y-hidden custom-scrollbar" id="main-container">
+        
+        <!-- SVG Layer -->
+        <svg id="svg-layer" class="absolute inset-0 w-full h-full pointer-events-none z-0"></svg>
+
+        <!-- Columns -->
+        <!-- Column 1: Endpoints -->
+        <section class="w-80 flex-none border-r border-slate-800/50 bg-slate-950/20 z-10 flex flex-col">
+            <div class="p-4 border-b border-slate-800/50 text-[10px] font-black text-slate-500 uppercase tracking-widest flex justify-between">
+                Endpoints <span>v1.4</span>
+            </div>
+            <div id="endpoint-list" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar"></div>
+        </section>
+
+        <!-- Column 2: Security -->
+        <section class="w-72 flex-none border-r border-slate-800/50 bg-emerald-950/5 z-10 flex flex-col">
+            <div class="p-4 border-b border-emerald-900/20 text-[10px] font-black text-emerald-500 uppercase tracking-widest flex justify-between">
+                Security Layer <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+            </div>
+            <div id="security-list" class="flex-1 flex flex-col justify-center p-6 space-y-6"></div>
+        </section>
+
+        <!-- Column 3: Validation -->
+        <section class="w-72 flex-none border-r border-slate-800/50 bg-indigo-950/5 z-10 flex flex-col">
+            <div class="p-4 border-b border-indigo-900/20 text-[10px] font-black text-indigo-500 uppercase tracking-widest flex justify-between">
+                Validation <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div id="validation-list" class="flex-1 flex flex-col justify-center p-6 space-y-6"></div>
+        </section>
+
+        <!-- Column 4: Persistence -->
+        <section class="w-80 flex-none bg-pink-950/5 z-10 flex flex-col">
+            <div class="p-4 border-b border-pink-900/20 text-[10px] font-black text-pink-500 uppercase tracking-widest flex justify-between">
+                Persistence <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <div id="table-list" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar"></div>
+        </section>
+
+    </main>
+
+    <!-- Detail Panel -->
+    <aside id="detail-panel" class="detail-panel fixed inset-y-0 right-0 w-full sm:w-[450px] bg-[#0f172a]/95 backdrop-blur-xl border-l border-slate-800 shadow-2xl z-50 p-6 overflow-y-auto">
+        <div class="flex justify-between items-start mb-8">
+            <div id="detail-header">
+                <div class="text-[10px] font-mono text-cyan-500 uppercase tracking-widest mb-1">Entity Details</div>
+                <h2 class="text-2xl font-bold text-white tracking-tight" id="detail-title">Title</h2>
+            </div>
+            <button onclick="closeDetails()" class="p-2 hover:bg-slate-800 rounded-full text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <div id="detail-content" class="space-y-6 text-sm"></div>
+    </aside>
+
+    <script>
+        const PROJECT_DATA = {
+            endpoints: [
+                { id: 'ep-1', method: 'GET', path: '/api/v1/users', summary: 'List Users', flow: ['mw-auth-jwt', 'mw-val-user'], connectsTo: ['tbl-users'] },
+                { id: 'ep-2', method: 'POST', path: '/api/v1/users', summary: 'Register User', flow: ['mw-auth-public', 'mw-val-user'], connectsTo: ['tbl-users', 'tbl-logs'] },
+                { id: 'ep-3', method: 'POST', path: '/api/v1/orders', summary: 'Create Order', flow: ['mw-auth-jwt', 'mw-val-order'], connectsTo: ['tbl-orders', 'tbl-products', 'tbl-users'] },
+                { id: 'ep-4', method: 'GET', path: '/api/v1/products/:id', summary: 'Get Product', flow: ['mw-auth-key', 'mw-val-id'], connectsTo: ['tbl-products'] },
+                { id: 'ep-5', method: 'DELETE', path: '/api/v1/orders/:id', summary: 'Cancel Order', flow: ['mw-auth-jwt', 'mw-val-id'], connectsTo: ['tbl-orders', 'tbl-logs'] }
+            ],
+            middleware: [
+                { id: 'mw-auth-jwt', type: 'security', name: 'JWT Guard', icon: 'lock' },
+                { id: 'mw-auth-key', type: 'security', name: 'API Key Check', icon: 'key' },
+                { id: 'mw-auth-public', type: 'security', name: 'Public Gateway', icon: 'unlock' },
+                { id: 'mw-val-user', type: 'validation', name: 'User Schema', icon: 'check' },
+                { id: 'mw-val-order', type: 'validation', name: 'Order Sanitizer', icon: 'filter' },
+                { id: 'mw-val-id', type: 'validation', name: 'UUID Pipe', icon: 'scan' }
+            ],
+            tables: [
+                { id: 'tbl-users', name: 'users', fields: ['id: uuid', 'email: varchar'] },
+                { id: 'tbl-products', name: 'products', fields: ['id: uuid', 'stock: int'] },
+                { id: 'tbl-orders', name: 'orders', fields: ['id: uuid', 'total: decimal'] },
+                { id: 'tbl-logs', name: 'audit_logs', fields: ['_id: oid', 'action: string'] }
+            ]
+        };
+
+        const ICONS = {
+            lock: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/>`,
+            key: `<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>`,
+            unlock: `<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>`,
+            check: `<polyline points="20 6 9 17 4 12"/>`,
+            filter: `<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>`,
+            scan: `<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>`
+        };
+
+        const svgLayer = document.getElementById('svg-layer');
+        const mainContainer = document.getElementById('main-container');
+
+        function createNode(id, content, classes) {
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = classes;
+            div.innerHTML = content;
+            return div;
+        }
+
+        // --- Render Endpoints ---
+        PROJECT_DATA.endpoints.forEach(ep => {
+            const colorClass = ep.method === 'GET' ? 'blue' : ep.method === 'POST' ? 'emerald' : 'rose';
+            const html = `
+                <div class="flex justify-between items-start mb-2">
+                    <span class="px-1.5 py-0.5 text-[9px] font-bold rounded border uppercase tracking-wider bg-${colorClass}-500/20 text-${colorClass}-400 border-${colorClass}-500/30">${ep.method}</span>
+                </div>
+                <div class="font-mono text-xs text-white font-semibold truncate mb-1">${ep.path}</div>
+                <div class="text-[10px] text-slate-500 line-clamp-1">${ep.summary}</div>
+                <div class="absolute top-1/2 -right-[5px] w-2.5 h-2.5 bg-slate-800 border border-slate-600 rounded-full"></div>
+            `;
+            const node = createNode(ep.id, html, `group p-4 rounded-xl border border-slate-800 bg-slate-900/40 transition-all duration-300 cursor-pointer relative hover:border-slate-600`);
+            node.onmouseenter = () => highlightFlow(ep.id);
+            node.onmouseleave = resetHighlight;
+            node.onclick = () => showDetails(ep);
+            document.getElementById('endpoint-list').appendChild(node);
+        });
+
+        // --- Render Middleware ---
+        PROJECT_DATA.middleware.forEach(mw => {
+            const html = `
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-slate-800 text-slate-400 group-node">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[mw.icon]}</svg>
+                    </div>
+                    <div class="text-xs font-bold text-slate-200">${mw.name}</div>
+                </div>
+                <div class="absolute top-1/2 -left-[5px] w-2 h-2 bg-slate-800 border border-slate-600 rounded-full"></div>
+                <div class="absolute top-1/2 -right-[5px] w-2 h-2 bg-slate-800 border border-slate-600 rounded-full"></div>
+            `;
+            const node = createNode(mw.id, html, `p-4 rounded-xl border border-slate-800/60 bg-slate-900/40 cursor-pointer relative transition-all duration-300 hover:border-slate-500`);
+            node.onclick = () => showDetails(mw);
+            document.getElementById(`${mw.type}-list`).appendChild(node);
+        });
+
+        // --- Render Persistence ---
+        PROJECT_DATA.tables.forEach(tbl => {
+            const html = `
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-1.5 bg-pink-500/10 rounded">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-pink-500"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                    </div>
+                    <span class="font-bold text-sm text-white">${tbl.name}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 border-t border-slate-800/50 pt-3">
+                    ${tbl.fields.map(f => `<div class="text-[9px] font-mono text-slate-500 truncate">${f}</div>`).join('')}
+                </div>
+                <div class="absolute top-1/2 -left-[5px] w-2.5 h-2.5 bg-slate-800 border border-slate-600 rounded-full"></div>
+            `;
+            const node = createNode(tbl.id, html, `p-4 rounded-xl border border-slate-800 bg-slate-900/40 transition-all duration-300 cursor-pointer relative hover:border-slate-600`);
+            node.onclick = () => showDetails(tbl);
+            document.getElementById('table-list').appendChild(node);
+        });
+
+        // --- Paths Calculation ---
+        function drawPaths() {
+            svgLayer.innerHTML = '';
+            const containerRect = mainContainer.getBoundingClientRect();
+
+            PROJECT_DATA.endpoints.forEach(ep => {
+                const epEl = document.getElementById(ep.id);
+                const epRect = epEl.getBoundingClientRect();
+                let startX = epRect.right - containerRect.left;
+                let startY = (epRect.top + epRect.height / 2) - containerRect.top;
+
+                let prevId = ep.id;
+
+                ep.flow.forEach(mwId => {
+                    const mwEl = document.getElementById(mwId);
+                    const mwRect = mwEl.getBoundingClientRect();
+                    const endX = mwRect.left - containerRect.left;
+                    const endY = (mwRect.top + mwRect.height / 2) - containerRect.top;
+
+                    createPath(startX, startY, endX, endY, ep.id);
+                    
+                    startX = mwRect.right - containerRect.left;
+                    startY = endY;
+                });
+
+                ep.connectsTo.forEach(tblId => {
+                    const tblEl = document.getElementById(tblId);
+                    const tblRect = tblEl.getBoundingClientRect();
+                    const endX = tblRect.left - containerRect.left;
+                    const endY = (tblRect.top + tblRect.height / 2) - containerRect.top;
+
+                    createPath(startX, startY, endX, endY, ep.id);
+                });
+            });
+        }
+
+        function createPath(x1, y1, x2, y2, epId) {
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            const controlPoint = (x2 - x1) / 2;
+            const d = `M ${x1} ${y1} C ${x1 + controlPoint} ${y1}, ${x1 + controlPoint} ${y2}, ${x2} ${y2}`;
+            path.setAttribute("d", d);
+            path.setAttribute("stroke", "#1e293b");
+            path.setAttribute("stroke-width", "1.5");
+            path.setAttribute("fill", "none");
+            path.setAttribute("data-ep", epId);
+            svgLayer.appendChild(path);
+        }
+
+        function highlightFlow(epId) {
+            document.querySelectorAll('[id^="ep-"], [id^="mw-"], [id^="tbl-"]').forEach(el => el.classList.add('dimmed'));
+            
+            const ep = PROJECT_DATA.endpoints.find(e => e.id === epId);
+            const activeIds = [epId, ...ep.flow, ...ep.connectsTo];
+            
+            activeIds.forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove('dimmed');
+                el.classList.add('node-active');
+            });
+
+            document.querySelectorAll('path').forEach(p => {
+                if (p.getAttribute('data-ep') === epId) {
+                    p.classList.add('path-active');
+                } else {
+                    p.style.opacity = '0.1';
+                }
+            });
+        }
+
+        function resetHighlight() {
+            document.querySelectorAll('[id^="ep-"], [id^="mw-"], [id^="tbl-"]').forEach(el => {
+                el.classList.remove('dimmed', 'node-active');
+            });
+            document.querySelectorAll('path').forEach(p => {
+                p.classList.remove('path-active');
+                p.style.opacity = '1';
+            });
+        }
+
+        // --- Detail Panel Logic ---
+        function showDetails(data) {
+            const panel = document.getElementById('detail-panel');
+            const content = document.getElementById('detail-content');
+            document.getElementById('detail-title').innerText = data.path || data.name;
+            
+            let html = `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                <p class="text-slate-400">Comprehensive configuration for ${data.id}.</p>
+            </div>`;
+
+            if (data.method) {
+                html += `<div class="p-4 bg-slate-900 rounded-xl border border-slate-800">
+                    <div class="text-[10px] text-slate-500 font-bold mb-2 uppercase">Request Logic</div>
+                    <pre class="text-xs text-blue-300 font-mono">Flow: ${data.flow.join(' -> ')}</pre>
+                </div>`;
+            }
+
+            if (data.fields) {
+                html += `<div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-slate-500 uppercase">Column Schema</h3>
+                    ${data.fields.map(f => `<div class="p-3 bg-slate-900 rounded-lg border border-slate-800 text-xs font-mono text-pink-400">${f}</div>`).join('')}
+                </div>`;
+            }
+
+            content.innerHTML = html;
+            panel.classList.add('open');
+        }
+
+        function closeDetails() {
+            document.getElementById('detail-panel').classList.remove('open');
+        }
+
+        window.addEventListener('resize', drawPaths);
+        window.onload = () => {
+            drawPaths();
+            // Initial call after elements settle
+            setTimeout(drawPaths, 500);
+        };
+    </script>
+</body>
+</html>

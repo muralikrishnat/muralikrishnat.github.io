@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Flag Management Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+    <!-- App Container -->
+    <div id="app" class="max-w-7xl mx-auto p-4 md:p-8">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <i data-lucide="flag" class="text-blue-600"></i>
+                    Feature Navigator
+                </h1>
+                <p class="text-slate-500 text-sm">Manage feature toggles and monitor usage across environments.</p>
+            </div>
+            
+            <!-- Environment Switcher -->
+            <div class="flex items-center bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                <button onclick="setEnvironment('development')" id="env-development" class="env-btn px-4 py-2 rounded-lg text-sm font-medium transition-all">Development</button>
+                <button onclick="setEnvironment('staging')" id="env-staging" class="env-btn px-4 py-2 rounded-lg text-sm font-medium transition-all">Staging</button>
+                <button onclick="setEnvironment('production')" id="env-production" class="env-btn px-4 py-2 rounded-lg text-sm font-medium transition-all">Production</button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Flag List -->
+            <div class="lg:col-span-2 space-y-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-lg font-semibold flex items-center gap-2">
+                        Active Flags 
+                        <span id="flag-count" class="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full">0</span>
+                    </h2>
+                    <div class="relative">
+                        <input type="text" id="search-flags" placeholder="Search flags..." class="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-64">
+                        <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
+                    </div>
+                </div>
+
+                <div id="flag-list" class="space-y-4">
+                    <!-- Flags injected here -->
+                </div>
+            </div>
+
+            <!-- Right Column: Details & Analytics -->
+            <div class="space-y-6">
+                <!-- Analytics Card -->
+                <div id="details-panel" class="hidden sticky top-8">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="p-6 border-b border-slate-100">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 id="detail-name" class="text-xl font-bold text-slate-800">Flag Details</h3>
+                                <button onclick="closeDetails()" class="text-slate-400 hover:text-slate-600">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <p id="detail-desc" class="text-slate-500 text-sm mb-4 italic">Select a flag to view analytics.</p>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-slate-50 p-3 rounded-lg">
+                                    <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Created</span>
+                                    <span id="detail-created" class="text-sm font-medium text-slate-700">--</span>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-lg">
+                                    <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Total Hits</span>
+                                    <span id="detail-hits" class="text-sm font-medium text-slate-700">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Usage Analytics -->
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h4 class="text-sm font-bold text-slate-800">Usage Analytics</h4>
+                                <select id="time-range" onchange="updateAnalytics()" class="text-xs bg-slate-100 border-none rounded px-2 py-1 outline-none">
+                                    <option value="24h">Last 24 Hours</option>
+                                    <option value="7d">Last 7 Days</option>
+                                    <option value="30d">Last 30 Days</option>
+                                </select>
+                            </div>
+
+                            <!-- Mock Chart Visualization -->
+                            <div id="analytics-bars" class="h-32 flex items-end gap-1 mb-4 px-2">
+                                <!-- Bars injected here -->
+                            </div>
+                            
+                            <div class="flex justify-between text-[10px] text-slate-400 font-medium px-1">
+                                <span>Past</span>
+                                <span>Now</span>
+                            </div>
+
+                            <div class="mt-6 pt-6 border-t border-slate-100">
+                                <h4 class="text-sm font-bold text-slate-800 mb-4">Recent Audit Log</h4>
+                                <div id="audit-log" class="space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                                    <!-- Logs injected here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Placeholder when no flag selected -->
+                <div id="no-selection" class="bg-slate-100 border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center">
+                    <div class="bg-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                        <i data-lucide="mouse-pointer-2" class="text-slate-400 w-6 h-6"></i>
+                    </div>
+                    <p class="text-slate-500 text-sm font-medium">Select a feature flag to view performance data and history.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Confirmation Modal -->
+    <div id="update-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 transform scale-95 transition-transform duration-200">
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Confirm State Change</h3>
+            <p id="modal-text" class="text-slate-500 text-sm mb-6">You are about to update the status for this feature.</p>
+            
+            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Change Comment (Required)</label>
+            <textarea id="change-comment" placeholder="Explain why this change is being made..." class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-24 mb-6"></textarea>
+            
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50">Cancel</button>
+                <button id="confirm-update-btn" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Apply Change</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA MODEL ---
+        const MOCK_DATA = {
+            environments: ['development', 'staging', 'production'],
+            flags: [
+                { 
+                    id: 'ff-001', 
+                    name: 'Beta User Dashboard', 
+                    key: 'new-dashboard-v2',
+                    description: 'Enables the React-based dashboard for early adopters.',
+                    created: '2023-11-12',
+                    states: { development: true, staging: true, production: false },
+                    logs: [
+                        { env: 'production', user: 'admin@company.com', comment: 'Initial setup', timestamp: '2023-11-12T10:00:00Z', type: 'create' }
+                    ]
+                },
+                { 
+                    id: 'ff-002', 
+                    name: 'AI Image Generator', 
+                    key: 'ai-gen-enabled',
+                    description: 'Integrates the DALL-E 3 API for profile picture generation.',
+                    created: '2024-01-05',
+                    states: { development: true, staging: false, production: false },
+                    logs: []
+                },
+                { 
+                    id: 'ff-003', 
+                    name: 'Dark Mode Toggle', 
+                    key: 'theme-dark-v1',
+                    description: 'Global support for system-wide dark mode styling.',
+                    created: '2023-08-20',
+                    states: { development: true, staging: true, production: true },
+                    logs: []
+                },
+                { 
+                    id: 'ff-004', 
+                    name: 'Multi-factor Auth', 
+                    key: 'mfa-mandatory',
+                    description: 'Force all users to use TOTP during login flow.',
+                    created: '2023-12-01',
+                    states: { development: true, staging: true, production: false },
+                    logs: []
+                }
+            ]
+        };
+
+        // --- STATE ---
+        let currentEnv = 'development';
+        let selectedFlagId = null;
+        let pendingUpdate = null;
+        let searchQuery = '';
+
+        // --- CORE FUNCTIONS ---
+        function safeCreateIcons() {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
+        }
+
+        function init() {
+            safeCreateIcons();
+            setEnvironment('development');
+            renderFlagList();
+            
+            // Search listener
+            document.getElementById('search-flags').addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                renderFlagList();
+            });
+        }
+
+        function setEnvironment(env) {
+            currentEnv = env;
+            document.querySelectorAll('.env-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+            const activeBtn = document.getElementById(`env-${env}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+            }
+            
+            renderFlagList();
+            if (selectedFlagId) updateAnalytics();
+        }
+
+        function renderFlagList() {
+            const list = document.getElementById('flag-list');
+            const filtered = MOCK_DATA.flags.filter(f => 
+                f.name.toLowerCase().includes(searchQuery) || 
+                f.key.toLowerCase().includes(searchQuery)
+            );
+            
+            document.getElementById('flag-count').textContent = filtered.length;
+            
+            list.innerHTML = filtered.map(flag => {
+                const isActive = flag.states[currentEnv];
+                const isSelected = flag.id === selectedFlagId;
+                
+                return `
+                    <div onclick="selectFlag('${flag.id}')" class="group transition-all cursor-pointer bg-white border ${isSelected ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-200 hover:border-slate-300'} p-5 rounded-2xl shadow-sm flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl ${isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'} flex items-center justify-center transition-colors">
+                                <i data-lucide="${isActive ? 'zap' : 'zap-off'}" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800">${flag.name}</h3>
+                                <code class="text-[11px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">${flag.key}</code>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-6" onclick="event.stopPropagation()">
+                            <div class="text-right hidden sm:block">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 block">Status</span>
+                                <span class="text-xs font-semibold ${isActive ? 'text-emerald-600' : 'text-slate-400'}">
+                                    ${isActive ? 'Active' : 'Disabled'}
+                                </span>
+                            </div>
+                            
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" ${isActive ? 'checked' : ''} 
+                                    onchange="requestUpdate('${flag.id}', this.checked)">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            safeCreateIcons();
+        }
+
+        function selectFlag(id) {
+            selectedFlagId = id;
+            const flag = MOCK_DATA.flags.find(f => f.id === id);
+            
+            document.getElementById('no-selection').classList.add('hidden');
+            document.getElementById('details-panel').classList.remove('hidden');
+            
+            document.getElementById('detail-name').textContent = flag.name;
+            document.getElementById('detail-desc').textContent = flag.description;
+            document.getElementById('detail-created').textContent = new Date(flag.created).toLocaleDateString();
+            
+            renderFlagList(); // Re-render to show active ring
+            updateAnalytics();
+        }
+
+        function closeDetails() {
+            selectedFlagId = null;
+            document.getElementById('no-selection').classList.remove('hidden');
+            document.getElementById('details-panel').classList.add('hidden');
+            renderFlagList();
+        }
+
+        // --- ANALYTICS LOGIC ---
+        function updateAnalytics() {
+            if (!selectedFlagId) return;
+            
+            const range = document.getElementById('time-range').value;
+            const flag = MOCK_DATA.flags.find(f => f.id === selectedFlagId);
+            
+            // Mock total hits based on age and environment
+            const envMultiplier = currentEnv === 'production' ? 1000 : (currentEnv === 'staging' ? 100 : 10);
+            const totalHits = Math.floor(Math.random() * envMultiplier) + 50;
+            document.getElementById('detail-hits').textContent = totalHits.toLocaleString();
+
+            // Generate mock bar chart
+            const barsContainer = document.getElementById('analytics-bars');
+            const barCount = range === '24h' ? 24 : (range === '7d' ? 7 : 15);
+            
+            let barsHtml = '';
+            for(let i=0; i < barCount; i++) {
+                const height = Math.floor(Math.random() * 80) + 10;
+                barsHtml += `
+                    <div class="flex-1 bg-blue-100 hover:bg-blue-500 transition-colors rounded-t-sm relative group" style="height: ${height}%">
+                        <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap">
+                            ${Math.floor(height * (totalHits/100))} hits
+                        </div>
+                    </div>
+                `;
+            }
+            barsContainer.innerHTML = barsHtml;
+
+            // Render Audit Logs
+            const logContainer = document.getElementById('audit-log');
+            const envLogs = flag.logs.filter(l => l.env === currentEnv);
+            
+            if (envLogs.length === 0) {
+                logContainer.innerHTML = `<p class="text-xs text-slate-400 italic">No activity recorded for this environment.</p>`;
+            } else {
+                logContainer.innerHTML = envLogs.slice().reverse().map(log => `
+                    <div class="flex gap-3 items-start">
+                        <div class="mt-1 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
+                        <div>
+                            <p class="text-[11px] leading-tight text-slate-700">
+                                <span class="font-bold">${log.user}</span> updated flag status.
+                            </p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 italic">"${log.comment}"</p>
+                            <span class="text-[10px] text-slate-300 font-medium">${formatDate(log.timestamp)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // --- MODAL & UPDATES ---
+        function requestUpdate(flagId, newState) {
+            const flag = MOCK_DATA.flags.find(f => f.id === flagId);
+            pendingUpdate = { flagId, newState, env: currentEnv };
+            
+            const modal = document.getElementById('update-modal');
+            const modalContent = modal.querySelector('div');
+            
+            document.getElementById('modal-text').innerHTML = `Switching <b>${flag.name}</b> to <span class="${newState ? 'text-emerald-600' : 'text-rose-600'} font-bold">${newState ? 'ON' : 'OFF'}</span> in <b>${currentEnv}</b>.`;
+            document.getElementById('change-comment').value = '';
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('update-modal');
+            const modalContent = modal.querySelector('div');
+            
+            modal.classList.remove('opacity-100');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                pendingUpdate = null;
+                renderFlagList(); // Reset toggle if cancelled
+            }, 200);
+        }
+
+        document.getElementById('confirm-update-btn').addEventListener('click', () => {
+            const comment = document.getElementById('change-comment').value.trim();
+            if (!comment) {
+                document.getElementById('change-comment').classList.add('border-rose-400', 'ring-1', 'ring-rose-100');
+                return;
+            }
+
+            const flag = MOCK_DATA.flags.find(f => f.id === pendingUpdate.flagId);
+            flag.states[pendingUpdate.env] = pendingUpdate.newState;
+            
+            // Add to logs
+            flag.logs.push({
+                env: pendingUpdate.env,
+                user: 'current.user@company.com',
+                comment: comment,
+                timestamp: new Date().toISOString(),
+                type: 'update'
+            });
+
+            closeModal();
+            renderFlagList();
+            if (selectedFlagId === flag.id) updateAnalytics();
+        });
+
+        // Utils
+        function formatDate(iso) {
+            const date = new Date(iso);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        // Use DOMContentLoaded to ensure Lucide script is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+        });
+    </script>
+</body>
+</html>

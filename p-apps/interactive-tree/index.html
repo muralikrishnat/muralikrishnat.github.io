@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree Structure Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom utilities for smoother drag interactions */
+        .node-row {
+            transition: all 0.2s ease;
+        }
+        .drag-top {
+            border-top: 2px solid #6366f1; /* indigo-500 */
+        }
+        .drag-bottom {
+            border-bottom: 2px solid #6366f1; /* indigo-500 */
+        }
+        .drag-inside {
+            background-color: #eef2ff; /* indigo-50 */
+            box-shadow: inset 0 0 0 2px #6366f1;
+        }
+        /* Hide scrollbar for cleaner look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800 flex justify-center">
+
+    <div id="app" class="w-full max-w-4xl p-6 sm:p-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                    <div class="p-2 bg-indigo-600 rounded-lg text-white shadow-lg shadow-indigo-200">
+                        <!-- FolderTree Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0-5.523-4.477-10-10-10S0 4.477 0 10v10a4 4 0 0 0 4 4h10"></path><path d="M4 10a6 6 0 0 1 12 0v10"></path><path d="M8 22v-8"></path><path d="M4 22v-6"></path><path d="M12 22v-6"></path><path d="M20 22V10"></path></svg>
+                    </div>
+                    Structure Editor
+                </h1>
+                <p class="text-slate-500 mt-2 text-sm max-w-lg">
+                    Organize your hierarchy. Drag and drop items to reorder or nest them. 
+                    Double-click text to edit labels.
+                </p>
+            </div>
+            <button onclick="handleAddNode(null)" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full font-medium shadow-md shadow-indigo-200 transition-transform active:scale-95">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                New Root Node
+            </button>
+        </div>
+
+        <!-- Tree Container -->
+        <div class="bg-white rounded-xl shadow-xl shadow-slate-200/60 overflow-hidden border border-slate-100">
+            <!-- Legend -->
+            <div class="bg-slate-50/50 border-b border-slate-100 px-6 py-3 text-xs text-slate-400 flex items-center justify-between">
+                <div class="flex gap-4">
+                    <span class="flex items-center gap-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
+                        Drag to move
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        Double-click to rename
+                    </span>
+                </div>
+                <div id="node-count" class="hidden sm:block">0 Nodes Total</div>
+            </div>
+
+            <!-- Tree Area -->
+            <div id="tree-root" class="p-6 min-h-[400px]">
+                <!-- Content injected here -->
+            </div>
+        </div>
+
+        <div class="text-center mt-8 text-slate-400 text-xs">
+            Built with Vanilla JS & Tailwind CSS
+        </div>
+    </div>
+
+    <script>
+        // --- Icons (SVGs) ---
+        const ICONS = {
+            chevronRight: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
+            chevronDown: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`,
+            grip: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>`,
+            edit: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>`,
+            plus: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+            trash: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+            arrowUp: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>`,
+            arrowDown: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>`,
+            indent: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 8 7 12 3 16"></polyline><line x1="21" y1="12" x2="7" y2="12"></line><line x1="21" y1="6" x2="11" y2="6"></line><line x1="21" y1="18" x2="11" y2="18"></line></svg>`,
+            outdent: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 3 12 7 16"></polyline><line x1="21" y1="12" x2="3" y2="12"></line><line x1="21" y1="6" x2="11" y2="6"></line><line x1="21" y1="18" x2="11" y2="18"></line></svg>`,
+            check: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+            x: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+            empty: `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-4 opacity-20"><polyline points="9 10 4 15 9 20"></polyline><path d="M20 4v7a4 4 0 0 1-4 4H4"></path></svg>`
+        };
+
+        // --- Data & State ---
+
+        const generateId = () => Math.random().toString(36).substr(2, 9);
+        
+        let data = [
+            {
+                id: '1',
+                label: 'Marketing Campaign',
+                isExpanded: true,
+                children: [
+                    { id: '1-1', label: 'Q1 Strategy', children: [], isExpanded: false },
+                    { 
+                        id: '1-2', 
+                        label: 'Social Media', 
+                        isExpanded: true, 
+                        children: [
+                            { id: '1-2-1', label: 'Instagram Assets', children: [], isExpanded: false },
+                            { id: '1-2-2', label: 'Twitter Thread', children: [], isExpanded: false }
+                        ] 
+                    },
+                ]
+            },
+            {
+                id: '2',
+                label: 'Product Development',
+                isExpanded: true,
+                children: [
+                    { id: '2-1', label: 'MVP Features', children: [], isExpanded: false },
+                    { id: '2-2', label: 'User Research', children: [], isExpanded: false }
+                ]
+            }
+        ];
+
+        // Drag State
+        let draggedNodeId = null;
+        let dragTargetId = null;
+        let dropPosition = null; // 'top', 'bottom', 'inside'
+
+        // --- Utility ---
+
+        function findNodeAndParent(nodes, id, parent = null) {
+            for (let node of nodes) {
+                if (node.id === id) return { node, parent };
+                if (node.children) {
+                    const found = findNodeAndParent(node.children, id, node);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function countNodes(nodes) {
+            let count = 0;
+            for(let node of nodes) {
+                count += 1;
+                if(node.children) count += countNodes(node.children);
+            }
+            return count;
+        }
+
+        // --- Core Rendering ---
+
+        function render() {
+            const container = document.getElementById('tree-root');
+            const countEl = document.getElementById('node-count');
+            
+            // Update Stats
+            countEl.textContent = `${countNodes(data)} Nodes Total`;
+
+            container.innerHTML = ''; // Clear current tree
+
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-64 text-slate-400 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50/50">
+                        ${ICONS.empty}
+                        <p>Tree is empty</p>
+                        <button onclick="handleAddNode(null)" class="mt-4 text-indigo-600 font-medium hover:underline">
+                            Create first node
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Recursive Build
+            function buildTree(nodes, depth) {
+                const wrapper = document.createElement('div');
+                
+                nodes.forEach(node => {
+                    const nodeEl = document.createElement('div');
+                    
+                    // Render Row
+                    const row = document.createElement('div');
+                    row.className = `node-row group relative flex items-center py-2 px-2 my-0.5 rounded-lg hover:bg-white hover:shadow-sm transition-colors duration-200`;
+                    row.style.marginLeft = `${depth * 24}px`;
+                    
+                    // Drag Attributes
+                    row.setAttribute('draggable', 'true');
+                    row.dataset.id = node.id;
+                    
+                    // Event Listeners for Drag (Native JS)
+                    row.addEventListener('dragstart', (e) => handleDragStart(e, node.id));
+                    row.addEventListener('dragover', (e) => handleDragOver(e, node.id));
+                    row.addEventListener('dragleave', (e) => handleDragLeave(e));
+                    row.addEventListener('drop', (e) => handleDrop(e, node.id));
+                    row.addEventListener('dragend', handleDragEnd);
+
+                    // 1. Connecting Line (if depth > 0)
+                    if (depth > 0) {
+                        const line = document.createElement('div');
+                        line.className = 'absolute left-[-13px] top-1/2 w-3 h-px bg-slate-300 -translate-y-1/2 pointer-events-none';
+                        row.appendChild(line);
+                    }
+
+                    // 2. Drag Handle
+                    const handle = document.createElement('div');
+                    handle.className = 'mr-1 cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 p-1';
+                    handle.innerHTML = ICONS.grip;
+                    row.appendChild(handle);
+
+                    // 3. Chevron / Toggle
+                    const toggle = document.createElement('div');
+                    toggle.className = 'mr-1 w-6 h-6 flex items-center justify-center cursor-pointer hover:bg-slate-100 rounded-md transition-colors text-slate-500';
+                    toggle.onclick = (e) => { e.stopPropagation(); handleToggle(node.id); };
+                    
+                    if (node.children && node.children.length > 0) {
+                        toggle.innerHTML = node.isExpanded ? ICONS.chevronDown : ICONS.chevronRight;
+                    } else {
+                        toggle.innerHTML = '<div class="w-4"></div>';
+                        toggle.classList.remove('hover:bg-slate-100', 'cursor-pointer');
+                    }
+                    row.appendChild(toggle);
+
+                    // 4. Content (Label)
+                    const content = document.createElement('div');
+                    content.className = 'flex-1 flex items-center min-w-0';
+                    content.id = `content-${node.id}`;
+                    
+                    const span = document.createElement('span');
+                    span.className = 'text-sm font-medium text-slate-700 cursor-text flex-1 truncate select-none';
+                    span.textContent = node.label;
+                    span.ondblclick = (e) => { e.stopPropagation(); startEditing(node.id); };
+                    
+                    const countBadge = document.createElement('span');
+                    countBadge.className = 'ml-2 text-xs text-slate-400 font-normal opacity-0 group-hover:opacity-100 transition-opacity';
+                    countBadge.textContent = node.children ? `${node.children.length} items` : '0 items';
+
+                    span.appendChild(countBadge);
+                    content.appendChild(span);
+                    row.appendChild(content);
+
+                    // 5. Actions Toolbar
+                    const actions = document.createElement('div');
+                    actions.className = 'flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200';
+                    actions.innerHTML = `
+                        <div class="h-4 w-px bg-slate-200 mx-1"></div>
+                        <button onclick="handleMoveUp('${node.id}')" class="p-1.5 rounded-md hover:bg-indigo-50 text-slate-500 hover:text-indigo-600" title="Move Up">${ICONS.arrowUp}</button>
+                        <button onclick="handleMoveDown('${node.id}')" class="p-1.5 rounded-md hover:bg-indigo-50 text-slate-500 hover:text-indigo-600" title="Move Down">${ICONS.arrowDown}</button>
+                        <button onclick="handleOutdent('${node.id}')" class="p-1.5 rounded-md hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 disabled:opacity-30 disabled:cursor-not-allowed" title="Outdent" ${depth === 0 ? 'disabled' : ''}>${ICONS.outdent}</button>
+                        <button onclick="handleIndent('${node.id}')" class="p-1.5 rounded-md hover:bg-indigo-50 text-slate-500 hover:text-indigo-600" title="Indent">${ICONS.indent}</button>
+                        <div class="h-4 w-px bg-slate-200 mx-1"></div>
+                        <button onclick="startEditing('${node.id}')" class="p-1.5 rounded-md hover:bg-indigo-50 text-slate-500 hover:text-indigo-600" title="Rename">${ICONS.edit}</button>
+                        <button onclick="handleAddNode('${node.id}')" class="p-1.5 rounded-md hover:bg-indigo-50 text-slate-500 hover:text-indigo-600" title="Add Child">${ICONS.plus}</button>
+                        <button onclick="handleDelete('${node.id}')" class="p-1.5 rounded-md hover:bg-red-50 text-slate-500 hover:text-red-600" title="Delete">${ICONS.trash}</button>
+                    `;
+                    // Prevent propagation on buttons
+                    Array.from(actions.querySelectorAll('button')).forEach(btn => {
+                        btn.addEventListener('click', (e) => e.stopPropagation());
+                    });
+                    
+                    row.appendChild(actions);
+                    nodeEl.appendChild(row);
+
+                    // 6. Children Container
+                    if (node.isExpanded && node.children && node.children.length > 0) {
+                        const childrenContainer = document.createElement('div');
+                        childrenContainer.className = 'relative';
+                        
+                        // Vertical Guide Line
+                        const guideLine = document.createElement('div');
+                        guideLine.className = 'absolute bg-slate-200 w-px bottom-3 top-0 pointer-events-none';
+                        guideLine.style.left = `${(depth * 24) + 27}px`;
+                        childrenContainer.appendChild(guideLine);
+
+                        const childrenNodes = buildTree(node.children, depth + 1);
+                        childrenContainer.appendChild(childrenNodes);
+                        nodeEl.appendChild(childrenContainer);
+                    }
+
+                    wrapper.appendChild(nodeEl);
+                });
+                return wrapper;
+            }
+
+            container.appendChild(buildTree(data, 0));
+        }
+
+        // --- Logic: Editing ---
+
+        function startEditing(id) {
+            const { node } = findNodeAndParent(data, id);
+            if(!node) return;
+
+            const contentEl = document.getElementById(`content-${id}`);
+            if(!contentEl) return;
+
+            // Swap content with Input
+            contentEl.innerHTML = `
+                <div class="flex items-center w-full gap-2" onclick="event.stopPropagation()">
+                    <input id="edit-input-${id}" type="text" value="${node.label}" class="flex-1 px-2 py-1 text-sm border border-indigo-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    <button onclick="saveEdit('${id}')" class="p-1.5 text-green-600 hover:bg-green-50 rounded-md">${ICONS.check}</button>
+                    <button onclick="render()" class="p-1.5 text-red-600 hover:bg-red-50 rounded-md">${ICONS.x}</button>
+                </div>
+            `;
+            
+            // Hide parent actions toolbar while editing
+            contentEl.parentElement.querySelector('.group-hover\\:opacity-100')?.classList.add('hidden');
+            
+            // Focus and attach key listeners
+            const input = document.getElementById(`edit-input-${id}`);
+            input.focus();
+            input.select();
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') saveEdit(id);
+                if (e.key === 'Escape') render();
+            });
+            // Click outside to save? Usually in trees, blur saves.
+            input.addEventListener('blur', () => {
+                // Short timeout to allow button clicks to register first
+                setTimeout(() => saveEdit(id), 150);
+            });
+        }
+
+        function saveEdit(id) {
+            const input = document.getElementById(`edit-input-${id}`);
+            if(!input) return; // Already saved/unmounted
+            const newVal = input.value.trim();
+            if (newVal) {
+                const { node } = findNodeAndParent(data, id);
+                if(node) node.label = newVal;
+            }
+            render();
+        }
+
+        // --- Logic: Structure Modifications ---
+
+        function handleToggle(id) {
+            const { node } = findNodeAndParent(data, id);
+            if (node) {
+                node.isExpanded = !node.isExpanded;
+                render();
+            }
+        }
+
+        function handleAddNode(parentId) {
+            const newNode = {
+                id: generateId(),
+                label: 'New Item',
+                children: [],
+                isExpanded: true
+            };
+
+            if (parentId === null) {
+                data.push(newNode);
+            } else {
+                const { node } = findNodeAndParent(data, parentId);
+                if (node) {
+                    node.children.push(newNode);
+                    node.isExpanded = true;
+                }
+            }
+            render();
+        }
+
+        function handleDelete(id) {
+            const { node, parent } = findNodeAndParent(data, id);
+            if (parent) {
+                parent.children = parent.children.filter(c => c.id !== id);
+            } else {
+                data = data.filter(c => c.id !== id);
+            }
+            render();
+        }
+
+        function handleMoveUp(id) {
+            const { parent } = findNodeAndParent(data, id);
+            const list = parent ? parent.children : data;
+            const idx = list.findIndex(n => n.id === id);
+            if (idx > 0) {
+                const [item] = list.splice(idx, 1);
+                list.splice(idx - 1, 0, item);
+                render();
+            }
+        }
+
+        function handleMoveDown(id) {
+            const { parent } = findNodeAndParent(data, id);
+            const list = parent ? parent.children : data;
+            const idx = list.findIndex(n => n.id === id);
+            if (idx < list.length - 1) {
+                const [item] = list.splice(idx, 1);
+                list.splice(idx + 1, 0, item);
+                render();
+            }
+        }
+
+        function handleIndent(id) {
+            const { parent } = findNodeAndParent(data, id);
+            const list = parent ? parent.children : data;
+            const idx = list.findIndex(n => n.id === id);
+            if (idx > 0) {
+                const newParent = list[idx - 1];
+                const [item] = list.splice(idx, 1);
+                newParent.children.push(item);
+                newParent.isExpanded = true;
+                render();
+            }
+        }
+
+        function handleOutdent(id) {
+            const { node, parent } = findNodeAndParent(data, id);
+            if (parent) {
+                const gp = findNodeAndParent(data, parent.id);
+                const targetList = gp.parent ? gp.parent.children : data;
+                
+                parent.children = parent.children.filter(n => n.id !== id);
+                
+                const pIdx = targetList.findIndex(n => n.id === parent.id);
+                targetList.splice(pIdx + 1, 0, node);
+                render();
+            }
+        }
+
+        // --- Logic: Drag & Drop ---
+
+        function handleDragStart(e, id) {
+            e.stopPropagation();
+            draggedNodeId = id;
+            e.dataTransfer.effectAllowed = 'move';
+            // Slight delay to allow drag ghost to generate before dimming row
+            setTimeout(() => {
+                e.target.style.opacity = '0.5';
+            }, 0);
+        }
+
+        function handleDragEnd(e) {
+            e.target.style.opacity = '1';
+            clearDragStyles();
+            draggedNodeId = null;
+            dragTargetId = null;
+            dropPosition = null;
+        }
+
+        function clearDragStyles() {
+            document.querySelectorAll('.node-row').forEach(row => {
+                row.classList.remove('drag-top', 'drag-bottom', 'drag-inside');
+            });
+        }
+
+        function handleDragOver(e, id) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!draggedNodeId || draggedNodeId === id) return;
+
+            // Calculate drop position
+            const rect = e.currentTarget.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            const height = rect.height;
+
+            clearDragStyles();
+            
+            dragTargetId = id;
+            
+            if (y < height * 0.25) {
+                dropPosition = 'top';
+                e.currentTarget.classList.add('drag-top');
+            } else if (y > height * 0.75) {
+                dropPosition = 'bottom';
+                e.currentTarget.classList.add('drag-bottom');
+            } else {
+                dropPosition = 'inside';
+                e.currentTarget.classList.add('drag-inside');
+            }
+        }
+
+        function handleDragLeave(e) {
+            // Optional: refine this if flickering occurs
+        }
+
+        function handleDrop(e, targetId) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (!draggedNodeId || !dragTargetId) return;
+
+            // Check circular dependency (dropping parent into child)
+            const isCircular = (searchId, nodeToCheck) => {
+                if(nodeToCheck.id === searchId) return true;
+                if(nodeToCheck.children) return nodeToCheck.children.some(c => isCircular(searchId, c));
+                return false;
+            };
+
+            const { node: draggedNode } = findNodeAndParent(data, draggedNodeId);
+            
+            if (isCircular(dragTargetId, draggedNode)) {
+                handleDragEnd(e);
+                return;
+            }
+
+            // Remove from old location
+            const { parent: oldParent } = findNodeAndParent(data, draggedNodeId);
+            if (oldParent) {
+                oldParent.children = oldParent.children.filter(n => n.id !== draggedNodeId);
+            } else {
+                data = data.filter(n => n.id !== draggedNodeId);
+            }
+
+            // Insert at new location
+            const { node: targetNode, parent: targetParent } = findNodeAndParent(data, targetId);
+
+            if (dropPosition === 'inside') {
+                targetNode.children.push(draggedNode);
+                targetNode.isExpanded = true;
+            } else {
+                const list = targetParent ? targetParent.children : data;
+                const idx = list.findIndex(n => n.id === targetId);
+                
+                if (dropPosition === 'top') {
+                    list.splice(idx, 0, draggedNode);
+                } else {
+                    list.splice(idx + 1, 0, draggedNode);
+                }
+            }
+
+            render();
+        }
+
+        // Init
+        render();
+
+    </script>
+</body>
+</html>

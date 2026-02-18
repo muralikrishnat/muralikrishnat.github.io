@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glassmorphic File Explorer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .glass-input:focus {
+            outline: none;
+            border-color: rgba(56, 189, 248, 0.5);
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Editor Font */
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Animation for folder toggle */
+        .folder-content {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            overflow: hidden;
+        }
+        
+        .folder-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        
+        .folder-content.expanded {
+            max-height: 1000px; /* Arbitrary large height */
+            opacity: 1;
+        }
+
+        /* Abstract Background Blobs */
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: -1;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #7c3aed; border-radius: 50%; }
+        .blob-2 { bottom: -10%; right: -10%; width: 600px; height: 600px; background: #0ea5e9; border-radius: 50%; }
+        .blob-3 { top: 40%; left: 40%; width: 300px; height: 300px; background: #ec4899; border-radius: 50%; }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4 sm:p-8 relative">
+
+    <!-- Background Blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- Main Container -->
+    <div class="glass-panel w-full max-w-7xl h-[90vh] rounded-2xl flex flex-col md:flex-row overflow-hidden relative z-10">
+        
+        <!-- Sidebar (File Explorer) -->
+        <div class="w-full md:w-64 lg:w-72 border-b md:border-b-0 md:border-r border-white/10 flex flex-col bg-slate-900/50">
+            <!-- Sidebar Header -->
+            <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                <h2 class="font-semibold text-sm uppercase tracking-wider text-slate-400">Explorer</h2>
+                <div class="flex gap-2">
+                    <button onclick="createNewFile()" title="New File" class="p-1.5 hover:bg-white/10 rounded-md transition text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-file-circle-plus"></i>
+                    </button>
+                    <button onclick="createNewFolder()" title="New Folder" class="p-1.5 hover:bg-white/10 rounded-md transition text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-folder-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- File Tree -->
+            <div id="file-tree" class="flex-1 overflow-y-auto p-2">
+                <!-- Content injected by JS -->
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col bg-slate-900/30 relative">
+            
+            <!-- Empty State (No file selected) -->
+            <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 z-0">
+                <i class="fa-regular fa-file-code text-6xl mb-4 opacity-50"></i>
+                <p class="text-lg font-medium">Select a file to view or edit</p>
+                <p class="text-sm opacity-60">HTML files support live preview</p>
+            </div>
+
+            <!-- Content Editor/Preview (Hidden initially) -->
+            <div id="editor-container" class="flex flex-col h-full hidden relative z-10">
+                
+                <!-- Tab/Header Bar -->
+                <div class="h-12 border-b border-white/10 flex items-center justify-between px-4 bg-slate-900/40">
+                    <div class="flex items-center gap-3">
+                        <i id="active-file-icon" class="fa-brands fa-html5 text-orange-500"></i>
+                        <span id="active-filename" class="font-medium text-sm text-slate-200">index.html</span>
+                        <span id="unsaved-indicator" class="w-2 h-2 rounded-full bg-blue-500 opacity-0 transition-opacity"></span>
+                    </div>
+
+                    <div class="flex items-center gap-2 bg-black/20 p-1 rounded-lg" id="view-toggles">
+                        <button id="btn-code" onclick="setViewMode('code')" class="px-3 py-1 text-xs font-medium rounded-md bg-white/10 text-white shadow-sm transition-all">Code</button>
+                        <button id="btn-preview" onclick="setViewMode('preview')" class="px-3 py-1 text-xs font-medium rounded-md text-slate-400 hover:text-white transition-all">Preview</button>
+                    </div>
+                </div>
+
+                <!-- Editor Area -->
+                <div class="flex-1 relative group">
+                    <!-- Text Area for Code -->
+                    <textarea id="code-editor" class="w-full h-full bg-transparent text-slate-300 p-4 resize-none border-none focus:ring-0 code-font text-sm leading-relaxed outline-none" spellcheck="false"></textarea>
+                    
+                    <!-- Iframe for Preview -->
+                    <iframe id="preview-frame" class="w-full h-full bg-white hidden border-none" sandbox="allow-scripts"></iframe>
+                </div>
+
+                <!-- Footer / Status Bar -->
+                <div class="h-8 border-t border-white/10 bg-slate-900/60 flex items-center px-4 text-xs text-slate-500 justify-between">
+                    <span id="status-path">root > index.html</span>
+                    <span class="flex items-center gap-2">
+                        <span>UTF-8</span>
+                        <span id="status-mode">HTML</span>
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal for Input -->
+    <div id="input-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden">
+        <div class="glass-panel p-6 rounded-xl w-80 transform scale-95 opacity-0 transition-all duration-200" id="modal-content">
+            <h3 id="modal-title" class="text-lg font-semibold mb-4 text-white">New Item</h3>
+            <input type="text" id="modal-input" class="glass-input w-full px-3 py-2 rounded-md mb-4 text-sm" placeholder="Enter name..." autocomplete="off">
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal()" class="px-3 py-1.5 text-xs text-slate-300 hover:text-white transition">Cancel</button>
+                <button id="modal-confirm" class="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded-md transition shadow-lg shadow-blue-500/20">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Initial Data ---
+        const initialData = [
+            {
+                id: 'root-1',
+                name: 'index.html',
+                type: 'file',
+                parentId: null,
+                content: `<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            background: #f0f9ff; 
+            color: #334155;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 { color: #0ea5e9; }
+        button {
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+        button:hover { background: #0284c7; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Hello World!</h1>
+        <p>This is a live preview from the file explorer.</p>
+        <button onclick="alert('It works!')">Click Me</button>
+    </div>
+</body>
+</html>`
+            },
+            {
+                id: 'root-2',
+                name: 'styles.css',
+                type: 'file',
+                parentId: null,
+                content: `/* Main Styles */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #1e1e1e;
+}`
+            },
+            {
+                id: 'root-3',
+                name: 'components',
+                type: 'folder',
+                parentId: null,
+                isOpen: true,
+                children: [
+                    {
+                        id: 'comp-1',
+                        name: 'Header.html',
+                        type: 'file',
+                        parentId: 'root-3',
+                        content: '<header><h1>My Website</h1></header>'
+                    },
+                    {
+                        id: 'comp-2',
+                        name: 'Footer.html',
+                        type: 'file',
+                        parentId: 'root-3',
+                        content: '<footer>&copy; 2023</footer>'
+                    }
+                ]
+            },
+            {
+                id: 'root-4',
+                name: 'utils',
+                type: 'folder',
+                parentId: null,
+                isOpen: false,
+                children: [
+                    {
+                        id: 'util-1',
+                        name: 'helper.js',
+                        type: 'file',
+                        parentId: 'root-4',
+                        content: 'console.log("Helper loaded");'
+                    }
+                ]
+            }
+        ];
+
+        // --- State Management ---
+        let fileSystem = JSON.parse(JSON.stringify(initialData));
+        let activeFileId = null;
+        let selectedFolderId = null; // For creating new files
+        let viewMode = 'code'; // 'code' or 'preview'
+
+        // --- DOM Elements ---
+        const fileTreeEl = document.getElementById('file-tree');
+        const emptyStateEl = document.getElementById('empty-state');
+        const editorContainerEl = document.getElementById('editor-container');
+        const codeEditorEl = document.getElementById('code-editor');
+        const previewFrameEl = document.getElementById('preview-frame');
+        const activeFilenameEl = document.getElementById('active-filename');
+        const activeFileIconEl = document.getElementById('active-file-icon');
+        const btnCode = document.getElementById('btn-code');
+        const btnPreview = document.getElementById('btn-preview');
+        const viewTogglesEl = document.getElementById('view-toggles');
+        const unsavedIndicator = document.getElementById('unsaved-indicator');
+        const statusPathEl = document.getElementById('status-path');
+        const statusModeEl = document.getElementById('status-mode');
+        
+        // Modal Elements
+        const modal = document.getElementById('input-modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalInput = document.getElementById('modal-input');
+        const modalConfirmBtn = document.getElementById('modal-confirm');
+        const modalTitle = document.getElementById('modal-title');
+
+        // --- Initialization ---
+        renderTree();
+
+        // --- Rendering Logic ---
+        function renderTree() {
+            fileTreeEl.innerHTML = '';
+            fileSystem.forEach(node => {
+                fileTreeEl.appendChild(createNodeElement(node, 0));
+            });
+        }
+
+        function createNodeElement(node, depth) {
+            const container = document.createElement('div');
+            
+            // Node Row
+            const row = document.createElement('div');
+            row.className = `flex items-center gap-2 p-1.5 rounded-md cursor-pointer transition-colors text-sm select-none ${
+                activeFileId === node.id 
+                ? 'bg-blue-600/30 text-white border border-blue-500/30' 
+                : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+            }`;
+            row.style.paddingLeft = `${depth * 12 + 8}px`; // Indentation
+            
+            // Icon
+            const icon = document.createElement('i');
+            if (node.type === 'folder') {
+                icon.className = `fa-solid ${node.isOpen ? 'fa-folder-open text-yellow-500' : 'fa-folder text-yellow-600'} transition-colors`;
+            } else {
+                icon.className = getFileIcon(node.name);
+            }
+            row.appendChild(icon);
+
+            // Name
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = node.name;
+            nameSpan.className = 'truncate flex-1';
+            row.appendChild(nameSpan);
+
+            // Click Event
+            row.onclick = (e) => {
+                e.stopPropagation(); // Prevent bubbling
+                handleNodeClick(node);
+            };
+
+            container.appendChild(row);
+
+            // Children (if folder and open)
+            if (node.type === 'folder') {
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = `folder-content ${node.isOpen ? 'expanded' : 'collapsed'}`;
+                
+                if (node.isOpen && node.children) {
+                    node.children.forEach(child => {
+                        childrenContainer.appendChild(createNodeElement(child, depth + 1));
+                    });
+                }
+                container.appendChild(childrenContainer);
+            }
+
+            return container;
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            switch (ext) {
+                case 'html': return 'fa-brands fa-html5 text-orange-500';
+                case 'css': return 'fa-brands fa-css3-alt text-blue-500';
+                case 'js': return 'fa-brands fa-js text-yellow-400';
+                case 'json': return 'fa-solid fa-code text-green-400';
+                case 'png': 
+                case 'jpg': 
+                case 'svg': return 'fa-solid fa-image text-purple-400';
+                default: return 'fa-regular fa-file text-slate-500';
+            }
+        }
+
+        // --- Logic & Interaction ---
+
+        function handleNodeClick(node) {
+            if (node.type === 'folder') {
+                // Toggle folder
+                node.isOpen = !node.isOpen;
+                selectedFolderId = node.id; // Select folder for new file creation
+                renderTree();
+            } else {
+                // Open file
+                loadFile(node);
+            }
+        }
+
+        function loadFile(node) {
+            activeFileId = node.id;
+            selectedFolderId = node.parentId; // Set context to this file's folder
+            
+            // Find full path logic could go here
+            statusPathEl.innerText = `${node.parentId ? '... > ' : 'root > '}${node.name}`;
+            
+            // Update UI State
+            renderTree(); // To highlight selection
+            emptyStateEl.classList.add('hidden');
+            editorContainerEl.classList.remove('hidden');
+
+            activeFilenameEl.textContent = node.name;
+            activeFileIconEl.className = getFileIcon(node.name);
+            codeEditorEl.value = node.content || '';
+            
+            // Determine file type handling
+            const ext = node.name.split('.').pop().toLowerCase();
+            statusModeEl.innerText = ext.toUpperCase();
+
+            if (ext === 'html') {
+                viewTogglesEl.classList.remove('invisible');
+                // Reset to code view initially or keep previous preference?
+                // Let's reset to Code view for better UX when switching
+                setViewMode('code');
+            } else {
+                viewTogglesEl.classList.add('invisible');
+                setViewMode('code'); // Force code view for non-html
+            }
+
+            unsavedIndicator.classList.add('opacity-0');
+        }
+
+        // --- Editing & Preview ---
+
+        codeEditorEl.addEventListener('input', () => {
+            if (!activeFileId) return;
+            
+            const node = findNodeById(fileSystem, activeFileId);
+            if (node) {
+                node.content = codeEditorEl.value;
+                unsavedIndicator.classList.remove('opacity-0');
+                
+                // Debounce preview update if in preview mode
+                if (viewMode === 'preview') {
+                    clearTimeout(window.previewTimeout);
+                    window.previewTimeout = setTimeout(updatePreview, 500);
+                }
+            }
+        });
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            const isCode = mode === 'code';
+
+            // Button Styles
+            if (isCode) {
+                btnCode.classList.replace('text-slate-400', 'text-white');
+                btnCode.classList.add('bg-white/10', 'shadow-sm');
+                btnCode.classList.remove('hover:text-white');
+                
+                btnPreview.classList.replace('text-white', 'text-slate-400');
+                btnPreview.classList.remove('bg-white/10', 'shadow-sm');
+                btnPreview.classList.add('hover:text-white');
+
+                codeEditorEl.classList.remove('hidden');
+                previewFrameEl.classList.add('hidden');
+            } else {
+                btnPreview.classList.replace('text-slate-400', 'text-white');
+                btnPreview.classList.add('bg-white/10', 'shadow-sm');
+                btnPreview.classList.remove('hover:text-white');
+                
+                btnCode.classList.replace('text-white', 'text-slate-400');
+                btnCode.classList.remove('bg-white/10', 'shadow-sm');
+                btnCode.classList.add('hover:text-white');
+
+                codeEditorEl.classList.add('hidden');
+                previewFrameEl.classList.remove('hidden');
+                updatePreview();
+            }
+        }
+
+        function updatePreview() {
+            const node = findNodeById(fileSystem, activeFileId);
+            if (node && (node.name.endsWith('.html') || node.name.endsWith('.htm'))) {
+                // Using srcdoc for sandbox safety and immediate rendering
+                previewFrameEl.srcdoc = node.content;
+            }
+        }
+
+        // --- File System Helpers ---
+
+        function findNodeById(nodes, id) {
+            for (const node of nodes) {
+                if (node.id === id) return node;
+                if (node.children) {
+                    const found = findNodeById(node.children, id);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function addNode(parentId, name, type) {
+            const newNode = {
+                id: Math.random().toString(36).substr(2, 9),
+                name: name,
+                type: type,
+                parentId: parentId,
+                content: type === 'file' ? (name.endsWith('.html') ? '<h1>New HTML File</h1>' : '') : undefined,
+                children: type === 'folder' ? [] : undefined,
+                isOpen: true
+            };
+
+            if (!parentId) {
+                fileSystem.push(newNode);
+            } else {
+                const parent = findNodeById(fileSystem, parentId);
+                if (parent && parent.type === 'folder') {
+                    if (!parent.children) parent.children = [];
+                    parent.children.push(newNode);
+                    parent.isOpen = true; // Auto open parent
+                }
+            }
+            renderTree();
+            
+            // If it's a file, select it immediately
+            if (type === 'file') {
+                loadFile(newNode);
+            }
+        }
+
+        // --- Modal & Creation Logic ---
+
+        let pendingCreationType = null; // 'file' or 'folder'
+
+        function createNewFile() {
+            openModal('New File', 'Enter file name (e.g., page.html)', 'file');
+        }
+
+        function createNewFolder() {
+            openModal('New Folder', 'Enter folder name', 'folder');
+        }
+
+        function openModal(title, placeholder, type) {
+            modalTitle.textContent = title;
+            modalInput.placeholder = placeholder;
+            modalInput.value = '';
+            pendingCreationType = type;
+            
+            modal.classList.remove('hidden');
+            // Small animation
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+                modalInput.focus();
+            }, 10);
+        }
+
+        function closeModal() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                pendingCreationType = null;
+            }, 200);
+        }
+
+        modalConfirmBtn.onclick = () => {
+            const name = modalInput.value.trim();
+            if (name) {
+                // Determine where to add: currently selected folder, or parent of selected file, or root
+                let targetParentId = selectedFolderId;
+                
+                // If nothing selected, or if the selected ID points to a non-existent node (deleted?), default to root
+                if (targetParentId && !findNodeById(fileSystem, targetParentId)) {
+                    targetParentId = null;
+                }
+
+                addNode(targetParentId, name, pendingCreationType);
+                closeModal();
+            }
+        };
+
+        // Allow Enter key to submit modal
+        modalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') modalConfirmBtn.click();
+            if (e.key === 'Escape') closeModal();
+        });
+
+    </script>
+</body>
+</html>

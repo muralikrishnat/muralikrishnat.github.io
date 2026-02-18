@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlassQA - Automation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        glass: "rgba(255, 255, 255, 0.08)",
+                        glassBorder: "rgba(255, 255, 255, 0.15)",
+                        glassHover: "rgba(255, 255, 255, 0.15)",
+                        accent: "#6366f1", // Indigo 500
+                        success: "#10b981",
+                        danger: "#ef4444",
+                        warning: "#f59e0b"
+                    },
+                    backdropBlur: {
+                        xs: '2px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: radial-gradient(circle at 10% 20%, rgb(17, 24, 39) 0%, rgb(13, 16, 26) 90%);
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* App-like feel */
+        }
+        
+        /* Glassmorphism Utility Class */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glassBorder);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glassBorder);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1); 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.2); 
+        }
+
+        /* Node Animation */
+        .node-enter {
+            animation: fadeIn 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Drag and Drop Styles */
+        .draggable-item {
+            cursor: grab;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+        .drop-zone-active {
+            border: 2px dashed #6366f1 !important;
+            background: rgba(99, 102, 241, 0.1) !important;
+        }
+
+        /* Custom Background Blobs for depth */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: -1;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #4f46e5; }
+        .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: #ec4899; }
+        .blob-3 { top: 40%; left: 40%; width: 300px; height: 300px; background: #06b6d4; }
+
+    </style>
+</head>
+<body class="h-screen w-full flex text-sm">
+
+    <!-- Ambient Background -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- Sidebar -->
+    <aside class="w-64 h-full glass-panel flex flex-col justify-between z-10 border-r-0 border-t-0 border-b-0 border-l-0 border-r border-white/10">
+        <div>
+            <div class="p-6 flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                    Q
+                </div>
+                <h1 class="text-xl font-bold tracking-wide">GlassQA</h1>
+            </div>
+
+            <nav class="mt-6 px-4 space-y-2">
+                <button onclick="renderView('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/10 text-white/70 hover:text-white bg-white/10 text-white shadow-lg">
+                    <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+                </button>
+                <button onclick="renderView('journeys')" id="nav-journeys" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/10 text-white/70 hover:text-white">
+                    <i class="fa-solid fa-route w-5"></i> User Journeys
+                </button>
+                <button onclick="renderView('scheduler')" id="nav-scheduler" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/10 text-white/70 hover:text-white">
+                    <i class="fa-solid fa-clock w-5"></i> Scheduler
+                </button>
+            </nav>
+        </div>
+
+        <div class="p-4">
+            <div class="glass-panel p-4 rounded-xl">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                    <span class="text-xs font-medium text-white/60">System Status</span>
+                </div>
+                <div class="text-xs text-white/40">Grid Running: v2.4.1</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 h-full overflow-hidden flex flex-col relative">
+        <!-- Top Bar -->
+        <header class="h-16 px-8 flex items-center justify-between z-10">
+            <h2 id="page-title" class="text-2xl font-semibold text-white/90">Dashboard</h2>
+            <div class="flex items-center gap-4">
+                <button class="w-10 h-10 rounded-full glass-panel flex items-center justify-center hover:bg-white/20 transition">
+                    <i class="fa-regular fa-bell"></i>
+                </button>
+                <div class="flex items-center gap-3 glass-panel px-3 py-1.5 rounded-full pr-4">
+                    <img src="https://ui-avatars.com/api/?name=QA+Lead&background=random" alt="User" class="w-8 h-8 rounded-full">
+                    <div>
+                        <div class="text-xs font-bold">Alex Chen</div>
+                        <div class="text-[10px] text-white/50">QA Lead</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Container -->
+        <div id="content-area" class="flex-1 overflow-y-auto p-8 pt-2 scroll-smooth">
+            <!-- Content Injected via JS -->
+        </div>
+    </main>
+
+    <!-- Modal Backdrop -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div id="modal-content" class="glass-panel w-full max-w-2xl rounded-2xl p-6 transform scale-95 transition-transform duration-300 relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-white/50 hover:text-white z-10">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div id="modal-body">
+                <!-- Dynamic Modal Content -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Mock Data ---
+        const actions = [
+            { type: 'navigate', icon: 'fa-location-arrow', color: 'text-blue-400' },
+            { type: 'click', icon: 'fa-hand-pointer', color: 'text-yellow-400' },
+            { type: 'type', icon: 'fa-keyboard', color: 'text-purple-400' },
+            { type: 'assert_text', icon: 'fa-check-circle', color: 'text-green-400' },
+            { type: 'wait', icon: 'fa-hourglass-half', color: 'text-gray-400' },
+            { type: 'screenshot', icon: 'fa-camera', color: 'text-pink-400' }
+        ];
+
+        let journeys = [
+            {
+                id: 1,
+                name: "Checkout Flow - Guest",
+                status: "passed",
+                lastRun: "2 hrs ago",
+                steps: [
+                    { id: 101, action: 'navigate', value: '/home', time: '120ms' },
+                    { id: 102, action: 'click', value: '#btn-shop-now', time: '45ms' },
+                    { id: 103, action: 'wait', value: '500ms', time: '500ms' },
+                    { id: 104, action: 'click', value: '.product-card:first', time: '60ms' },
+                    { id: 105, action: 'assert_text', value: 'Add to Cart', time: '10ms' },
+                    { id: 106, action: 'screenshot', value: 'checkout_success.png', time: '200ms', img: 'https://placehold.co/600x400/1e293b/FFF?text=Checkout+Success' }
+                ],
+                metrics: { loadTime: 1.2, networkSize: 450, completedAt: '10:42 AM' }
+            },
+            {
+                id: 2,
+                name: "Login & Profile Update",
+                status: "failed",
+                lastRun: "Yesterday",
+                steps: [
+                    { id: 201, action: 'navigate', value: '/login', time: '200ms' },
+                    { id: 202, action: 'type', value: 'user@test.com', time: '110ms' },
+                    { id: 203, action: 'click', value: '#submit', time: '50ms' },
+                    { id: 204, action: 'assert_text', value: 'Welcome Back', time: 'Failed', error: 'Element not found' }
+                ],
+                metrics: { loadTime: 2.1, networkSize: 620, completedAt: 'Failed' }
+            },
+            {
+                id: 3,
+                name: "Search Functionality",
+                status: "passed",
+                lastRun: "5 mins ago",
+                steps: [
+                    { id: 301, action: 'navigate', value: '/search', time: '90ms' },
+                    { id: 302, action: 'type', value: 'Blue Shoes', time: '80ms' },
+                    { id: 303, action: 'wait', value: '1000ms', time: '1000ms' },
+                    { id: 304, action: 'screenshot', value: 'results.png', time: '200ms', img: 'https://placehold.co/600x400/1e293b/FFF?text=Search+Results' }
+                ],
+                metrics: { loadTime: 0.8, networkSize: 150, completedAt: '11:15 AM' }
+            }
+        ];
+
+        let schedules = [
+            { id: 1, name: "Nightly Regression", cron: "Daily @ 2:00 AM", next: "14h 30m" },
+            { id: 2, name: "Smoke Test", cron: "Hourly", next: "45m" }
+        ];
+
+        // --- Core Logic ---
+
+        function renderView(viewName, data = null) {
+            const content = document.getElementById('content-area');
+            const title = document.getElementById('page-title');
+            
+            // Update Nav State
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('bg-white/10', 'text-white', 'shadow-lg');
+                el.classList.add('text-white/70');
+            });
+            const activeNav = document.getElementById(`nav-${viewName === 'details' ? 'journeys' : viewName}`);
+            if(activeNav) {
+                activeNav.classList.add('bg-white/10', 'text-white', 'shadow-lg');
+                activeNav.classList.remove('text-white/70');
+            }
+
+            // Route
+            switch(viewName) {
+                case 'dashboard':
+                    title.innerText = "Dashboard";
+                    content.innerHTML = getDashboardHTML();
+                    break;
+                case 'journeys':
+                    title.innerText = "User Journeys";
+                    content.innerHTML = getJourneysListHTML();
+                    break;
+                case 'details':
+                    const journey = journeys.find(j => j.id === data);
+                    title.innerText = `Edit: ${journey.name}`;
+                    content.innerHTML = getJourneyDetailHTML(journey);
+                    renderGraph(journey); // Post-render visual logic
+                    break;
+                case 'scheduler':
+                    title.innerText = "Scheduler";
+                    content.innerHTML = getSchedulerHTML();
+                    break;
+            }
+        }
+
+        // --- View Generators ---
+
+        function getDashboardHTML() {
+            const total = journeys.length;
+            const passed = journeys.filter(j => j.status === 'passed').length;
+            const failed = journeys.filter(j => j.status === 'failed').length;
+            const steps = journeys.reduce((acc, j) => acc + j.steps.length, 0);
+
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <!-- Stat Card 1 -->
+                    <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/5 rounded-full group-hover:scale-110 transition"></div>
+                        <div class="text-white/60 mb-1">Total Journeys</div>
+                        <div class="text-4xl font-bold">${total}</div>
+                        <div class="mt-4 text-xs flex items-center gap-2 text-green-400">
+                            <i class="fa-solid fa-arrow-up"></i> 12% vs last week
+                        </div>
+                    </div>
+                    
+                    <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-green-500/10 rounded-full group-hover:scale-110 transition"></div>
+                        <div class="text-white/60 mb-1">Passed</div>
+                        <div class="text-4xl font-bold text-green-400">${passed}</div>
+                        <div class="mt-4 w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-green-400 h-full" style="width: ${(passed/total)*100}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-red-500/10 rounded-full group-hover:scale-110 transition"></div>
+                        <div class="text-white/60 mb-1">Failed</div>
+                        <div class="text-4xl font-bold text-red-400">${failed}</div>
+                        <div class="mt-4 text-xs text-white/40">Requires Attention</div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-indigo-500/10 rounded-full group-hover:scale-110 transition"></div>
+                        <div class="text-white/60 mb-1">Steps Executed</div>
+                        <div class="text-4xl font-bold text-indigo-400">${steps * 124}</div> 
+                        <div class="mt-4 text-xs text-white/40">Across all environments</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Recent Activity -->
+                    <div class="glass-panel p-6 rounded-2xl lg:col-span-2">
+                        <h3 class="text-lg font-semibold mb-4">Coverage Heatmap</h3>
+                        <!-- Simulated Heatmap -->
+                        <div class="grid grid-cols-12 gap-1 h-32">
+                            ${Array(48).fill(0).map(() => {
+                                const opacity = Math.random() * 0.8 + 0.1;
+                                const color = Math.random() > 0.9 ? 'bg-red-500' : 'bg-green-500';
+                                return `<div class="${color} rounded-sm w-full h-full hover:opacity-100 transition" style="opacity: ${opacity}"></div>`
+                            }).join('')}
+                        </div>
+                        <div class="flex justify-between text-xs text-white/40 mt-2">
+                            <span>24 Hours ago</span>
+                            <span>Now</span>
+                        </div>
+                    </div>
+
+                    <!-- Environment Health -->
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <h3 class="text-lg font-semibold mb-4">Node Health</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-400"></div> Chrome (v118)</span>
+                                <span class="text-green-400">98% Stable</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-400"></div> Firefox (v120)</span>
+                                <span class="text-green-400">99% Stable</span>
+                            </div>
+                             <div class="flex items-center justify-between">
+                                <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-yellow-400"></div> Safari (Webkit)</span>
+                                <span class="text-yellow-400">85% Stable</span>
+                            </div>
+                        </div>
+                        <button class="w-full mt-6 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition text-sm">View Infrastructure</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getJourneysListHTML() {
+            return `
+                <div class="flex justify-between mb-6">
+                    <div class="relative w-64">
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-white/40"></i>
+                        <input type="text" placeholder="Search journeys..." class="glass-input w-full pl-10 pr-4 py-2 rounded-xl text-sm">
+                    </div>
+                    <button onclick="createNewJourney()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl transition shadow-lg shadow-indigo-500/30 flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> New Journey
+                    </button>
+                </div>
+
+                <div class="grid gap-4">
+                    ${journeys.map(j => `
+                        <div onclick="renderView('details', ${j.id})" class="glass-panel p-4 rounded-xl flex items-center justify-between hover:bg-white/5 transition cursor-pointer group border-l-4 ${j.status === 'passed' ? 'border-l-green-500' : 'border-l-red-500'}">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-lg">
+                                    <i class="fa-solid ${j.status === 'passed' ? 'fa-check text-green-400' : 'fa-xmark text-red-400'}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-lg">${j.name}</h4>
+                                    <div class="text-xs text-white/50 flex gap-3">
+                                        <span><i class="fa-solid fa-layer-group"></i> ${j.steps.length} Steps</span>
+                                        <span><i class="fa-regular fa-clock"></i> ${j.lastRun}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-6 opacity-0 group-hover:opacity-100 transition">
+                                <button class="text-white/60 hover:text-white p-2"><i class="fa-solid fa-play"></i></button>
+                                <button class="text-white/60 hover:text-white p-2"><i class="fa-solid fa-pencil"></i></button>
+                                <button class="text-red-400/60 hover:text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                            <div class="text-right opacity-100 group-hover:opacity-0 transition absolute right-4">
+                                <div class="text-sm font-bold ${j.status === 'passed' ? 'text-green-400' : 'text-red-400'}">${j.status.toUpperCase()}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function getJourneyDetailHTML(journey) {
+            return `
+                <div class="flex flex-col h-full">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <button onclick="renderView('journeys')" class="text-white/50 hover:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-left"></i> Back
+                        </button>
+                        <div class="flex gap-2">
+                            <button class="bg-green-600/20 text-green-400 border border-green-500/30 px-4 py-1.5 rounded-lg hover:bg-green-600/30 transition flex items-center gap-2">
+                                <i class="fa-solid fa-play"></i> Run Now
+                            </button>
+                            <button onclick="renderView('dashboard')" class="glass-panel px-4 py-1.5 rounded-lg hover:bg-white/10 transition">
+                                <i class="fa-solid fa-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Split View with Toolbox -->
+                    <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 overflow-hidden">
+                        
+                        <!-- Toolbox (Left) -->
+                        <div class="glass-panel rounded-2xl p-4 flex flex-col">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-white/50 mb-4">Toolbox</h3>
+                            <div class="space-y-3 overflow-y-auto pr-2">
+                                <div class="text-[10px] text-white/30 uppercase mb-2">Drag to add</div>
+                                ${actions.map(a => `
+                                    <div draggable="true" ondragstart="handleDragStart(event, '${a.type}')" 
+                                         class="draggable-item glass-panel p-3 rounded-lg hover:bg-white/10 transition flex items-center gap-3 group border border-transparent hover:border-white/20">
+                                        <div class="w-8 h-8 rounded bg-white/5 flex items-center justify-center ${a.color}">
+                                            <i class="fa-solid ${a.icon}"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-medium group-hover:text-white text-white/80">${a.type.replace('_', ' ')}</div>
+                                        </div>
+                                        <i class="fa-solid fa-grip-vertical ml-auto text-white/20"></i>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="mt-auto pt-4 border-t border-white/10">
+                                <div class="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 text-xs text-blue-300">
+                                    <i class="fa-solid fa-circle-info mr-1"></i> Drag items from here to the flow area to add steps.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Visual Node Editor (Builder) (Center) -->
+                        <div class="lg:col-span-2 flex flex-col">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-white/50 mb-3 flex justify-between">
+                                <span>Flow Builder</span>
+                                <span class="text-[10px] font-normal opacity-50">Drop Zone Active</span>
+                            </h3>
+                            <div id="drop-zone" 
+                                 ondragover="handleDragOver(event)" 
+                                 ondrop="handleDrop(event, ${journey.id})"
+                                 class="glass-panel rounded-2xl p-6 flex-1 overflow-y-auto relative bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] transition-all duration-200">
+                                <div class="absolute inset-0 flex flex-col items-center py-10 space-y-8" id="node-container">
+                                    <!-- Nodes injected here -->
+                                </div>
+                                
+                                <!-- Empty State for new journey -->
+                                ${journey.steps.length === 0 ? `
+                                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        <div class="text-center text-white/20">
+                                            <i class="fa-solid fa-arrow-pointer text-4xl mb-2"></i>
+                                            <p>Drag actions here to start</p>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Metrics & Details (Right) -->
+                        <div class="flex flex-col gap-6">
+                            <!-- Creative Metrics Panel -->
+                            <div class="glass-panel rounded-2xl p-6">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-white/50 mb-4">Run Stats</h3>
+                                
+                                <div class="space-y-6">
+                                    <!-- Gauge Style for Load Time -->
+                                    <div>
+                                        <div class="flex justify-between text-xs mb-1">
+                                            <span>Page Load</span>
+                                            <span class="font-mono text-accent">${journey.metrics.loadTime}s</span>
+                                        </div>
+                                        <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-green-400 to-yellow-400" style="width: ${(journey.metrics.loadTime/3)*100}%"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bar representation for Network -->
+                                    <div>
+                                         <div class="flex justify-between text-xs mb-1">
+                                            <span>Payload Size</span>
+                                            <span class="font-mono text-blue-400">${journey.metrics.networkSize}kb</span>
+                                        </div>
+                                        <div class="flex items-end gap-1 h-12">
+                                            <div class="w-1/4 bg-white/10 h-[30%] rounded-t-sm"></div>
+                                            <div class="w-1/4 bg-white/10 h-[50%] rounded-t-sm"></div>
+                                            <div class="w-1/4 bg-indigo-500 h-[80%] rounded-t-sm shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div>
+                                            <div class="w-1/4 bg-white/10 h-[40%] rounded-t-sm"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Test Data/Settings -->
+                            <div class="glass-panel rounded-2xl p-6 flex-1">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-white/50 mb-4">Configuration</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-xs text-white/60 mb-1">Base URL</label>
+                                        <input type="text" value="https://staging.app.com" class="glass-input w-full px-3 py-2 rounded-lg text-sm">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-xs text-white/60 mb-1">Auth Profile</label>
+                                        <select class="w-full glass-input px-3 py-2 rounded-lg text-sm">
+                                            <option>Admin User</option>
+                                            <option>Guest</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getSchedulerHTML() {
+            return `
+                <div class="max-w-4xl mx-auto">
+                    <div class="glass-panel p-6 rounded-2xl mb-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold">Scheduled Executions</h3>
+                            <button class="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded-lg transition">+ Add Schedule</button>
+                        </div>
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-white/40 text-xs border-b border-white/10">
+                                    <th class="py-3 pl-2">Journey Name</th>
+                                    <th class="py-3">Frequency</th>
+                                    <th class="py-3">Next Run</th>
+                                    <th class="py-3 text-right pr-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm">
+                                ${schedules.map(s => `
+                                    <tr class="border-b border-white/5 hover:bg-white/5 transition">
+                                        <td class="py-4 pl-2 font-medium">${s.name}</td>
+                                        <td class="py-4"><span class="bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded text-xs">${s.cron}</span></td>
+                                        <td class="py-4 font-mono text-white/70">${s.next}</td>
+                                        <td class="py-4 text-right pr-2">
+                                            <button class="text-white/40 hover:text-white mr-2"><i class="fa-solid fa-pause"></i></button>
+                                            <button class="text-white/40 hover:text-red-400"><i class="fa-solid fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="glass-panel p-8 rounded-2xl border border-dashed border-white/20 bg-transparent flex flex-col items-center justify-center text-center py-12">
+                        <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                            <i class="fa-regular fa-calendar-plus text-white/50 text-xl"></i>
+                        </div>
+                        <h4 class="text-lg font-medium">Create New Schedule</h4>
+                        <p class="text-white/40 text-sm max-w-sm mt-1 mb-4">Automate your journeys to run periodically and receive reports.</p>
+                        <button class="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition">Configure</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Visual Logic ---
+
+        function renderGraph(journey) {
+            const container = document.getElementById('node-container');
+            if(!container) return;
+
+            container.innerHTML = '';
+            
+            // Start Node
+            container.innerHTML += `
+                <div class="w-12 h-12 rounded-full border-2 border-green-500 flex items-center justify-center bg-green-500/10 z-10 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                    <span class="text-[10px] font-bold">START</span>
+                </div>
+                <div class="h-8 w-0.5 bg-white/20"></div>
+            `;
+
+            journey.steps.forEach((step, index) => {
+                const actionMeta = actions.find(a => a.type === step.action) || actions[0];
+                
+                const nodeHTML = `
+                    <div class="node-enter relative group w-full max-w-md" style="animation-delay: ${index * 0.1}s">
+                        <!-- Connecting Line -->
+                        ${index < journey.steps.length - 1 ? 
+                            '<div class="absolute left-1/2 bottom-[-32px] w-0.5 h-8 bg-white/20 -ml-[1px]"></div>' : ''
+                        }
+                        
+                        <div class="glass-panel p-4 rounded-xl flex items-start gap-4 hover:border-indigo-500/50 transition relative overflow-hidden">
+                            <!-- Icon -->
+                            <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center ${actionMeta.color} text-lg shrink-0 mt-0.5">
+                                <i class="fa-solid ${actionMeta.icon}"></i>
+                            </div>
+                            
+                            <!-- Content -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-xs font-bold uppercase tracking-wide text-white/40">${step.action.replace('_', ' ')}</span>
+                                    <span class="text-[10px] font-mono ${step.time === 'Failed' ? 'text-red-400' : 'text-green-400'}">${step.time}</span>
+                                </div>
+                                <div class="text-sm font-medium truncate mb-1" title="${step.value}">${step.value}</div>
+                                
+                                <!-- Screenshot Thumbnail (if applicable) -->
+                                ${step.action === 'screenshot' || step.img ? `
+                                    <div class="mt-2 group/img relative cursor-pointer overflow-hidden rounded-lg border border-white/10" onclick="viewScreenshot('${step.img}', '${step.value}')">
+                                        <div class="absolute inset-0 bg-black/40 group-hover/img:bg-transparent transition z-10"></div>
+                                        <div class="absolute inset-0 flex items-center justify-center z-20 group-hover/img:opacity-0 transition">
+                                            <i class="fa-solid fa-eye text-white/80"></i>
+                                        </div>
+                                        <img src="${step.img || 'https://placehold.co/600x400/1e293b/FFF?text=Screenshot'}" class="w-full h-24 object-cover" alt="Step Screenshot">
+                                    </div>
+                                ` : ''}
+
+                                <!-- Error Message -->
+                                ${step.error ? `<div class="text-xs text-red-400 mt-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> ${step.error}</div>` : ''}
+                            </div>
+
+                            <!-- Hover Actions -->
+                            <div class="absolute right-2 top-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition duration-200 bg-black/40 p-1 rounded backdrop-blur-md z-30">
+                                <button onclick="editStep(${step.id})" class="p-1.5 hover:text-white text-white/60"><i class="fa-solid fa-pen text-xs"></i></button>
+                                <button onclick="deleteStep(${step.id})" class="p-1.5 hover:text-red-400 text-white/60"><i class="fa-solid fa-trash text-xs"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += nodeHTML;
+
+                if (index < journey.steps.length - 1) {
+                    container.innerHTML += `<div class="h-8 w-0.5 bg-white/20"></div>`;
+                }
+            });
+
+            // End Node
+            container.innerHTML += `
+                <div class="h-8 w-0.5 bg-white/20"></div>
+                <div class="w-12 h-12 rounded-full border-2 ${journey.status === 'passed' ? 'border-green-500 bg-green-500/10' : 'border-red-500 bg-red-500/10'} flex items-center justify-center z-10">
+                    <span class="text-[10px] font-bold">END</span>
+                </div>
+            `;
+        }
+
+        // --- Drag & Drop Handlers ---
+
+        function handleDragStart(e, type) {
+            e.dataTransfer.setData("text/plain", type);
+            e.dataTransfer.effectAllowed = "copy";
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+            const zone = document.getElementById('drop-zone');
+            if(zone) zone.classList.add('drop-zone-active');
+        }
+
+        function handleDrop(e, journeyId) {
+            e.preventDefault();
+            const zone = document.getElementById('drop-zone');
+            if(zone) zone.classList.remove('drop-zone-active');
+            
+            const type = e.dataTransfer.getData("text/plain");
+            if (type) {
+                // Add the step
+                const journey = journeys.find(j => j.id === journeyId);
+                if (journey) {
+                    journey.steps.push({
+                        id: Date.now(),
+                        action: type,
+                        value: type === 'wait' ? '500ms' : (type === 'screenshot' ? 'New Screenshot' : 'New Step'),
+                        time: '-',
+                        img: type === 'screenshot' ? 'https://placehold.co/600x400/1e293b/FFF?text=New+Screenshot' : null
+                    });
+                    renderGraph(journey);
+                }
+            }
+        }
+
+        // --- Interactive Functions ---
+
+        function createNewJourney() {
+            const name = prompt("Enter Journey Name:");
+            if (name) {
+                const newId = journeys.length + 1;
+                journeys.push({
+                    id: newId,
+                    name: name,
+                    status: "passed", 
+                    lastRun: "Never",
+                    steps: [],
+                    metrics: { loadTime: 0, networkSize: 0, completedAt: '-' }
+                });
+                renderView('details', newId);
+            }
+        }
+
+        function deleteStep(stepId) {
+            journeys.forEach(j => {
+                j.steps = j.steps.filter(s => s.id !== stepId);
+            });
+            const currentTitle = document.getElementById('page-title').innerText;
+            if (currentTitle.startsWith('Edit: ')) {
+                const journeyName = currentTitle.replace('Edit: ', '');
+                const journey = journeys.find(j => j.name === journeyName);
+                if (journey) renderGraph(journey);
+            }
+        }
+
+        function viewScreenshot(url, title) {
+            const modal = document.getElementById('modal-backdrop');
+            const body = document.getElementById('modal-body');
+            
+            body.innerHTML = `
+                <h3 class="text-xl font-bold mb-4">${title}</h3>
+                <div class="rounded-xl overflow-hidden border border-white/20">
+                    <img src="${url}" class="w-full h-auto" alt="${title}">
+                </div>
+                <div class="flex justify-end mt-4">
+                    <a href="${url}" download class="text-sm text-indigo-400 hover:text-indigo-300 flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Download Image
+                    </a>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                document.getElementById('modal-content').classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal-backdrop');
+            const content = document.getElementById('modal-content');
+            
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function editStep(id) {
+            alert("Edit Mode enabled for Node ID: " + id + ".");
+        }
+
+        // Initialize
+        renderView('dashboard');
+
+        // Add dragleave to clean up styles if user drags out
+        document.addEventListener('dragleave', (e) => {
+             const zone = document.getElementById('drop-zone');
+             if(zone && !zone.contains(e.relatedTarget)) {
+                 zone.classList.remove('drop-zone-active');
+             }
+        });
+
+    </script>
+</body>
+</html>

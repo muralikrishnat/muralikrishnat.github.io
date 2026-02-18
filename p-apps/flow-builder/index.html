@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowBuilder - Visual Automation Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        /* Dot grid background */
+        .bg-grid {
+            background-size: 20px 20px;
+            background-image: radial-gradient(circle, #334155 1px, transparent 1px);
+        }
+
+        /* Hide default drag image */
+        .dragging-ghost {
+            opacity: 0.5;
+        }
+
+        /* Node Styles */
+        .flow-node {
+            position: absolute;
+            min-width: 200px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.1s;
+        }
+        .flow-node:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+        .flow-node.selected {
+            ring: 2px solid #3b82f6; /* blue-500 */
+            z-index: 20;
+        }
+
+        /* Ports */
+        .port {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: crosshair;
+            transition: transform 0.1s;
+            z-index: 5;
+        }
+        .port:hover {
+            transform: translateY(-50%) scale(1.3);
+        }
+        .port-input {
+            left: -6px;
+            background-color: #64748b;
+        }
+        /* Grouping selectors to ensure all output types are on the right */
+        .port-output, .port-output-true, .port-output-false {
+            right: -6px;
+        }
+        .port-output {
+            background-color: #3b82f6;
+        }
+        .port-output-true {
+            background-color: #22c55e; /* green */
+        }
+        .port-output-false {
+            background-color: #ef4444; /* red */
+        }
+        
+        /* SVG Connection styling */
+        path.connection {
+            fill: none;
+            stroke: #64748b;
+            stroke-width: 2px;
+            transition: stroke 0.2s;
+        }
+        path.connection:hover {
+            stroke: #94a3b8;
+            stroke-width: 4px;
+            cursor: pointer;
+        }
+        path.connection.selected {
+            stroke: #3b82f6;
+            stroke-width: 3px;
+        }
+        path.temp-connection {
+            fill: none;
+            stroke: #94a3b8;
+            stroke-width: 2px;
+            stroke-dasharray: 5, 5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 h-screen w-screen overflow-hidden flex select-none font-sans">
+
+    <!-- Left Sidebar: Components -->
+    <div class="w-64 bg-slate-800 border-r border-slate-700 flex flex-col z-30 shadow-xl">
+        <div class="p-4 border-b border-slate-700 bg-slate-900">
+            <h1 class="text-xl font-bold flex items-center gap-2 text-blue-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></svg>
+                FlowBuilder
+            </h1>
+        </div>
+        
+        <div class="p-4 flex-1 overflow-y-auto">
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Core Nodes</div>
+            
+            <!-- Draggable Items -->
+            <div class="space-y-3">
+                <div draggable="true" ondragstart="handleDragStart(event)" data-type="start" class="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg cursor-grab active:cursor-grabbing border border-slate-600 shadow-sm flex items-center gap-3 transition-colors">
+                    <div class="w-8 h-8 rounded-md bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18"/><path d="m5 19 6-6"/><path d="m5 5 6 6"/></svg>
+                    </div>
+                    <div>
+                        <div class="font-medium text-sm">Start Flow</div>
+                        <div class="text-xs text-slate-400">Entry point</div>
+                    </div>
+                </div>
+
+                <div draggable="true" ondragstart="handleDragStart(event)" data-type="action" class="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg cursor-grab active:cursor-grabbing border border-slate-600 shadow-sm flex items-center gap-3 transition-colors">
+                    <div class="w-8 h-8 rounded-md bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 11 4-7"/><path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8c.9 0 1.8-.7 2-1.6l1.7-7.4"/><path d="m9 11 1 9"/></svg>
+                    </div>
+                    <div>
+                        <div class="font-medium text-sm">Action</div>
+                        <div class="text-xs text-slate-400">Click, Type, Scroll...</div>
+                    </div>
+                </div>
+
+                <div draggable="true" ondragstart="handleDragStart(event)" data-type="condition" class="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg cursor-grab active:cursor-grabbing border border-slate-600 shadow-sm flex items-center gap-3 transition-colors">
+                    <div class="w-8 h-8 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+                    </div>
+                    <div>
+                        <div class="font-medium text-sm">Condition</div>
+                        <div class="text-xs text-slate-400">If / Else logic</div>
+                    </div>
+                </div>
+
+                <div draggable="true" ondragstart="handleDragStart(event)" data-type="debug" class="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg cursor-grab active:cursor-grabbing border border-slate-600 shadow-sm flex items-center gap-3 transition-colors">
+                    <div class="w-8 h-8 rounded-md bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>
+                    </div>
+                    <div>
+                        <div class="font-medium text-sm">Debug Log</div>
+                        <div class="text-xs text-slate-400">Console output</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 bg-slate-800/50 p-3 rounded text-xs text-slate-500 border border-slate-700/50">
+                <p class="font-bold mb-1">How to use:</p>
+                <ul class="list-disc pl-4 space-y-1">
+                    <li>Drag nodes to canvas</li>
+                    <li>Connect output dots to input dots</li>
+                    <li>Click node to edit properties</li>
+                    <li>Select & Press Del to remove</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Canvas Area -->
+    <div id="canvas-container" class="flex-1 relative bg-slate-900 bg-grid overflow-hidden" 
+         ondrop="handleDrop(event)" 
+         ondragover="allowDrop(event)"
+         onmousedown="handleCanvasMouseDown(event)"
+         onmousemove="handleCanvasMouseMove(event)"
+         onmouseup="handleCanvasMouseUp(event)">
+        
+        <!-- SVG Layer for connections -->
+        <svg id="connections-layer" class="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible">
+            <!-- Defined in JS -->
+        </svg>
+
+        <!-- Nodes Layer -->
+        <div id="nodes-layer" class="absolute inset-0 w-full h-full z-10 origin-top-left">
+            <!-- Nodes will be injected here via JS -->
+        </div>
+
+        <!-- Toolbar -->
+        <div class="absolute top-4 left-4 z-20 flex gap-2 bg-slate-800 p-1.5 rounded-lg border border-slate-700 shadow-lg">
+            <button onclick="zoomCanvas(0.1)" class="p-2 hover:bg-slate-700 rounded text-slate-300" title="Zoom In">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <button onclick="zoomCanvas(-0.1)" class="p-2 hover:bg-slate-700 rounded text-slate-300" title="Zoom Out">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <button onclick="resetZoom()" class="p-2 hover:bg-slate-700 rounded text-slate-300" title="Reset View">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Right Sidebar: Properties -->
+    <div id="properties-panel" class="w-80 bg-slate-800 border-l border-slate-700 z-30 flex flex-col shadow-xl transform transition-transform duration-300 translate-x-full absolute right-0 h-full">
+        <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900">
+            <h2 class="font-bold text-slate-100">Node Properties</h2>
+            <button onclick="closePanel()" class="text-slate-400 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div id="properties-content" class="p-5 flex-1 overflow-y-auto space-y-4">
+            <!-- Dynamic Form Content -->
+            <div class="text-center text-slate-500 mt-10">Select a node to edit its properties</div>
+        </div>
+        <div class="p-4 border-t border-slate-700 bg-slate-900">
+            <button onclick="deleteSelectedNode()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-2 px-4 rounded border border-red-500/50 flex items-center justify-center gap-2 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                Delete Node
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        const state = {
+            nodes: [],
+            connections: [],
+            nextNodeId: 1,
+            nextConnId: 1,
+            scale: 1,
+            pan: { x: 0, y: 0 },
+            draggingNode: null,
+            dragOffset: { x: 0, y: 0 },
+            selectedNodeId: null,
+            connecting: {
+                active: false,
+                sourceNodeId: null,
+                sourcePort: null, // 'output' | 'true' | 'false'
+                tempLine: null
+            },
+            panning: false,
+            panStart: { x: 0, y: 0 }
+        };
+
+        // DOM Elements
+        const canvasContainer = document.getElementById('canvas-container');
+        const nodesLayer = document.getElementById('nodes-layer');
+        const connectionsLayer = document.getElementById('connections-layer');
+        const propertiesPanel = document.getElementById('properties-panel');
+        const propertiesContent = document.getElementById('properties-content');
+
+        // Node Configuration
+        const nodeConfig = {
+            start: {
+                title: 'Start',
+                color: 'bg-emerald-600',
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v18"/><path d="m5 19 6-6"/><path d="m5 5 6 6"/></svg>',
+                inputs: [],
+                outputs: ['default'],
+                fields: [
+                    { name: 'name', label: 'Flow Name', type: 'text', placeholder: 'My Automation' },
+                    { name: 'trigger', label: 'Trigger Type', type: 'select', options: ['On Click', 'On Load', 'Schedule'] }
+                ]
+            },
+            action: {
+                title: 'Action',
+                color: 'bg-blue-600',
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 11 4-7"/><path d="m19 11-4-7"/><path d="M2 11h20"/></svg>',
+                inputs: ['default'],
+                outputs: ['default'],
+                fields: [
+                    { name: 'actionType', label: 'Action Type', type: 'select', options: ['Open URL', 'Click Element', 'Type Text', 'Scroll To', 'Hover'] },
+                    { name: 'target', label: 'Target (Selector/URL)', type: 'text', placeholder: 'https://example.com or #btn-id' },
+                    { name: 'value', label: 'Value (Optional)', type: 'text', placeholder: 'Text to type...' }
+                ]
+            },
+            condition: {
+                title: 'Condition',
+                color: 'bg-amber-600',
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+                inputs: ['default'],
+                outputs: ['true', 'false'],
+                fields: [
+                    { name: 'variable', label: 'Variable', type: 'text', placeholder: 'e.g. elementExists' },
+                    { name: 'operator', label: 'Operator', type: 'select', options: ['Equals', 'Contains', 'Greater Than', 'Is Visible'] },
+                    { name: 'value', label: 'Comparison Value', type: 'text', placeholder: 'true' }
+                ]
+            },
+            debug: {
+                title: 'Debug',
+                color: 'bg-purple-600',
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/></svg>',
+                inputs: ['default'],
+                outputs: ['default'],
+                fields: [
+                    { name: 'message', label: 'Log Message', type: 'text', placeholder: 'Success!' },
+                    { name: 'level', label: 'Level', type: 'select', options: ['Info', 'Warning', 'Error'] }
+                ]
+            }
+        };
+
+        // --- Drag & Drop (Sidebar -> Canvas) ---
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('type', e.target.dataset.type);
+            e.dataTransfer.effectAllowed = 'copy';
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const type = e.dataTransfer.getData('type');
+            if (!type) return;
+
+            // Calculate canvas coordinates
+            const rect = canvasContainer.getBoundingClientRect();
+            const x = (e.clientX - rect.left - state.pan.x) / state.scale;
+            const y = (e.clientY - rect.top - state.pan.y) / state.scale;
+
+            createNode(type, x, y);
+        }
+
+        // --- Node Management ---
+
+        function createNode(type, x, y) {
+            const config = nodeConfig[type];
+            const node = {
+                id: state.nextNodeId++,
+                type,
+                x,
+                y,
+                w: 220, // default width
+                data: {} // Dynamic data from properties
+            };
+
+            // Initialize default data
+            config.fields.forEach(f => node.data[f.name] = '');
+
+            state.nodes.push(node);
+            renderNode(node);
+        }
+
+        function renderNode(node) {
+            const config = nodeConfig[node.type];
+            const div = document.createElement('div');
+            div.id = `node-${node.id}`;
+            div.className = `flow-node bg-slate-800 rounded-lg border border-slate-700 select-none`;
+            div.style.left = `${node.x}px`;
+            div.style.top = `${node.y}px`;
+            div.style.width = `${node.w}px`;
+
+            // Inner HTML
+            let inputsHtml = '';
+            if (config.inputs.length) {
+                // Changed from onmousedown to onmouseup for proper drag-and-drop support
+                inputsHtml = `<div class="port port-input" onmouseup="finishConnection(event, ${node.id})" title="Input"></div>`;
+            }
+
+            let outputsHtml = '';
+            config.outputs.forEach((out, index) => {
+                const isBool = out === 'true' || out === 'false';
+                const colorClass = out === 'true' ? 'port-output-true' : (out === 'false' ? 'port-output-false' : 'port-output');
+                const offset = config.outputs.length > 1 ? (index === 0 ? -15 : 15) : 0; // simple spacing for 2 outputs
+                const style = config.outputs.length > 1 ? `top: calc(50% + ${offset}px)` : '';
+                
+                outputsHtml += `<div class="port ${colorClass}" style="${style}" onmousedown="startConnection(event, ${node.id}, '${out}')" title="${out}"></div>`;
+            });
+
+            div.innerHTML = `
+                ${inputsHtml}
+                <div class="node-header ${config.color} p-2 rounded-t-lg flex items-center gap-2 text-white cursor-move" onmousedown="startNodeDrag(event, ${node.id})">
+                    ${config.icon}
+                    <span class="font-semibold text-sm pointer-events-none">${config.title} <span class="text-xs opacity-75">#${node.id}</span></span>
+                </div>
+                <div class="p-3 text-xs text-slate-300" onclick="selectNode(${node.id})">
+                    <div class="mb-1 opacity-50 uppercase tracking-wider font-bold" style="font-size: 0.65rem">${node.type.toUpperCase()}</div>
+                    <div class="truncate">${node.data.name || node.data.actionType || node.data.message || 'Configure...'}</div>
+                </div>
+                ${outputsHtml}
+            `;
+
+            nodesLayer.appendChild(div);
+        }
+
+        function updateNodePosition(node) {
+            const el = document.getElementById(`node-${node.id}`);
+            if (el) {
+                el.style.left = `${node.x}px`;
+                el.style.top = `${node.y}px`;
+                updateConnectionsForNode(node.id);
+            }
+        }
+
+        // --- Interaction: Dragging Nodes ---
+
+        function startNodeDrag(e, nodeId) {
+            e.stopPropagation();
+            if (e.button !== 0) return; // Only left click
+
+            const node = state.nodes.find(n => n.id === nodeId);
+            state.draggingNode = node;
+            
+            // Calculate offset within the node
+            const rect = document.getElementById(`node-${nodeId}`).getBoundingClientRect();
+            // We need to account for scale in the offset
+            state.dragOffset = {
+                x: (e.clientX - rect.left) / state.scale,
+                y: (e.clientY - rect.top) / state.scale
+            };
+
+            selectNode(nodeId);
+        }
+
+        // --- Interaction: Canvas Pan ---
+        function handleCanvasMouseDown(e) {
+            if (e.target === canvasContainer || e.target === nodesLayer || e.target === connectionsLayer) {
+                 if (e.button === 0 || e.button === 1) { // Left or Middle click
+                    state.panning = true;
+                    state.panStart = { x: e.clientX, y: e.clientY };
+                    canvasContainer.style.cursor = 'grabbing';
+                 }
+                 // Deselect if clicking empty space
+                 if(!state.connecting.active) deselectNode();
+            }
+        }
+
+        function handleCanvasMouseMove(e) {
+            // Panning
+            if (state.panning) {
+                const dx = e.clientX - state.panStart.x;
+                const dy = e.clientY - state.panStart.y;
+                
+                state.pan.x += dx;
+                state.pan.y += dy;
+                state.panStart = { x: e.clientX, y: e.clientY };
+                
+                updateCanvasTransform();
+                return;
+            }
+
+            // Dragging Node
+            if (state.draggingNode) {
+                const rect = canvasContainer.getBoundingClientRect();
+                const x = (e.clientX - rect.left - state.pan.x) / state.scale - state.dragOffset.x;
+                const y = (e.clientY - rect.top - state.pan.y) / state.scale - state.dragOffset.y;
+                
+                state.draggingNode.x = x;
+                state.draggingNode.y = y;
+                updateNodePosition(state.draggingNode);
+            }
+
+            // Drawing Temp Connection
+            if (state.connecting.active) {
+                updateTempConnection(e);
+            }
+        }
+
+        function handleCanvasMouseUp(e) {
+            state.draggingNode = null;
+            state.panning = false;
+            canvasContainer.style.cursor = 'default';
+
+            // End Connection Drag (if dropped on empty space or cancelled)
+            if (state.connecting.active) {
+                state.connecting.active = false;
+                if (state.connecting.tempLine) {
+                    state.connecting.tempLine.remove();
+                    state.connecting.tempLine = null;
+                }
+            }
+        }
+
+        // --- Viewport Transform ---
+        function updateCanvasTransform() {
+            nodesLayer.style.transform = `translate(${state.pan.x}px, ${state.pan.y}px) scale(${state.scale})`;
+            connectionsLayer.style.transform = `translate(${state.pan.x}px, ${state.pan.y}px) scale(${state.scale})`;
+            
+            // Grid background position update to simulate infinity
+            canvasContainer.style.backgroundPosition = `${state.pan.x}px ${state.pan.y}px`;
+            canvasContainer.style.backgroundSize = `${20 * state.scale}px ${20 * state.scale}px`;
+        }
+
+        function zoomCanvas(delta) {
+            state.scale = Math.max(0.5, Math.min(2, state.scale + delta));
+            updateCanvasTransform();
+        }
+
+        function resetZoom() {
+            state.scale = 1;
+            state.pan = { x: 0, y: 0 };
+            updateCanvasTransform();
+        }
+
+        // --- Connection Logic ---
+
+        function startConnection(e, nodeId, portType) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            // Always starting a new connection from an Output
+            state.connecting.active = true;
+            state.connecting.sourceNodeId = nodeId;
+            state.connecting.sourcePort = portType;
+
+            // Create Temp Line SVG
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('class', 'temp-connection');
+            connectionsLayer.appendChild(path);
+            state.connecting.tempLine = path;
+            
+            // Initial update
+            updateTempConnection(e);
+        }
+
+        // New function to handle dropping a connection onto an input
+        function finishConnection(e, nodeId) {
+            // We rely on handleCanvasMouseUp to clean up if this fails (or succeeds and clears state)
+            if (state.connecting.active) {
+                completeConnection(nodeId);
+            }
+        }
+
+        function updateTempConnection(e) {
+            const rect = canvasContainer.getBoundingClientRect();
+            // Mouse Pos relative to canvas transform
+            const mouseX = (e.clientX - rect.left - state.pan.x) / state.scale;
+            const mouseY = (e.clientY - rect.top - state.pan.y) / state.scale;
+
+            const sourceNode = state.nodes.find(n => n.id === state.connecting.sourceNodeId);
+            const sourcePos = getPortPosition(sourceNode, state.connecting.sourcePort);
+
+            const d = calculateBezierPath(sourcePos.x, sourcePos.y, mouseX, mouseY);
+            state.connecting.tempLine.setAttribute('d', d);
+        }
+
+        function completeConnection(targetNodeId) {
+            if (state.connecting.sourceNodeId === targetNodeId) return; // Self connection check
+
+            // Check duplicates
+            const exists = state.connections.find(c => 
+                c.sourceNodeId === state.connecting.sourceNodeId && 
+                c.targetNodeId === targetNodeId &&
+                c.sourcePort === state.connecting.sourcePort
+            );
+            
+            if (exists) return;
+
+            const conn = {
+                id: state.nextConnId++,
+                sourceNodeId: state.connecting.sourceNodeId,
+                sourcePort: state.connecting.sourcePort,
+                targetNodeId: targetNodeId
+            };
+
+            state.connections.push(conn);
+            renderConnection(conn);
+
+            // Cleanup
+            state.connecting.active = false;
+            state.connecting.tempLine.remove();
+            state.connecting.tempLine = null;
+        }
+
+        function getPortPosition(node, type) {
+            // Simplified port calculation
+            const el = document.getElementById(`node-${node.id}`);
+            const w = node.w;
+            const h = el ? el.offsetHeight : 50; // estimate if not rendered yet, but it should be
+            
+            let x, y;
+            
+            if (type === 'input') {
+                x = node.x;
+                y = node.y + h / 2;
+            } else {
+                // Outputs
+                x = node.x + w;
+                
+                // If multiple outputs, offset them
+                const config = nodeConfig[node.type];
+                if (config.outputs.length > 1) {
+                    const index = config.outputs.indexOf(type);
+                    const offset = index === 0 ? -15 : 15;
+                    y = node.y + (h / 2) + offset;
+                } else {
+                    y = node.y + h / 2;
+                }
+            }
+            return { x, y };
+        }
+
+        function calculateBezierPath(x1, y1, x2, y2) {
+            const dist = Math.abs(x2 - x1) * 0.5;
+            const cp1x = x1 + dist; // Control point 1
+            const cp2x = x2 - dist; // Control point 2
+            return `M ${x1} ${y1} C ${cp1x} ${y1}, ${cp2x} ${y2}, ${x2} ${y2}`;
+        }
+
+        function renderConnection(conn) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.id = `conn-${conn.id}`;
+            path.setAttribute('class', 'connection');
+            
+            // Add click listener to select/delete
+            path.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectConnection(conn.id);
+            });
+
+            connectionsLayer.appendChild(path);
+            updateConnectionPath(conn);
+        }
+
+        function updateConnectionPath(conn) {
+            const sourceNode = state.nodes.find(n => n.id === conn.sourceNodeId);
+            const targetNode = state.nodes.find(n => n.id === conn.targetNodeId);
+            
+            if (!sourceNode || !targetNode) return; // Should remove connection if node missing
+
+            const start = getPortPosition(sourceNode, conn.sourcePort);
+            const end = getPortPosition(targetNode, 'input');
+
+            const d = calculateBezierPath(start.x, start.y, end.x, end.y);
+            const el = document.getElementById(`conn-${conn.id}`);
+            if (el) el.setAttribute('d', d);
+        }
+
+        function updateConnectionsForNode(nodeId) {
+            state.connections.forEach(conn => {
+                if (conn.sourceNodeId === nodeId || conn.targetNodeId === nodeId) {
+                    updateConnectionPath(conn);
+                }
+            });
+        }
+
+        // --- Properties Panel & Selection ---
+
+        function selectNode(nodeId) {
+            deselectNode();
+            state.selectedNodeId = nodeId;
+            
+            // Visual highlight
+            const el = document.getElementById(`node-${nodeId}`);
+            if (el) el.classList.add('selected');
+
+            // Open Panel
+            propertiesPanel.classList.remove('translate-x-full');
+            
+            renderProperties(nodeId);
+        }
+
+        function deselectNode() {
+            if (state.selectedNodeId) {
+                const el = document.getElementById(`node-${state.selectedNodeId}`);
+                if (el) el.classList.remove('selected');
+                state.selectedNodeId = null;
+                propertiesPanel.classList.add('translate-x-full');
+            }
+            // Also deselect connections
+            document.querySelectorAll('.connection.selected').forEach(el => el.classList.remove('selected'));
+        }
+
+        function renderProperties(nodeId) {
+            const node = state.nodes.find(n => n.id === nodeId);
+            const config = nodeConfig[node.type];
+            
+            let html = `
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Node ID</label>
+                    <input type="text" value="${node.id}" disabled class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-500 text-sm">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Type</label>
+                    <div class="flex items-center gap-2 text-slate-200">
+                        <div class="w-3 h-3 rounded-full ${config.color}"></div>
+                        ${config.title}
+                    </div>
+                </div>
+            `;
+
+            config.fields.forEach(field => {
+                const value = node.data[field.name] || '';
+                
+                html += `<div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">${field.label}</label>`;
+
+                if (field.type === 'select') {
+                    html += `<select onchange="updateNodeData(${nodeId}, '${field.name}', this.value)" class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">`;
+                    field.options.forEach(opt => {
+                        const selected = value === opt ? 'selected' : '';
+                        html += `<option value="${opt}" ${selected}>${opt}</option>`;
+                    });
+                    html += `</select>`;
+                } else {
+                    html += `<input type="text" value="${value}" oninput="updateNodeData(${nodeId}, '${field.name}', this.value)" placeholder="${field.placeholder}" class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">`;
+                }
+
+                html += `</div>`;
+            });
+
+            propertiesContent.innerHTML = html;
+        }
+
+        function updateNodeData(nodeId, field, value) {
+            const node = state.nodes.find(n => n.id === nodeId);
+            if (node) {
+                node.data[field] = value;
+                // Update visual summary on node card
+                const el = document.getElementById(`node-${nodeId}`);
+                if (el) {
+                    // This is a rough refresh of the visual text
+                    const summary = node.data.name || node.data.actionType || node.data.message || 'Configure...';
+                    const summaryEl = el.querySelector('.truncate');
+                    if(summaryEl) summaryEl.textContent = summary;
+                }
+            }
+        }
+
+        // --- Deletion ---
+        
+        function selectConnection(connId) {
+            deselectNode(); // Deselect nodes first
+            const el = document.getElementById(`conn-${connId}`);
+            if(el) el.classList.add('selected');
+            
+            // Allow deletion with Delete key
+            state.selectedConnectionId = connId;
+        }
+
+        function deleteSelectedNode() {
+            if (state.selectedNodeId) {
+                // Remove connections attached to this node
+                state.connections = state.connections.filter(c => {
+                    const related = c.sourceNodeId === state.selectedNodeId || c.targetNodeId === state.selectedNodeId;
+                    if (related) {
+                        const el = document.getElementById(`conn-${c.id}`);
+                        if (el) el.remove();
+                    }
+                    return !related;
+                });
+
+                // Remove node
+                state.nodes = state.nodes.filter(n => n.id !== state.selectedNodeId);
+                const el = document.getElementById(`node-${state.selectedNodeId}`);
+                if (el) el.remove();
+
+                deselectNode();
+            }
+        }
+        
+        // --- Keyboard Shortcuts ---
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                if(e.target.tagName === 'INPUT') return; // Don't delete while typing
+                
+                if (state.selectedNodeId) {
+                    deleteSelectedNode();
+                } else if (state.selectedConnectionId) {
+                     // Delete Connection
+                    state.connections = state.connections.filter(c => c.id !== state.selectedConnectionId);
+                    const el = document.getElementById(`conn-${state.selectedConnectionId}`);
+                    if(el) el.remove();
+                    state.selectedConnectionId = null;
+                }
+            }
+        });
+
+        // Initialize with one Start node
+        window.onload = () => {
+           createNode('start', 50, 100);
+           updateCanvasTransform();
+        };
+
+    </script>
+</body>
+</html>

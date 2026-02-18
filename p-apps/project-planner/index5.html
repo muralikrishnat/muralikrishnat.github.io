@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Plan Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 1280px;
+        }
+        textarea, #plan-display {
+            transition: all 0.3s ease-in-out;
+        }
+        .step-circle {
+            animation: pulse-ring 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+        }
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+        .epic-item {
+            border-left: 5px solid #2196F3 !important;
+        }
+        .feature-item {
+            border-left: 5px solid #607d8b !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-6 sm:p-10 min-h-screen flex flex-col items-center">
+
+    <div id="toast-message" class="toast"></div>
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 md:p-8 bg-white shadow-xl rounded-2xl w-full">
+
+        <!-- Header -->
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-center text-gray-900 mb-2">Project Plan Generator</h1>
+        <p class="text-center text-lg text-gray-500 mb-10">Generate a comprehensive project plan from your requirements.</p>
+
+        <!-- First Row: Input & Button -->
+        <div class="mb-10 p-6 bg-gray-50 border border-gray-200 rounded-xl">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Project Requirements</h2>
+            <textarea id="project-requirements" class="w-full h-40 md:h-64 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700" placeholder="Enter your project requirements here... e.g., 'Build a mobile app for finding local dog parks with user reviews, photos, and a check-in feature.'"></textarea>
+            <button id="generate-button" class="mt-4 w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 transform hover:scale-105">
+                Generate Plan
+            </button>
+        </div>
+
+        <!-- Second Row: Progress Tracker -->
+        <div id="progress-container" class="mb-10 p-6 bg-gray-50 border border-gray-200 rounded-xl">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-6">Review & Feedback Progress</h2>
+            <div id="roles-tracker" class="flex flex-col md:flex-row justify-between items-start md:items-center relative">
+                <!-- Lines for connecting steps -->
+                <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 hidden md:block" style="transform: translateY(-50%);"></div>
+            </div>
+        </div>
+
+        <!-- Third Row: Project Plan Display -->
+        <div id="plan-display" class="p-6 bg-gray-50 border border-gray-200 rounded-xl opacity-100">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Project Plan</h2>
+            <div id="plan-content">
+                <!-- Initial dummy content loaded by JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Use a function to show temporary messages (Toast) instead of alert()
+        function showToast(message) {
+            const toast = document.getElementById('toast-message');
+            toast.textContent = message;
+            toast.className = "toast show";
+            setTimeout(() => {
+                toast.className = toast.className.replace("show", "");
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const requirementsTextarea = document.getElementById('project-requirements');
+            const generateButton = document.getElementById('generate-button');
+            const rolesTracker = document.getElementById('roles-tracker');
+            const planContent = document.getElementById('plan-content');
+            
+            // Define the roles and their initial status
+            const roles = [
+                { name: 'Technical Manager', status: 'waiting' },
+                { name: 'Senior Architect', status: 'waiting' },
+                { name: 'Business Analyst', status: 'waiting' },
+                { name: 'Senior Technical Lead', status: 'waiting' },
+                { name: 'QA Lead and Tester', status: 'waiting' },
+                { name: 'DevOps Engineer', status: 'waiting' },
+                { name: 'Senior Developer', status: 'waiting' }
+            ];
+
+            // Sample JSON for initial display
+            const samplePlan = {
+                "projectTitle": "Online Food Delivery Web Application",
+                "epics": [
+                    {
+                        "name": "User Management",
+                        "description": "Handles user registration, login, profile management, and authentication.",
+                        "features": [
+                            {
+                                "name": "User Registration",
+                                "description": "Allow users to create accounts with necessary details.",
+                                "featureType": "Implementation",
+                                "estimatedDays": "5"
+                            },
+                            {
+                                "name": "User Login",
+                                "description": "Enable users to securely log in to their accounts.",
+                                "featureType": "Implementation",
+                                "estimatedDays": "3"
+                            }
+                        ],
+                        "estimatedDays": "23"
+                    },
+                    {
+                        "name": "Restaurant Management",
+                        "description": "Enables restaurants to register, manage menus, and update information.",
+                        "features": [
+                            {
+                                "name": "Restaurant Registration",
+                                "description": "Allow restaurants to register and create profiles.",
+                                "featureType": "Implementation",
+                                "estimatedDays": "5"
+                            },
+                            {
+                                "name": "Menu Management",
+                                "description": "Enable restaurants to add, update, and delete menu items.",
+                                "featureType": "Implementation",
+                                "estimatedDays": "7"
+                            },
+                            {
+                                "name": "Restaurant Profile Management",
+                                "description": "Allow restaurants to manage their profile information (address, hours, etc.).",
+                                "featureType": "Implementation",
+                                "estimatedDays": "3"
+                            }
+                        ],
+                        "estimatedDays": "30"
+                    }
+                ],
+                "feedbackIterations": [
+                    {
+                        "iteration": 1,
+                        "comments": "Initial project plan created. Review required from stakeholders to validate scope and estimations.",
+                        "feedbackBy": "TECHNICAL_MANAGER"
+                    },
+                    {
+                        "iteration": 2,
+                        "comments": "The project breakdown structure looks comprehensive. However, consider adding a feature under 'Restaurant Management' for 'Promotional Offers Management' to allow restaurants to create and manage discounts. Also, under 'User Management', a feature for 'Social Login Integration' (e.g., Google, Facebook) could enhance user experience. Finally, under 'Discovery and Analysis', consider adding 'Competitive Analysis' as a separate feature to give it more visibility and dedicated effort.",
+                        "feedbackBy": "BUSINESS_ANALYST_PRODUCT_OWNER"
+                    },
+                    {
+                        "iteration": 3,
+                        "comments": "The addition of 'Social Login Integration', 'Promotional Offers Management', and 'Competitive Analysis' features is a good enhancement. From an architectural perspective, consider adding a feature under 'Deployment and Infrastructure' for 'Disaster Recovery Planning' to ensure business continuity in case of unforeseen events. Also, under 'Order Management', consider adding 'Delivery Driver Management' to handle delivery logistics.",
+                        "feedbackBy": "SENIOR_ARCHITECT"
+                    }
+                ]
+            };
+
+            // Function to render the progress tracker UI
+            function renderRoles() {
+                rolesTracker.innerHTML = '';
+                roles.forEach((role, index) => {
+                    const statusColor = {
+                        'waiting': 'bg-gray-400',
+                        'progress': 'bg-blue-500',
+                        'finished': 'bg-green-500'
+                    };
+                    const statusText = {
+                        'waiting': 'Waiting',
+                        'progress': 'In Progress',
+                        'finished': 'Finished'
+                    };
+                    const statusIcon = {
+                        'waiting': `<svg class="w-5 h-5 text-gray-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+                        'progress': `<svg class="animate-spin w-5 h-5 text-white" viewBox="0 0 24 24"><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`,
+                        'finished': `<svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
+                    };
+
+                    const roleDiv = document.createElement('div');
+                    roleDiv.className = `flex flex-col items-center relative z-10 w-full md:w-auto mb-6 md:mb-0 transition-all duration-500`;
+                    roleDiv.innerHTML = `
+                        <div class="relative w-12 h-12 flex items-center justify-center rounded-full ${statusColor[role.status]} mb-2">
+                            ${statusIcon[role.status]}
+                            ${role.status === 'progress' ? `<span class="step-circle absolute w-full h-full rounded-full ${statusColor[role.status]} opacity-75"></span>` : ''}
+                        </div>
+                        <span class="text-xs font-semibold text-center mt-1 text-gray-500">${role.name}</span>
+                        <span class="text-xs text-center text-gray-400">${statusText[role.status]}</span>
+                    `;
+                    rolesTracker.appendChild(roleDiv);
+                });
+            }
+
+            // Function to render the project plan
+            function renderPlan(plan) {
+                planContent.innerHTML = '';
+
+                const planTitle = document.createElement('h3');
+                planTitle.className = "text-3xl font-bold text-gray-900 mb-6 border-b pb-4";
+                planTitle.textContent = plan.projectTitle || "Untitled Project Plan";
+                planContent.appendChild(planTitle);
+
+                // Epics Section
+                if (plan.epics && plan.epics.length > 0) {
+                    const epicsTitle = document.createElement('h4');
+                    epicsTitle.className = "text-2xl font-semibold text-gray-700 mt-8 mb-4";
+                    epicsTitle.textContent = "Epics & Features";
+                    planContent.appendChild(epicsTitle);
+
+                    plan.epics.forEach(epic => {
+                        const epicDiv = document.createElement('div');
+                        epicDiv.className = "mb-6 p-6 bg-white rounded-lg shadow-sm border border-gray-200 epic-item";
+                        epicDiv.innerHTML = `
+                            <div class="flex items-center justify-between cursor-pointer">
+                                <div>
+                                    <h5 class="text-xl font-bold text-blue-700">${epic.name}</h5>
+                                    <p class="text-sm text-gray-500 mt-1">${epic.estimatedDays} days</p>
+                                </div>
+                                <span class="text-2xl text-gray-500 toggle-epic" data-target="epic-${epic.name.replace(/\s/g, '-')}" data-expanded="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform transition-transform duration-300 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div id="epic-${epic.name.replace(/\s/g, '-')}" class="mt-4 transition-all duration-300">
+                                <p class="text-gray-600 mb-4">${epic.description}</p>
+                                <h6 class="text-lg font-semibold text-gray-600 mb-2 border-b pb-2">Features</h6>
+                                <div class="space-y-3">
+                                    ${epic.features.map(feature => `
+                                        <div class="p-4 bg-gray-100 rounded-md border border-gray-200 feature-item">
+                                            <p class="font-semibold text-gray-800">${feature.name}</p>
+                                            <p class="text-sm text-gray-500">${feature.description}</p>
+                                            <p class="text-xs text-gray-400 mt-2">Type: ${feature.featureType} | Est. Days: ${feature.estimatedDays}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                        planContent.appendChild(epicDiv);
+                    });
+                }
+
+                // Feedback Section
+                if (plan.feedbackIterations && plan.feedbackIterations.length > 0) {
+                    const feedbackTitle = document.createElement('h4');
+                    feedbackTitle.className = "text-2xl font-semibold text-gray-700 mt-8 mb-4";
+                    feedbackTitle.textContent = "Feedback & Iterations";
+                    planContent.appendChild(feedbackTitle);
+
+                    plan.feedbackIterations.forEach(feedback => {
+                        const feedbackDiv = document.createElement('div');
+                        feedbackDiv.className = "mb-4 p-4 bg-gray-100 rounded-lg shadow-sm border border-gray-200";
+                        feedbackDiv.innerHTML = `
+                            <div class="flex items-center mb-2">
+                                <span class="text-sm font-bold text-blue-600">Iteration ${feedback.iteration}</span>
+                                <span class="ml-2 text-sm text-gray-500">- Feedback by: ${feedback.feedbackBy.replace(/_/g, ' ').toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')}</span>
+                            </div>
+                            <p class="text-gray-700">${feedback.comments}</p>
+                        `;
+                        planContent.appendChild(feedbackDiv);
+                    });
+                }
+
+                // Add event listeners for collapsible epics
+                document.querySelectorAll('.toggle-epic').forEach(toggle => {
+                    toggle.addEventListener('click', (event) => {
+                        const targetId = event.currentTarget.dataset.target;
+                        const targetEl = document.getElementById(targetId);
+                        const isExpanded = event.currentTarget.dataset.expanded === 'true';
+
+                        if (isExpanded) {
+                            targetEl.style.height = '0';
+                            targetEl.style.overflow = 'hidden';
+                            targetEl.classList.add('opacity-0');
+                            event.currentTarget.dataset.expanded = 'false';
+                            event.currentTarget.querySelector('svg').style.transform = 'rotate(0deg)';
+                        } else {
+                            targetEl.style.height = 'auto';
+                            targetEl.style.overflow = 'visible';
+                            targetEl.classList.remove('opacity-0');
+                            event.currentTarget.dataset.expanded = 'true';
+                            event.currentTarget.querySelector('svg').style.transform = 'rotate(180deg)';
+                        }
+                    });
+                });
+            }
+
+            // Function to simulate the review process and call the LLM
+            async function generatePlan() {
+                const requirements = requirementsTextarea.value.trim();
+                if (!requirements) {
+                    showToast("Please enter project requirements to generate a plan.");
+                    return;
+                }
+
+                generateButton.disabled = true;
+                generateButton.textContent = "Generating...";
+                showToast("Generating plan...");
+
+                // Reset roles to waiting state
+                roles.forEach(role => role.status = 'waiting');
+                renderRoles();
+
+                // Simulate review process
+                for (let i = 0; i < roles.length; i++) {
+                    roles[i].status = 'progress';
+                    renderRoles();
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    roles[i].status = 'finished';
+                    renderRoles();
+                }
+
+                // Define the JSON schema for the LLM response
+                const responseSchema = {
+                    "type": "OBJECT",
+                    "properties": {
+                        "projectTitle": { "type": "STRING" },
+                        "epics": {
+                            "type": "ARRAY",
+                            "items": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "name": { "type": "STRING" },
+                                    "description": { "type": "STRING" },
+                                    "features": {
+                                        "type": "ARRAY",
+                                        "items": {
+                                            "type": "OBJECT",
+                                            "properties": {
+                                                "name": { "type": "STRING" },
+                                                "description": { "type": "STRING" },
+                                                "featureType": { "type": "STRING" },
+                                                "estimatedDays": { "type": "STRING" }
+                                            }
+                                        }
+                                    },
+                                    "estimatedDays": { "type": "STRING" }
+                                }
+                            }
+                        },
+                        "feedbackIterations": {
+                            "type": "ARRAY",
+                            "items": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "iteration": { "type": "NUMBER" },
+                                    "comments": { "type": "STRING" },
+                                    "feedbackBy": { "type": "STRING" }
+                                }
+                            }
+                        }
+                    },
+                    "propertyOrdering": ["projectTitle", "epics", "feedbackIterations"]
+                };
+
+                const userQuery = `Generate a comprehensive project plan for the following project requirements. 
+                The plan must strictly follow the provided JSON schema. 
+                Project Requirements: ${requirements}
+                
+                The plan should include a project title, a list of epics, each with a description and a list of features. Each feature must have a name, description, featureType (e.g., 'Implementation', 'Discovery', 'Testing'), and estimatedDays.
+                
+                Also, include a 'feedbackIterations' array that simulates feedback from different roles. The roles are:
+                1. TECHNICAL_MANAGER
+                2. SENIOR_ARCHITECT
+                3. BUSINESS_ANALYST_PRODUCT_OWNER
+                4. SENIOR_TECHNICAL_LEAD
+                5. QA_LEAD_AND_TESTER
+                6. DEVOPS_ENGINEER
+                7. SENIOR_DEVELOPER
+                
+                Create at least 3 detailed feedback iterations based on a realistic project lifecycle.`;
+
+                try {
+                    const apiKey = "AIzaSyBsPRPlFDjG504huzQ4OzFnrGxlPKYtWsg";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                    const payload = {
+                        contents: [{ parts: [{ text: userQuery }] }],
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: responseSchema
+                        }
+                    };
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const jsonString = result.candidates[0].content.parts[0].text;
+                        const generatedPlan = JSON.parse(jsonString);
+                        renderPlan(generatedPlan);
+                        showToast("Plan generated successfully!");
+                    } else {
+                        throw new Error('Failed to generate plan.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast("Error generating plan. Please try again.");
+                    // Revert to sample plan on error
+                    renderPlan(samplePlan);
+                } finally {
+                    generateButton.disabled = false;
+                    generateButton.textContent = "Generate Plan";
+                }
+            }
+
+            generateButton.addEventListener('click', generatePlan);
+
+            // Initial render of roles and sample plan
+            renderRoles();
+            renderPlan(samplePlan);
+
+
+            
+        });
+        showToast("Please enter project requirements to generate a plan.");
+    </script>
+</body>
+</html>

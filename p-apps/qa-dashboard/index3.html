@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlassQA - Automation Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        glass: {
+                            100: 'rgba(255, 255, 255, 0.05)',
+                            200: 'rgba(255, 255, 255, 0.1)',
+                            300: 'rgba(255, 255, 255, 0.2)',
+                            border: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        neon: {
+                            blue: '#3b82f6',
+                            purple: '#8b5cf6',
+                            green: '#10b981',
+                            red: '#ef4444',
+                            pink: '#ec4899'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+        }
+
+        .glass-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .glass-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Branching Line */
+        .branch-line {
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            width: 20px;
+            height: 2px;
+            background: rgba(139, 92, 246, 0.3);
+        }
+        
+        .branch-vertical {
+            position: absolute;
+            left: -20px;
+            top: -50%;
+            bottom: 50%;
+            width: 2px;
+            background: rgba(139, 92, 246, 0.3);
+        }
+
+        .step-connector {
+            position: absolute;
+            left: 24px;
+            top: 40px;
+            bottom: -20px;
+            width: 2px;
+            background: rgba(255,255,255,0.1);
+            z-index: 0;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .drawer-hidden { transform: translateX(100%); }
+        .drawer-visible { transform: translateX(0); }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden selection:bg-neon-purple selection:text-white">
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass-panel flex flex-col z-20">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center shadow-lg shadow-neon-purple/20">
+                <i class="fa-solid fa-cube text-white text-lg"></i>
+            </div>
+            <h1 class="font-bold text-xl tracking-wide glow-text">GlassQA</h1>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-2 mt-4">
+            <button onclick="router.navigate('dashboard')" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-gray-400 hover:text-white hover:bg-white/5 active-nav" id="nav-dashboard">
+                <i class="fa-solid fa-chart-pie w-5"></i>
+                <span class="font-medium">Dashboard</span>
+            </button>
+            <button onclick="router.navigate('journeys')" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-gray-400 hover:text-white hover:bg-white/5" id="nav-journeys">
+                <i class="fa-solid fa-road w-5"></i>
+                <span class="font-medium">User Journeys</span>
+            </button>
+            <button onclick="router.navigate('schedule')" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-gray-400 hover:text-white hover:bg-white/5" id="nav-schedule">
+                <i class="fa-solid fa-calendar-clock w-5"></i>
+                <span class="font-medium">Scheduler</span>
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-white/5">
+            <div class="glass-card p-3 rounded-xl flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-neon-green/20 text-neon-green flex items-center justify-center text-xs border border-neon-green/30">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400">System Status</div>
+                    <div class="text-xs font-semibold text-neon-green">Operational</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col relative overflow-hidden">
+        <header class="h-16 glass-panel border-b border-white/5 flex items-center justify-between px-8 z-10">
+            <h2 id="page-title" class="text-lg font-medium text-white/90">Dashboard</h2>
+            <div class="flex items-center gap-4">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-r from-gray-700 to-gray-600 border border-white/10"></div>
+            </div>
+        </header>
+
+        <div id="content-area" class="flex-1 overflow-y-auto p-8 relative"></div>
+
+        <!-- Right Side Drawer -->
+        <div id="side-drawer" class="fixed right-0 top-0 bottom-0 w-96 glass-panel z-50 drawer-hidden transition-transform duration-300 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] flex flex-col">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <h3 id="drawer-title" class="text-lg font-bold text-white">Configure Step</h3>
+                <button onclick="closeDrawer()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-times text-xl"></i></button>
+            </div>
+            <div id="drawer-body" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
+            <div class="p-6 border-t border-white/10 flex gap-3">
+                <button onclick="saveStep()" class="flex-1 bg-neon-purple py-2 rounded-lg font-medium text-white hover:bg-neon-purple/80 transition-all">Apply Changes</button>
+                <button onclick="closeDrawer()" class="px-4 py-2 glass-btn rounded-lg text-sm">Cancel</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentEditingJourneyId = null;
+        let currentEditingStepIndex = null;
+
+        const store = {
+            journeys: [
+                {
+                    id: 1,
+                    name: "E-Commerce Checkout Flow",
+                    status: "passed",
+                    metrics: { load: "1.2s", network: "3.4MB" },
+                    steps: [
+                        { id: 's1', type: 'navigate', action: 'Go to URL', value: 'https://store.demo.com/home' },
+                        { id: 's2', type: 'action', action: 'Click', target: '#search-btn' },
+                        { id: 's3', type: 'condition', action: 'If Popup Exists', target: '.newsletter-modal' },
+                        { id: 's4', type: 'action', action: 'Click', target: '.close-btn', parentId: 's3' },
+                        { id: 's5', type: 'assertion', action: 'Assert Gone', target: '.newsletter-modal', parentId: 's3' },
+                        { id: 's6', type: 'input', action: 'Type', target: '#search-input', value: 'Headphones' },
+                        { id: 's7', type: 'assertion', action: 'Assert Text', target: '.results-count', value: '> 0' }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: "User Authentication",
+                    status: "failed",
+                    metrics: { load: "0.8s", network: "1.1MB" },
+                    steps: [
+                        { id: 'a1', type: 'navigate', action: 'Go to URL', value: '/login' },
+                        { id: 'a2', type: 'input', action: 'Type', target: '#email', value: 'admin@test.com' }
+                    ]
+                }
+            ]
+        };
+
+        const router = {
+            current: 'dashboard',
+            navigate(page, params = null) {
+                this.current = page;
+                const content = document.getElementById('content-area');
+                const title = document.getElementById('page-title');
+                content.innerHTML = '';
+                if (page === 'dashboard') { title.textContent = "Dashboard"; renderDashboard(content); }
+                else if (page === 'journeys') { title.textContent = "User Journeys"; renderJourneysList(content); }
+                else if (page === 'builder') { title.textContent = "Journey Builder"; renderBuilder(content, params); }
+            }
+        };
+
+        function renderDashboard(container) {
+            container.innerHTML = `<div class="p-4 text-gray-400">Select "User Journeys" to explore the branching builder logic.</div>`;
+        }
+
+        function renderJourneysList(container) {
+            container.innerHTML = `
+                <div class="flex justify-between items-center mb-6 slide-in">
+                    <h1 class="text-2xl font-bold">Automation Journeys</h1>
+                </div>
+                <div class="space-y-4">
+                    ${store.journeys.map(j => `
+                        <div class="glass-panel p-5 rounded-xl flex items-center justify-between group cursor-pointer" onclick="router.navigate('builder', ${j.id})">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-neon-blue"><i class="fa-solid fa-route"></i></div>
+                                <div><h3 class="font-medium">${j.name}</h3></div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-gray-600 group-hover:text-white transition-all"></i>
+                        </div>
+                    `).join('')}
+                </div>`;
+        }
+
+        function renderBuilder(container, journeyId) {
+            const journey = store.journeys.find(j => j.id === journeyId);
+            const icons = { navigate: 'fa-globe', action: 'fa-mouse-pointer', input: 'fa-keyboard', condition: 'fa-code-branch', assertion: 'fa-check-double' };
+
+            container.innerHTML = `
+                <div class="flex h-full gap-6 slide-in">
+                    <div class="flex-1 flex flex-col">
+                        <div class="flex items-center justify-between mb-6">
+                            <h1 class="text-2xl font-bold flex items-center gap-3">
+                                <button onclick="router.navigate('journeys')" class="text-gray-500 hover:text-white"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+                                ${journey.name}
+                            </h1>
+                            <button onclick="openDrawer(${journeyId})" class="bg-neon-blue px-4 py-2 rounded-lg text-sm font-medium">Add Root Step</button>
+                        </div>
+
+                        <div class="glass-panel flex-1 rounded-xl overflow-hidden flex flex-col">
+                            <div id="steps-container" class="overflow-y-auto p-8 space-y-4">
+                                ${renderStepNodes(journey.steps, journeyId, icons)}
+                                <div class="py-8 border-2 border-dashed border-white/5 rounded-xl flex flex-col items-center justify-center text-gray-600 hover:text-gray-400 hover:bg-white/5 transition-all cursor-pointer" onclick="openDrawer(${journeyId})">
+                                    <i class="fa-solid fa-plus-circle text-2xl mb-2"></i>
+                                    <span>Append a new root node</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function renderStepNodes(steps, journeyId, icons) {
+            // Helper to determine if a node is a child
+            const getChildren = (parentId) => steps.filter(s => s.parentId === parentId);
+            const roots = steps.filter(s => !s.parentId);
+
+            const buildHtml = (nodes, depth = 0) => {
+                return nodes.map((step, index) => {
+                    const children = getChildren(step.id);
+                    const isCondition = step.type === 'condition';
+                    
+                    return `
+                        <div class="relative" style="margin-left: ${depth * 48}px">
+                            ${depth > 0 ? '<div class="branch-vertical"></div><div class="branch-line"></div>' : ''}
+                            <div class="relative z-10 flex items-center gap-4 p-4 rounded-xl glass-card cursor-pointer border-l-4 ${isCondition ? 'border-neon-purple shadow-[0_0_15px_rgba(139,92,246,0.1)]' : 'border-white/10'}" 
+                                 onclick="openDrawer(${journeyId}, ${steps.indexOf(step)})">
+                                
+                                <div class="w-10 text-center">
+                                    <i class="fa-solid ${icons[step.type]} ${isCondition ? 'text-neon-purple' : 'text-gray-400'}"></i>
+                                </div>
+                                
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-bold text-white">${step.action}</span>
+                                        ${isCondition ? '<span class="px-2 py-0.5 rounded bg-neon-purple/20 text-[10px] text-neon-purple font-bold">BRANCH</span>' : ''}
+                                    </div>
+                                    <div class="text-xs text-gray-500 truncate max-w-md italic">
+                                        ${step.target ? `Target: ${step.target}` : ''} ${step.value ? ` | Value: ${step.value}` : ''}
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    ${isCondition ? `<button onclick="event.stopPropagation(); openDrawer(${journeyId}, null, '${step.id}')" class="w-8 h-8 rounded glass-btn text-neon-blue" title="Add nested step"><i class="fa-solid fa-plus text-xs"></i></button>` : ''}
+                                    <button onclick="event.stopPropagation(); deleteStep(${journeyId}, ${steps.indexOf(step)})" class="w-8 h-8 rounded glass-btn text-neon-red"><i class="fa-regular fa-trash-can text-xs"></i></button>
+                                </div>
+                            </div>
+                            
+                            ${children.length > 0 ? `<div class="mt-4 space-y-4">${buildHtml(children, depth + 1)}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            };
+
+            return buildHtml(roots);
+        }
+
+        function openDrawer(journeyId, index = null, parentId = null) {
+            currentEditingJourneyId = journeyId;
+            currentEditingStepIndex = index;
+            const drawer = document.getElementById('side-drawer');
+            const body = document.getElementById('drawer-body');
+            const journey = store.journeys.find(j => j.id === journeyId);
+            
+            let step = { type: 'action', action: 'Click', target: '', value: '', parentId: parentId };
+            if (index !== null) step = journey.steps[index];
+
+            document.getElementById('drawer-title').textContent = index !== null ? "Edit Step" : (parentId ? "Add Logic Branch" : "Add Root Step");
+
+            body.innerHTML = `
+                <input type="hidden" id="step-parent-id" value="${step.parentId || ''}">
+                <div>
+                    <label class="text-xs text-gray-500 uppercase font-bold mb-2 block">Step Category</label>
+                    <select id="step-type" class="w-full glass-input p-3 rounded-lg text-sm" onchange="updateDrawerFields()">
+                        <option value="navigate" ${step.type === 'navigate' ? 'selected' : ''}>Navigation</option>
+                        <option value="action" ${step.type === 'action' ? 'selected' : ''}>User Action</option>
+                        <option value="input" ${step.type === 'input' ? 'selected' : ''}>Input/Form</option>
+                        <option value="assertion" ${step.type === 'assertion' ? 'selected' : ''}>Assertion</option>
+                        <option value="condition" ${step.type === 'condition' ? 'selected' : ''}>Logic/Condition</option>
+                    </select>
+                </div>
+                <div id="dynamic-fields" class="space-y-4"></div>
+            `;
+            
+            updateDrawerFields(step);
+            drawer.classList.remove('drawer-hidden');
+        }
+
+        function updateDrawerFields(existingStep = null) {
+            const type = document.getElementById('step-type').value;
+            const container = document.getElementById('dynamic-fields');
+            const actions = {
+                navigate: ['Go to URL', 'Refresh'],
+                action: ['Click', 'Hover', 'Wait'],
+                input: ['Type', 'Select'],
+                assertion: ['Assert Visible', 'Assert Text', 'Assert Gone'],
+                condition: ['If Element Exists', 'If Text Matches']
+            };
+
+            container.innerHTML = `
+                <div>
+                    <label class="text-xs text-gray-500 uppercase font-bold mb-2 block">Action</label>
+                    <select id="step-action" class="w-full glass-input p-3 rounded-lg text-sm">
+                        ${actions[type].map(a => `<option value="${a}" ${existingStep?.action === a ? 'selected' : ''}>${a}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 uppercase font-bold mb-2 block">Selector</label>
+                    <input id="step-target" type="text" value="${existingStep?.target || ''}" class="w-full glass-input p-3 rounded-lg text-sm">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 uppercase font-bold mb-2 block">Value</label>
+                    <input id="step-value" type="text" value="${existingStep?.value || ''}" class="w-full glass-input p-3 rounded-lg text-sm">
+                </div>
+            `;
+        }
+
+        function saveStep() {
+            const journey = store.journeys.find(j => j.id === currentEditingJourneyId);
+            const parentId = document.getElementById('step-parent-id').value;
+            const newStep = {
+                id: currentEditingStepIndex !== null ? journey.steps[currentEditingStepIndex].id : 's' + Date.now(),
+                type: document.getElementById('step-type').value,
+                action: document.getElementById('step-action').value,
+                target: document.getElementById('step-target').value,
+                value: document.getElementById('step-value').value,
+                parentId: parentId || undefined
+            };
+
+            if (currentEditingStepIndex !== null) journey.steps[currentEditingStepIndex] = newStep;
+            else journey.steps.push(newStep);
+            
+            closeDrawer();
+            router.navigate('builder', currentEditingJourneyId);
+        }
+
+        function deleteStep(journeyId, index) {
+            const journey = store.journeys.find(j => j.id === journeyId);
+            const stepId = journey.steps[index].id;
+            // Remove the step and all its recursive children
+            journey.steps = journey.steps.filter(s => s.id !== stepId && s.parentId !== stepId);
+            router.navigate('builder', journeyId);
+        }
+
+        function closeDrawer() {
+            document.getElementById('side-drawer').classList.add('drawer-hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => router.navigate('dashboard'));
+    </script>
+</body>
+</html>

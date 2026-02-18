@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JourneyMapper - Mobile Responsive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        glass: 'rgba(255, 255, 255, 0.05)',
+                        neonBlue: '#3b82f6',
+                        darkBg: '#0f172a',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            background-color: #020617;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-node {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s, border-color 0.2s;
+            touch-action: none;
+        }
+
+        /* Responsive Grid Background */
+        .grid-bg {
+            background-size: 50px 50px;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        /* SVG Connection Styling */
+        svg#connections-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3000px; /* Large canvas area */
+            height: 3000px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .connection-path {
+            fill: none;
+            stroke-width: 3px;
+            stroke-linecap: round;
+            transition: stroke 0.4s, stroke-width 0.3s;
+        }
+
+        .path-active {
+            stroke-dasharray: 12, 12;
+            animation: dash 1s linear infinite;
+            stroke: #60a5fa !important;
+            stroke-width: 5px;
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: -24; }
+        }
+
+        /* Node Animations */
+        @keyframes pulse-test {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+            70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+
+        .testing-pulse { animation: pulse-test 1.2s infinite; border-color: #3b82f6 !important; }
+
+        /* Mobile specific adjustments */
+        #viewport {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #world {
+            position: absolute;
+            width: 3000px;
+            height: 3000px;
+            transform-origin: 0 0;
+            cursor: grab;
+        }
+
+        #world:active { cursor: grabbing; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- Header UI -->
+    <div class="fixed top-0 left-0 w-full z-50 p-3 md:p-6 pointer-events-none">
+        <div class="glass-panel max-w-4xl mx-auto rounded-2xl md:rounded-full px-4 md:px-8 py-3 flex flex-wrap items-center justify-between gap-3 pointer-events-auto shadow-2xl">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-sm">JM</div>
+                <h1 class="font-bold text-sm md:text-base hidden sm:block">JourneyMapper</h1>
+            </div>
+
+            <div class="flex items-center gap-4 md:gap-8">
+                <div class="text-center">
+                    <div class="text-[10px] text-gray-400 uppercase font-bold">Coverage</div>
+                    <div id="stat-avg" class="text-emerald-400 font-bold text-sm md:text-lg">--%</div>
+                </div>
+                <div class="h-8 w-[1px] bg-white/10"></div>
+                <button id="run-btn" onclick="runTests()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-bold transition-all flex items-center gap-2">
+                    <span id="run-icon">▶</span> Run Tests
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Scrolalble Viewport -->
+    <div id="viewport">
+        <div id="world" class="grid-bg">
+            <svg id="connections-layer"></svg>
+            <div id="nodes-container" class="relative w-full h-full"></div>
+        </div>
+    </div>
+
+    <!-- Node Details Side Panel -->
+    <div id="side-panel" class="fixed top-24 right-4 bottom-4 w-[calc(100vw-32px)] md:w-80 glass-panel rounded-2xl p-6 z-50 transform translate-x-[120%] transition-transform duration-500 ease-in-out">
+        <div class="flex justify-between items-start mb-6">
+            <h2 class="text-xl font-bold">Details</h2>
+            <button onclick="closePanel()" class="text-gray-400 p-1 hover:text-white">✕</button>
+        </div>
+        <div id="panel-body" class="space-y-6"></div>
+    </div>
+
+    <!-- Legend & Help -->
+    <div class="fixed bottom-6 left-6 z-40 hidden md:block">
+        <div class="glass-panel p-3 rounded-lg text-[10px] text-gray-400 flex flex-col gap-1">
+            <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> High Coverage (>80%)</div>
+            <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-amber-500"></div> Partial (>50%)</div>
+            <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-red-500"></div> Low/Untested</div>
+            <div class="mt-2 opacity-50 italic">Drag board to explore • Tap nodes for details</div>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            nodes: [
+                { id: 'n1', label: 'Home Page', type: 'page', x: 200, y: 300, cov: 95, icon: '🏠' },
+                { id: 'n2', label: 'Auth Click', type: 'action', x: 450, y: 200, cov: 88, icon: '🖱️' },
+                { id: 'n3', label: 'Login Form', type: 'page', x: 700, y: 200, cov: 45, icon: '📝' },
+                { id: 'n4', label: 'Dashboard', type: 'page', x: 1000, y: 350, cov: 100, icon: '📊' },
+                { id: 'n5', label: 'Signup Click', type: 'action', x: 450, y: 450, cov: 100, icon: '🖱️' },
+                { id: 'n6', label: 'Signup Form', type: 'page', x: 700, y: 450, cov: 72, icon: '📝' },
+                { id: 'n7', label: 'Verify Email', type: 'action', x: 1250, y: 350, cov: 30, icon: '📧' }
+            ],
+            edges: [
+                { id: 'e1', from: 'n1', to: 'n2' }, { id: 'e2', from: 'n2', to: 'n3' },
+                { id: 'e3', from: 'n3', to: 'n4' }, { id: 'e4', from: 'n1', to: 'n5' },
+                { id: 'e5', from: 'n5', to: 'n6' }, { id: 'e6', from: 'n6', to: 'n4' },
+                { id: 'e7', from: 'n4', to: 'n7' }
+            ],
+            pan: { x: 50, y: 50 },
+            isPanning: false,
+            startPos: { x: 0, y: 0 },
+            activeEdges: new Set(),
+            testingNodes: new Set(),
+            running: false
+        };
+
+        const world = document.getElementById('world');
+        const nodesContainer = document.getElementById('nodes-container');
+        const svgLayer = document.getElementById('connections-layer');
+
+        function init() {
+            render();
+            updateGlobalStats();
+            setupEvents();
+            
+            // Initial positioning for mobile - center on first node
+            if(window.innerWidth < 768) {
+                state.pan = { x: 20, y: 50 };
+                updateWorldTransform();
+            }
+        }
+
+        function render() {
+            // Nodes
+            nodesContainer.innerHTML = '';
+            state.nodes.forEach(n => {
+                const isTesting = state.testingNodes.has(n.id);
+                const colorClass = n.cov > 80 ? 'bg-emerald-500' : (n.cov > 50 ? 'bg-amber-500' : 'bg-red-500');
+                
+                const nodeEl = document.createElement('div');
+                nodeEl.className = `glass-node absolute w-48 p-4 rounded-xl cursor-pointer ${isTesting ? 'testing-pulse' : ''}`;
+                nodeEl.style.left = `${n.x}px`;
+                nodeEl.style.top = `${n.y}px`;
+                
+                nodeEl.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl">${n.icon}</div>
+                        <div class="flex-1">
+                            <div class="text-[9px] uppercase font-bold text-gray-500 tracking-widest">${n.type}</div>
+                            <div class="text-sm font-bold leading-tight">${n.label}</div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <div class="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+                                    <div class="h-full ${colorClass}" style="width: ${n.cov}%"></div>
+                                </div>
+                                <span class="text-[10px] font-mono text-gray-400">${n.cov}%</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                nodeEl.onclick = (e) => {
+                    e.stopPropagation();
+                    showDetails(n);
+                };
+                nodesContainer.appendChild(nodeEl);
+            });
+
+            // Edges
+            svgLayer.innerHTML = '';
+            state.edges.forEach(edge => {
+                const from = state.nodes.find(n => n.id === edge.from);
+                const to = state.nodes.find(n => n.id === edge.to);
+                
+                if (from && to) {
+                    const fx = from.x + 192; // Right edge of node
+                    const fy = from.y + 42;  // Center height of node
+                    const tx = to.x;         // Left edge of node
+                    const ty = to.y + 42;
+
+                    const dx = Math.abs(tx - fx);
+                    const ctrl = Math.max(dx * 0.5, 60);
+                    const pathD = `M ${fx} ${fy} C ${fx + ctrl} ${fy}, ${tx - ctrl} ${ty}, ${tx} ${ty}`;
+
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    path.setAttribute("d", pathD);
+                    const isActive = state.activeEdges.has(edge.id);
+                    const colorClass = isActive ? 'path-active' : (from.cov > 80 ? 'coverage-high' : 'coverage-med');
+                    
+                    // Standard colors for SVG
+                    const strokeColor = isActive ? '#3b82f6' : (from.cov > 80 ? '#10b981' : '#f59e0b');
+                    if (from.cov <= 50) path.setAttribute('stroke', '#ef4444');
+                    else path.setAttribute('stroke', strokeColor);
+
+                    path.setAttribute("class", `connection-path ${isActive ? 'path-active' : ''}`);
+                    svgLayer.appendChild(path);
+                }
+            });
+        }
+
+        function updateWorldTransform() {
+            world.style.transform = `translate(${state.pan.x}px, ${state.pan.y}px)`;
+        }
+
+        function setupEvents() {
+            const handleStart = (e) => {
+                state.isPanning = true;
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                state.startPos = { x: clientX - state.pan.x, y: clientY - state.pan.y };
+            };
+
+            const handleMove = (e) => {
+                if (!state.isPanning) return;
+                const clientX = e.clientX || e.touches?.[0].clientX;
+                const clientY = e.clientY || e.touches?.[0].clientY;
+                if(clientX === undefined) return;
+                
+                state.pan.x = clientX - state.startPos.x;
+                state.pan.y = clientY - state.startPos.y;
+                updateWorldTransform();
+            };
+
+            const handleEnd = () => state.isPanning = false;
+
+            document.getElementById('viewport').addEventListener('mousedown', handleStart);
+            document.getElementById('viewport').addEventListener('touchstart', handleStart);
+            window.addEventListener('mousemove', handleMove);
+            window.addEventListener('touchmove', handleMove);
+            window.addEventListener('mouseup', handleEnd);
+            window.addEventListener('touchend', handleEnd);
+        }
+
+        async function runTests() {
+            if (state.running) return;
+            state.running = true;
+            
+            const btn = document.getElementById('run-btn');
+            const icon = document.getElementById('run-icon');
+            btn.classList.add('opacity-50', 'pointer-events-none');
+            icon.textContent = '⌛';
+
+            // Reset scores
+            state.nodes.forEach(n => n.cov = 0);
+            render();
+
+            const layers = [
+                { nodes: ['n1'], edges: [] },
+                { nodes: ['n2', 'n5'], edges: ['e1', 'e4'] },
+                { nodes: ['n3', 'n6'], edges: ['e2', 'e5'] },
+                { nodes: ['n4'], edges: ['e3', 'e6'] },
+                { nodes: ['n7'], edges: ['e7'] }
+            ];
+
+            for (const layer of layers) {
+                layer.edges.forEach(e => state.activeEdges.add(e));
+                layer.nodes.forEach(n => state.testingNodes.add(n));
+                render();
+                
+                await new Promise(r => setTimeout(r, 800));
+                
+                layer.nodes.forEach(nId => {
+                    const n = state.nodes.find(node => node.id === nId);
+                    n.cov = Math.floor(Math.random() * 50) + 50;
+                    state.testingNodes.delete(nId);
+                });
+                layer.edges.forEach(e => state.activeEdges.delete(e));
+                updateGlobalStats();
+                render();
+            }
+
+            btn.classList.remove('opacity-50', 'pointer-events-none');
+            icon.textContent = '▶';
+            state.running = false;
+        }
+
+        function updateGlobalStats() {
+            const avg = Math.round(state.nodes.reduce((a, b) => a + b.cov, 0) / state.nodes.length);
+            document.getElementById('stat-avg').textContent = avg + '%';
+        }
+
+        function showDetails(node) {
+            const panel = document.getElementById('side-panel');
+            const body = document.getElementById('panel-body');
+            
+            body.innerHTML = `
+                <div class="flex items-center gap-4">
+                    <div class="text-4xl">${node.icon}</div>
+                    <div>
+                        <div class="text-2xl font-bold">${node.label}</div>
+                        <div class="text-sm text-gray-400 uppercase tracking-widest">${node.type}</div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-600/10 border border-blue-500/20 p-4 rounded-xl">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-gray-400 uppercase">Test Coverage</span>
+                        <span class="text-xl font-bold text-blue-400">${node.cov}%</span>
+                    </div>
+                    <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-500 transition-all duration-700" style="width: ${node.cov}%"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Active Test Scenarios</div>
+                    ${['E2E Journey #12', 'Sanity Flow 4', 'Edge Case: Timeout'].map(t => `
+                        <div class="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/5">
+                            <span class="text-sm text-gray-300">${t}</span>
+                            <span class="text-[10px] text-emerald-400 font-bold">STABLE</span>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <button class="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-semibold transition-all">
+                    View Full Trace Logs
+                </button>
+            `;
+            
+            panel.classList.remove('translate-x-[120%]');
+        }
+
+        function closePanel() {
+            document.getElementById('side-panel').classList.add('translate-x-[120%]');
+        }
+
+        init();
+        updateWorldTransform();
+    </script>
+</body>
+</html>
+

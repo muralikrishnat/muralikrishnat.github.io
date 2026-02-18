@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Chat UI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden; /* Prevent body scroll */
+        }
+        /* Custom scrollbar for chat history and messages */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            background-color: #f5f5f5;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            border-radius: 10px;
+            background-color: #cbd5e1; /* slate-300 */
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            border-radius: 10px;
+            background-color: #f5f5f5;
+        }
+        .chat-tab.active {
+            background-color: #e0f2fe; /* light-blue-100 */
+            border-bottom: 2px solid #3b82f6; /* blue-500 */
+        }
+        .sidebar.collapsed {
+            width: 4rem; /* Changed from 0 to 4rem (w-16) to keep button visible */
+            overflow: hidden;
+        }
+        /* Hide text content when sidebar is collapsed, but keep the toggle button */
+        .sidebar.collapsed .sidebar-content-hide {
+            display: none;
+        }
+        .message-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        textarea {
+            resize: vertical; /* Allow vertical resizing */
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar w-64 bg-white shadow-lg flex-shrink-0 transition-all duration-300 flex flex-col rounded-r-lg">
+        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+            <h2 class="text-xl font-semibold text-gray-800 sidebar-content-hide">Chat History</h2>
+            <button id="toggleSidebar" class="p-2 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <!-- Icon will change based on sidebar state -->
+                <i class="fas fa-chevron-left text-gray-600"></i>
+            </button>
+        </div>
+        <div class="p-4 space-y-2 sidebar-content-hide"> <!-- Container for bulk delete at the top of the content area in sidebar -->
+            <!-- Bulk Delete moved here -->
+            <button id="bulkDeleteButton" class="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors duration-200 shadow-md flex items-center justify-center space-x-2">
+                <i class="fas fa-trash"></i>
+                <span>Bulk Delete</span>
+            </button>
+            <div id="bulkDeleteActions" class="hidden mt-2 space-y-2">
+                <button id="confirmDeleteButton" class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors duration-200 shadow-md">
+                    Confirm Delete Selected
+                </button>
+                <button id="cancelDeleteButton" class="w-full bg-gray-400 text-white py-2 px-4 rounded-lg hover:bg-gray-500 transition-colors duration-200 shadow-md">
+                    Cancel
+                </button>
+            </div>
+        </div>
+        <div class="flex-1 overflow-y-auto custom-scrollbar px-4 pb-4 sidebar-content-hide">
+            <ul id="chatHistoryList" class="space-y-2">
+                <!-- Chat history items will be injected here by JS -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div id="mainContent" class="flex-1 flex flex-col transition-all duration-300">
+        <!-- Chat Tabs -->
+        <div id="chatTabsContainer" class="flex p-2 bg-white shadow-md border-b border-gray-200 overflow-x-auto custom-scrollbar">
+            <!-- New Chat tab button and other tabs will be injected here by JS -->
+        </div>
+
+        <!-- Chat Header / Options -->
+        <div class="p-4 bg-white shadow-md border-b border-gray-200 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-4">
+                <label for="vendorSelect" class="text-gray-700 font-medium">Vendor:</label>
+                <select id="vendorSelect" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-32 md:w-40">
+                    <option value="Google">Google</option>
+                    <option value="OpenAI">OpenAI</option>
+                    <option value="Anthropic">Anthropic</option>
+                    <option value="Blackbox">Blackbox</option>
+                </select>
+            </div>
+            <div class="flex items-center space-x-4">
+                <label for="modelSelect" class="text-gray-700 font-medium">LLM Model:</label>
+                <select id="modelSelect" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-32 md:w-40">
+                    <option value="Flash">Flash</option>
+                    <option value="O1">O1</option>
+                    <option value="Claude">Claude</option>
+                    <option value="GPT-4o">GPT-4o</option>
+                </select>
+            </div>
+            <div class="flex items-center space-x-4">
+                <label for="agentSelect" class="text-gray-700 font-medium">Agent Name:</label>
+                <select id="agentSelect" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-32 md:w-40">
+                    <option value="English Teacher">English Teacher</option>
+                    <option value="Local Guide">Local Guide</option>
+                    <option value="Web Developer">Web Developer</option>
+                    <option value="Creative Writer">Creative Writer</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div id="chatMessagesArea" class="flex-1 p-4 overflow-y-auto custom-scrollbar bg-gray-50">
+            <!-- Chat messages will be injected here by JS -->
+        </div>
+
+        <!-- Chat Input Area -->
+        <div class="p-4 bg-white shadow-md flex items-end rounded-t-lg">
+            <label for="fileUpload" class="cursor-pointer p-3 rounded-full hover:bg-gray-200 text-gray-600 mr-2">
+                <i class="fas fa-paperclip text-xl"></i>
+                <input type="file" id="fileUpload" class="hidden">
+            </label>
+            <textarea id="chatInput" placeholder="Type your message..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mr-4 text-gray-800 resize-y min-h-[44px] max-h-[150px]"></textarea>
+            <button id="sendMessageButton" class="bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors duration-200 shadow-md flex items-center space-x-2">
+                <i class="fas fa-paper-plane"></i>
+                <span>Send</span>
+            </button>
+            <div id="loadingIndicator" class="ml-4 hidden">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for confirmation/alerts (instead of alert/confirm) -->
+    <div id="customModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+            <p id="modalMessage" class="text-lg font-semibold mb-4 text-gray-800"></p>
+            <div id="modalContent" class="space-y-4 mb-4">
+                <!-- Dynamic content for new chat modal or other forms will go here -->
+            </div>
+            <div id="modalActions" class="flex justify-center space-x-4">
+                <button id="modalConfirmBtn" class="bg-blue-500 text-white py-2 px-5 rounded-lg hover:bg-blue-600 transition-colors duration-200 shadow-md">OK</button>
+                <button id="modalCancelBtn" class="bg-gray-400 text-white py-2 px-5 rounded-lg hover:bg-gray-500 transition-colors duration-200 shadow-md">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const toggleSidebarButton = document.getElementById('toggleSidebar');
+            const chatHistoryList = document.getElementById('chatHistoryList');
+            const chatTabsContainer = document.getElementById('chatTabsContainer');
+            const chatMessagesArea = document.getElementById('chatMessagesArea');
+            const chatInput = document.getElementById('chatInput');
+            const sendMessageButton = document.getElementById('sendMessageButton');
+            const vendorSelect = document.getElementById('vendorSelect');
+            const modelSelect = document.getElementById('modelSelect');
+            const agentSelect = document.getElementById('agentSelect');
+            const bulkDeleteButton = document.getElementById('bulkDeleteButton');
+            const bulkDeleteActions = document.getElementById('bulkDeleteActions');
+            const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+            const cancelDeleteButton = document.getElementById('cancelDeleteButton');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const fileUpload = document.getElementById('fileUpload');
+
+            // Custom Modal Elements
+            const customModal = document.getElementById('customModal');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalContent = document.getElementById('modalContent'); // New: for dynamic content in modal
+            const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+            const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+            let chatThreads = [];
+            let activeChatId = null;
+            let bulkDeleteMode = false;
+            let selectedForDelete = new Set();
+            let nextChatId = 1; // To generate unique IDs for new chats
+
+            // Dummy data for initial load
+            const initialDummyChatThreads = [
+                {
+                    id: 'chat-0',
+                    name: 'Initial Chat',
+                    vendor: 'Google',
+                    model: 'Flash',
+                    agent: 'English Teacher',
+                    messages: [
+                        { sender: 'llm', text: 'Hello! I am your English teacher. How can I help you improve your English today?' }
+                    ]
+                },
+                {
+                    id: 'chat-1',
+                    name: 'Web Dev Basics',
+                    vendor: 'OpenAI',
+                    model: 'O1',
+                    agent: 'Web Developer',
+                    messages: [
+                        { sender: 'user', text: 'Explain the concept of DOM in simple terms.' },
+                        { sender: 'llm', text: 'The Document Object Model (DOM) is a programming interface for web documents. It represents the page so that programs can change the document structure, style, and content.' },
+                        { sender: 'user', text: 'How do I add an event listener?' },
+                        { sender: 'llm', text: 'You can use `element.addEventListener(\'event\', handlerFunction);`' }
+                    ]
+                },
+                {
+                    id: 'chat-2',
+                    name: 'Travel Planning',
+                    vendor: 'Anthropic',
+                    model: 'Claude',
+                    agent: 'Local Guide',
+                    messages: [
+                        { sender: 'user', text: 'What are some must-visit places in Paris?' },
+                        { sender: 'llm', text: 'Paris is full of amazing sights! You should definitely visit the Eiffel Tower, the Louvre Museum, Notre Dame Cathedral, and stroll along the Seine River.' }
+                    ]
+                }
+            ];
+
+            // Helper function to show generic modal
+            function showModal(message, type = 'alert', onConfirm = () => {}, onCancel = () => {}, contentHTML = '') {
+                modalMessage.textContent = message;
+                modalContent.innerHTML = contentHTML; // Set dynamic content
+                
+                // Clear previous listeners to prevent multiple calls
+                modalConfirmBtn.onclick = null;
+                modalCancelBtn.onclick = null;
+
+                modalConfirmBtn.textContent = 'OK'; // Default text
+                modalConfirmBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                modalConfirmBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+
+                if (type === 'confirm') {
+                    modalConfirmBtn.textContent = 'Confirm';
+                    modalConfirmBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                    modalConfirmBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+                    modalCancelBtn.classList.remove('hidden');
+                    modalConfirmBtn.onclick = () => {
+                        customModal.classList.add('hidden');
+                        onConfirm();
+                    };
+                    modalCancelBtn.onclick = () => {
+                        customModal.classList.add('hidden');
+                        onCancel();
+                    };
+                } else if (type === 'newChatForm') {
+                    modalConfirmBtn.textContent = 'Create Chat';
+                     modalConfirmBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                    modalConfirmBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+                    modalCancelBtn.classList.remove('hidden');
+                    modalConfirmBtn.onclick = () => {
+                        // Logic to read values from modal's selects and call onConfirm
+                        const newChatVendor = document.getElementById('modalVendorSelect').value;
+                        const newChatModel = document.getElementById('modalModelSelect').value;
+                        const newChatAgent = document.getElementById('modalAgentSelect').value;
+                        customModal.classList.add('hidden');
+                        onConfirm(newChatVendor, newChatModel, newChatAgent);
+                    };
+                    modalCancelBtn.onclick = () => {
+                        customModal.classList.add('hidden');
+                        onCancel();
+                    };
+                } else { // 'alert' type
+                    modalCancelBtn.classList.add('hidden');
+                    modalConfirmBtn.onclick = () => {
+                        customModal.classList.add('hidden');
+                        onConfirm();
+                    };
+                }
+                customModal.classList.remove('hidden');
+            }
+
+
+            function getChatById(id) {
+                return chatThreads.find(chat => chat.id === id);
+            }
+
+            function renderChatHistory() {
+                chatHistoryList.innerHTML = '';
+                chatThreads.forEach(chat => {
+                    const li = document.createElement('li');
+                    li.classList.add('flex', 'items-center', 'justify-between', 'p-2', 'rounded-lg', 'cursor-pointer', 'hover:bg-gray-100', 'transition-colors', 'duration-150', 'text-gray-700', 'group');
+                    li.dataset.chatId = chat.id;
+
+                    const chatNameSpan = document.createElement('span');
+                    chatNameSpan.classList.add('flex-1', 'truncate');
+                    chatNameSpan.textContent = chat.name;
+
+                    li.appendChild(chatNameSpan);
+
+                    if (bulkDeleteMode) {
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.classList.add('form-checkbox', 'h-5', 'w-5', 'text-blue-600', 'rounded', 'ml-2');
+                        checkbox.checked = selectedForDelete.has(chat.id);
+                        checkbox.addEventListener('change', (e) => {
+                            e.stopPropagation(); // Prevent li click when checkbox is clicked
+                            if (checkbox.checked) {
+                                selectedForDelete.add(chat.id);
+                            } else {
+                                selectedForDelete.delete(chat.id);
+                            }
+                        });
+                        li.appendChild(checkbox);
+                    } else {
+                        li.addEventListener('click', () => switchChat(chat.id));
+                    }
+
+                    chatHistoryList.appendChild(li);
+                });
+            }
+
+            function renderChatTabs() {
+                chatTabsContainer.innerHTML = ''; // Clear all existing tabs
+
+                // Create and append the "New Chat" tab button first
+                const newChatTabButton = document.createElement('button');
+                newChatTabButton.id = 'newTabChatButton'; // Add ID for direct reference
+                newChatTabButton.classList.add('chat-tab', 'flex', 'items-center', 'space-x-2', 'px-4', 'py-2', 'rounded-t-lg', 'cursor-pointer', 'hover:bg-gray-100', 'transition-colors', 'duration-150', 'text-blue-600', 'font-semibold', 'flex-shrink-0', 'whitespace-nowrap', 'border-b-2', 'border-transparent');
+                newChatTabButton.innerHTML = '<i class="fas fa-plus-circle"></i><span>New Chat</span>';
+                newChatTabButton.addEventListener('click', showNewChatCreationModal); // Attach event listener to show modal
+                chatTabsContainer.appendChild(newChatTabButton);
+
+                chatThreads.forEach(chat => {
+                    const tab = document.createElement('div');
+                    tab.classList.add('chat-tab', 'flex', 'items-center', 'space-x-2', 'px-4', 'py-2', 'rounded-t-lg', 'cursor-pointer', 'hover:bg-gray-100', 'transition-colors', 'duration-150', 'text-gray-700', 'flex-shrink-0', 'whitespace-nowrap');
+                    if (chat.id === activeChatId) {
+                        tab.classList.add('active', 'font-medium', 'text-blue-700', 'border-blue-500');
+                    }
+                    tab.dataset.chatId = chat.id;
+                    tab.textContent = chat.name;
+
+                    const closeButton = document.createElement('button');
+                    closeButton.classList.add('text-gray-500', 'hover:text-red-500', 'ml-2');
+                    closeButton.innerHTML = '<i class="fas fa-times text-sm"></i>';
+                    closeButton.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Prevent tab switch when clicking close
+                        showModal(`Are you sure you want to close "${chat.name}"?`, 'confirm', () => closeChatTab(chat.id));
+                    });
+
+                    tab.appendChild(closeButton);
+                    tab.addEventListener('click', () => switchChat(chat.id));
+                    chatTabsContainer.appendChild(tab);
+                });
+            }
+
+            function renderChatMessages() {
+                chatMessagesArea.innerHTML = '';
+                const activeChat = getChatById(activeChatId);
+                if (!activeChat) {
+                    chatMessagesArea.innerHTML = '<p class="text-gray-500 text-center mt-8">Select a chat or start a new one.</p>';
+                    return;
+                }
+
+                activeChat.messages.forEach((message, index) => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('flex', 'mb-4', 'message-fade-in', 'group'); // Added group for hover effect on delete button
+                    if (message.sender === 'user') {
+                        messageDiv.classList.add('justify-end');
+                        messageDiv.innerHTML = `
+                            <div class="flex items-start space-x-2">
+                                <div class="bg-blue-500 text-white p-3 rounded-xl rounded-br-none max-w-lg shadow-md">
+                                    <p>${message.text}</p>
+                                </div>
+                                <button class="delete-message-btn text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200" data-message-index="${index}">
+                                    <i class="fas fa-trash-alt text-sm"></i>
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        messageDiv.classList.add('justify-start');
+                        messageDiv.innerHTML = `
+                            <div class="flex items-start space-x-2">
+                                <div class="bg-gray-200 text-gray-800 p-3 rounded-xl rounded-bl-none max-w-lg shadow-md">
+                                    <p>${message.text}</p>
+                                </div>
+                                <button class="delete-message-btn text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200" data-message-index="${index}">
+                                    <i class="fas fa-trash-alt text-sm"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
+                    chatMessagesArea.appendChild(messageDiv);
+                });
+
+                // Attach event listeners to delete buttons after rendering messages
+                chatMessagesArea.querySelectorAll('.delete-message-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const messageIndex = parseInt(e.currentTarget.dataset.messageIndex);
+                        showModal('Are you sure you want to delete this message?', 'confirm', () => deleteMessage(activeChatId, messageIndex));
+                    });
+                });
+
+                // Scroll to the bottom
+                chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+            }
+
+            function updateChatOptions() {
+                const activeChat = getChatById(activeChatId);
+                if (activeChat) {
+                    vendorSelect.value = activeChat.vendor || 'Google';
+                    modelSelect.value = activeChat.model || 'Flash';
+                    agentSelect.value = activeChat.agent || 'English Teacher';
+                } else {
+                    // Reset to default if no active chat
+                    vendorSelect.value = 'Google';
+                    modelSelect.value = 'Flash';
+                    agentSelect.value = 'English Teacher';
+                }
+            }
+
+            function switchChat(chatId) {
+                if (bulkDeleteMode) return; // Disable switching during bulk delete
+                activeChatId = chatId;
+                renderChatHistory(); // Re-render to clear any bulk delete selection display
+                renderChatTabs();
+                renderChatMessages();
+                updateChatOptions();
+            }
+
+            // Function to show the modal for new chat creation
+            function showNewChatCreationModal() {
+                const currentVendor = vendorSelect.value;
+                const currentModel = modelSelect.value;
+                const currentAgent = agentSelect.value;
+
+                const modalHtmlContent = `
+                    <div class="space-y-4 text-left">
+                        <div>
+                            <label for="modalVendorSelect" class="text-gray-700 font-medium block mb-1">Vendor:</label>
+                            <select id="modalVendorSelect" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                                <option value="Google">Google</option>
+                                <option value="OpenAI">OpenAI</option>
+                                <option value="Anthropic">Anthropic</option>
+                                <option value="Blackbox">Blackbox</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="modalModelSelect" class="text-gray-700 font-medium block mb-1">LLM Model:</label>
+                            <select id="modalModelSelect" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                                <option value="Flash">Flash</option>
+                                <option value="O1">O1</option>
+                                <option value="Claude">Claude</option>
+                                <option value="GPT-4o">GPT-4o</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="modalAgentSelect" class="text-gray-700 font-medium block mb-1">Agent Name:</label>
+                            <select id="modalAgentSelect" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                                <option value="English Teacher">English Teacher</option>
+                                <option value="Local Guide">Local Guide</option>
+                                <option value="Web Developer">Web Developer</option>
+                                <option value="Creative Writer">Creative Writer</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+
+                showModal('Configure New Chat', 'newChatForm',
+                    (vendor, model, agent) => { // onConfirm callback for new chat form
+                        createNewChat(vendor, model, agent);
+                    },
+                    () => { /* onCancel: do nothing, modal simply closes */ },
+                    modalHtmlContent // Pass the HTML content to the modal
+                );
+
+                // Set default values in the new chat modal after it's rendered
+                document.getElementById('modalVendorSelect').value = currentVendor;
+                document.getElementById('modalModelSelect').value = currentModel;
+                document.getElementById('modalAgentSelect').value = currentAgent;
+            }
+
+
+            function createNewChat(vendor, model, agent) {
+                const newId = `chat-${nextChatId++}`;
+                const newChatName = `New Chat ${nextChatId - 1}`;
+                const newChat = {
+                    id: newId,
+                    name: newChatName,
+                    vendor: vendor,
+                    model: model,
+                    agent: agent,
+                    messages: [
+                        { sender: 'llm', text: `Welcome to your new chat with ${agent}! How can I assist you?` }
+                    ]
+                };
+                chatThreads.push(newChat);
+                switchChat(newId);
+                renderChatHistory();
+                renderChatTabs();
+            }
+
+            function addMessageToActiveChat(sender, text) {
+                const activeChat = getChatById(activeChatId);
+                if (activeChat) {
+                    activeChat.messages.push({ sender, text });
+                    renderChatMessages();
+                }
+            }
+
+            function simulateLLMResponse(message) {
+                loadingIndicator.classList.remove('hidden');
+                setTimeout(() => {
+                    loadingIndicator.classList.add('hidden');
+                    const activeChat = getChatById(activeChatId);
+                    if (!activeChat) return;
+
+                    let llmResponse = "I'm not sure how to respond to that.";
+                    const agent = activeChat.agent;
+
+                    if (agent === "English Teacher") {
+                        llmResponse = `As your English teacher, I'd say "${message}" is a good start! What specific aspect of English do you want to discuss?`;
+                    } else if (agent === "Local Guide") {
+                        llmResponse = `Great! "${message}" sounds like an interesting place/topic. What would you like to know about it from a local perspective?`;
+                    } else if (agent === "Web Developer") {
+                        llmResponse = `Regarding "${message}", I can help you with that. Are you looking for code examples, conceptual explanations, or debugging advice?`;
+                    } else if (agent === "Creative Writer") {
+                        llmResponse = `"${message}" sparked an idea! Let's build upon that. What kind of story or poem are you thinking of?`;
+                    } else {
+                        llmResponse = `I've received your message: "${message}". How can I further assist you today?`;
+                    }
+
+                    addMessageToActiveChat('llm', llmResponse);
+                }, 1500); // Simulate network delay
+            }
+
+            function closeChatTab(chatId) {
+                const index = chatThreads.findIndex(chat => chat.id === chatId);
+                if (index > -1) {
+                    chatThreads.splice(index, 1);
+                    if (activeChatId === chatId) {
+                        // If the closed tab was active, switch to another one
+                        if (chatThreads.length > 0) {
+                            switchChat(chatThreads[0].id);
+                        } else {
+                            activeChatId = null; // No chats left
+                            chatMessagesArea.innerHTML = '<p class="text-gray-500 text-center mt-8">Start a new chat to begin!</p>';
+                            renderChatHistory();
+                            renderChatTabs();
+                            updateChatOptions();
+                        }
+                    } else {
+                        renderChatHistory();
+                        renderChatTabs();
+                    }
+                }
+            }
+
+            function deleteMessage(chatId, messageIndex) {
+                const chat = getChatById(chatId);
+                if (chat && chat.messages[messageIndex]) {
+                    chat.messages.splice(messageIndex, 1);
+                    renderChatMessages(); // Re-render messages for the active chat
+                }
+            }
+
+            function toggleBulkDeleteMode() {
+                bulkDeleteMode = !bulkDeleteMode;
+                selectedForDelete.clear();
+                renderChatHistory();
+                if (bulkDeleteMode) {
+                    bulkDeleteButton.textContent = 'Exit Bulk Delete';
+                    bulkDeleteButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+                    bulkDeleteButton.classList.add('bg-gray-500', 'hover:bg-gray-600');
+                    bulkDeleteActions.classList.remove('hidden');
+                } else {
+                    bulkDeleteButton.textContent = 'Bulk Delete';
+                    bulkDeleteButton.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+                    bulkDeleteButton.classList.add('bg-red-500', 'hover:bg-red-600');
+                    bulkDeleteActions.classList.add('hidden');
+                }
+            }
+
+            function performBulkDelete() {
+                if (selectedForDelete.size === 0) {
+                    showModal('No chats selected for deletion.', 'alert');
+                    return;
+                }
+
+                showModal(`Are you sure you want to delete ${selectedForDelete.size} selected chats?`, 'confirm', () => {
+                    chatThreads = chatThreads.filter(chat => !selectedForDelete.has(chat.id));
+                    selectedForDelete.clear();
+                    if (!chatThreads.some(chat => chat.id === activeChatId)) {
+                        // If active chat was deleted, switch to first available or none
+                        if (chatThreads.length > 0) {
+                            switchChat(chatThreads[0].id);
+                        } else {
+                            activeChatId = null;
+                            chatMessagesArea.innerHTML = '<p class="text-gray-500 text-center mt-8">Start a new chat to begin!</p>';
+                        }
+                    }
+                    toggleBulkDeleteMode(); // Exit bulk delete mode after deletion
+                });
+            }
+
+            // Event Listeners
+            toggleSidebarButton.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+                const chevronIcon = toggleSidebarButton.querySelector('i');
+                if (sidebar.classList.contains('collapsed')) {
+                    chevronIcon.classList.remove('fa-chevron-left');
+                    chevronIcon.classList.add('fa-chevron-right');
+                } else {
+                    chevronIcon.classList.remove('fa-chevron-right');
+                    chevronIcon.classList.add('fa-chevron-left');
+                }
+            });
+
+            sendMessageButton.addEventListener('click', () => {
+                const message = chatInput.value.trim();
+                if (message && activeChatId) {
+                    addMessageToActiveChat('user', message);
+                    chatInput.value = '';
+                    simulateLLMResponse(message);
+                } else if (!activeChatId) {
+                    showModal('Please start a new chat before sending a message.', 'alert');
+                }
+            });
+
+            // Updated for textarea: Enter to send, Shift+Enter for new line
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault(); // Prevent default new line behavior for Enter key
+                    sendMessageButton.click();
+                }
+            });
+
+            // File upload listener (placeholder for now)
+            fileUpload.addEventListener('change', (e) => {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    showModal(`File selected: ${files[0].name}. (File upload functionality not implemented beyond selection)`, 'alert');
+                    // In a real application, you would handle file upload to a server here
+                }
+            });
+
+            vendorSelect.addEventListener('change', (e) => {
+                const activeChat = getChatById(activeChatId);
+                if (activeChat) {
+                    activeChat.vendor = e.target.value;
+                }
+            });
+            modelSelect.addEventListener('change', (e) => {
+                const activeChat = getChatById(activeChatId);
+                if (activeChat) {
+                    activeChat.model = e.target.value;
+                }
+            });
+            agentSelect.addEventListener('change', (e) => {
+                const activeChat = getChatById(activeChatId);
+                if (activeChat) {
+                    activeChat.agent = e.target.value;
+                }
+            });
+
+            bulkDeleteButton.addEventListener('click', toggleBulkDeleteMode);
+            confirmDeleteButton.addEventListener('click', performBulkDelete);
+            cancelDeleteButton.addEventListener('click', toggleBulkDeleteMode);
+
+            // Initial load
+            function initializeApp() {
+                chatThreads = initialDummyChatThreads;
+                if (chatThreads.length > 0) {
+                    activeChatId = chatThreads[0].id;
+                }
+                renderChatHistory();
+                renderChatTabs();
+                renderChatMessages();
+                updateChatOptions();
+            }
+
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

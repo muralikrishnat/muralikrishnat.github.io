@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modular Core App (Web Components)</title>
+    <!-- 1. Shared Styling: Tailwind CSS CDN for global utility styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* General styling for the whole app */
+        :root {
+            --color-primary: #10b981; /* Emerald 500 */
+            --color-secondary: #3b82f6; /* Blue 500 */
+            --color-text: #1f2937; /* Gray 800 */
+            --color-bg: #f9fafb; /* Gray 50 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            padding: 1rem;
+            min-height: 100vh;
+        }
+        /* Custom styles for the CoreComponent's shadow DOM children */
+        .card {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            margin-top: 0.25rem;
+        }
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.15s;
+        }
+        .btn-primary:hover {
+            background-color: #059669; /* Emerald 600 */
+        }
+        .link-secondary {
+            color: var(--color-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+        .link-secondary:hover {
+            color: #2563eb; /* Blue 600 */
+        }
+    </style>
+</head>
+<body>
+    <!-- Main container for the single-page application -->
+    <main class="max-w-xl mx-auto mt-10">
+        <x-app-shell></x-app-shell>
+    </main>
+
+    <script type="module">
+        // ====================================================================
+        // 1. VDOM-Like Diffing Library (Lit-HTML)
+        // Imports the tiny library that enables efficient rendering updates.
+        // ====================================================================
+        import { html, render } from 'https://cdn.jsdelivr.net/npm/lit-html@3.0.0/lit-html.js';
+        
+        // ====================================================================
+        // 2. CORE PROVIDERS (Shared Services/Store/Globals)
+        // These are exposed globally and accessible to all components.
+        // ====================================================================
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let app, db, auth;
+        let authReady = false;
+        let currentUserId = null;
+
+        // --- Store Service (Simple Pub/Sub & State Management) ---
+        class StoreService {
+            constructor() {
+                this.state = {
+                    isAuthenticated: false,
+                    user: null,
+                    page: window.location.hash.slice(1) || 'login',
+                    message: null,
+                };
+                this.subscribers = {};
+            }
+
+            // Simple Pub/Sub: Register a function to be called when state changes
+            subscribe(key, callback) {
+                if (!this.subscribers[key]) {
+                    this.subscribers[key] = [];
+                }
+                this.subscribers[key].push(callback);
+                // Immediately call the callback with the current state value
+                callback(this.state[key]);
+            }
+
+            // Simple Pub/Sub: Notify all subscribers for a key
+            notify(key) {
+                if (this.subscribers[key]) {
+                    this.subscribers[key].forEach(callback => callback(this.state[key]));
+                }
+            }
+
+            // Set state and notify relevant subscribers
+            setState(newState) {
+                let changed = false;
+                for (const key in newState) {
+                    if (this.state[key] !== newState[key]) {
+                        this.state[key] = newState[key];
+                        this.notify(key);
+                        changed = true;
+                    }
+                }
+                if (changed) {
+                    console.log('Store Updated:', this.state);
+                }
+            }
+        }
+
+        // --- API Service (Data Fetching & Firebase Wrapper) ---
+        class ApiService {
+            constructor(db, auth, store) {
+                this.db = db;
+                this.auth = auth;
+                this.store = store;
+            }
+
+            // Helper to get the public collection path for a shared artifact
+            getPublicDocPath(collectionName, documentId) {
+                 return `artifacts/${appId}/public/data/${collectionName}/${documentId}`;
+            }
+
+            async checkUserExists(email) {
+                // This is a placeholder for checking user existence in a real auth system.
+                // In Firestore context, we can check a simple 'users' document.
+                const userRef = doc(this.db, this.getPublicDocPath('users', email.replace(/\./g, '_')));
+                const userSnap = await getDoc(userRef);
+                return userSnap.exists();
+            }
+
+            async registerUser(email, password) {
+                if (await this.checkUserExists(email)) {
+                    throw new Error("User already exists. Please login.");
+                }
+
+                // Placeholder for actual Firebase user creation (which requires Admin SDK or Client SDK calls outside this pattern)
+                // We'll simulate user creation by writing to Firestore.
+                const safeEmail = email.replace(/\./g, '_');
+                const userRef = doc(this.db, this.getPublicDocPath('users', safeEmail));
+                
+                // Save user data (in a real app, only store safe, non-sensitive data like email)
+                await setDoc(userRef, {
+                    email: email,
+                    created: new Date().toISOString(),
+                    // NEVER store plaintext passwords! This is a simulation/placeholder.
+                    passwordHash: btoa(password), 
+                });
+
+                // Simulate successful registration and sign-in
+                this.store.setState({ 
+                    user: { email, id: safeEmail }, 
+                    isAuthenticated: true,
+                    message: `Registration successful for ${email}! Welcome.`,
+                });
+            }
+
+            async loginUser(email, password) {
+                const safeEmail = email.replace(/\./g, '_');
+                const userRef = doc(this.db, this.getPublicDocPath('users', safeEmail));
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists() && userSnap.data().passwordHash === btoa(password)) {
+                    // Simulate successful login
+                    this.store.setState({ 
+                        user: { email, id: safeEmail }, 
+                        isAuthenticated: true,
+                        message: `Welcome back, ${email}!`,
+                    });
+                } else {
+                    throw new Error("Invalid email or password.");
+                }
+            }
+
+            logout() {
+                // Actual Firebase sign-out would go here: auth.signOut()
+                this.store.setState({ user: null, isAuthenticated: false, message: "Logged out successfully." });
+                // Reset to login page
+                window.location.hash = '#login';
+            }
+        }
+
+        // Initialize services globally for easy access
+        window.CORE = {};
+        window.CORE.Store = new StoreService();
+        window.CORE.API = null; // Will be initialized after Firebase auth
+
+        // --- Firebase Initialization and Auth Setup ---
+        async function initializeFirebase() {
+            if (firebaseConfig) {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                window.CORE.API = new ApiService(db, auth, window.CORE.Store);
+                console.log("Firebase initialized.");
+
+                // Sign in using the initial token or anonymously
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("Signed in anonymously.");
+                    }
+                } catch (error) {
+                    console.error("Firebase Auth Error:", error);
+                    // Fallback in case of auth failure
+                    await signInAnonymously(auth);
+                }
+                
+                onAuthStateChanged(auth, (user) => {
+                    currentUserId = user ? user.uid : crypto.randomUUID();
+                    authReady = true;
+                    // Note: The UI logic for isAuthenticated is handled by CORE.Store, 
+                    // which is updated via CORE.API login/register/logout calls.
+                    console.log(`Auth Ready. Current UID: ${user?.uid || 'Anonymous'}`);
+                });
+            } else {
+                 // For environments without Firebase
+                window.CORE.API = new ApiService(null, null, window.CORE.Store);
+                authReady = true;
+                console.warn("Firebase config not found. Running in simulation mode.");
+            }
+        }
+        
+        initializeFirebase();
+
+
+        // ====================================================================
+        // 3. CORE COMPONENT BASE CLASS
+        // NOW USES lit-html FOR EFFICIENT RENDERING (VDOM-LIKE DIFFING)
+        // ====================================================================
+        class CoreComponent extends HTMLElement {
+            constructor() {
+                super();
+                // Use Shadow DOM for style encapsulation (Crucial for modular development)
+                this.attachShadow({ mode: 'open' });
+                this.state = {};
+                this.subscriptions = [];
+
+                // Expose core services locally
+                this.store = window.CORE.Store;
+                this.api = window.CORE.API;
+            }
+
+            // Called when the component is inserted into the DOM
+            connectedCallback() {
+                this.setupSubscriptions();
+                this.render();
+            }
+
+            // Helper to set local state and trigger an optimized re-render
+            setState(newState) {
+                Object.assign(this.state, newState);
+                this.render();
+            }
+
+            // Override in child classes to set up store listeners
+            setupSubscriptions() {
+                // Example: this.store.subscribe('key', (val) => this.setState({ key: val }));
+            }
+
+            // Renders the component's internal HTML (must be overridden)
+            // *** Refactored to use lit-html's render method for diffing ***
+            render() {
+                // The 'render' function takes the template and the DOM node (shadowRoot)
+                // It performs an efficient diffing operation, only updating changed elements.
+                render(this.template(), this.shadowRoot);
+            }
+
+            // Cleans up event listeners and subscriptions when removed from DOM
+            disconnectedCallback() {
+                this.subscriptions.forEach(unsubscribe => unsubscribe());
+                this.subscriptions = [];
+            }
+
+            // Template MUST now use the 'html`...`' tagged template literal
+            template() {
+                return html`<div class="p-4 text-red-500">Error: template() must be overridden in child class and return a lit-html template.</div>`;
+            }
+        }
+
+        // ====================================================================
+        // 4. MODULAR PAGES (Custom Elements - Developed Independently)
+        // Templates now use the 'html' tagged literal.
+        // ====================================================================
+
+        // --- Shared Message Display Component ---
+        class MessageDisplayComponent extends CoreComponent {
+            setupSubscriptions() {
+                this.store.subscribe('message', (message) => this.setState({ message }));
+            }
+
+            template() {
+                if (!this.state.message) return html``;
+                
+                return html`
+                    <style>
+                        /* Local styles for the message box */
+                        .message-box {
+                            background-color: #d1fae5; /* Green 100 */
+                            border: 1px solid #34d399; /* Green 400 */
+                            color: #065f46; /* Green 800 */
+                            padding: 1rem;
+                            border-radius: 0.5rem;
+                            margin-bottom: 1rem;
+                            text-align: center;
+                            font-size: 0.875rem;
+                        }
+                    </style>
+                    <div class="message-box">
+                        ${this.state.message}
+                    </div>
+                `;
+            }
+        }
+        customElements.define('x-message-display', MessageDisplayComponent);
+
+
+        // --- Login Page Component ---
+        class LoginPageComponent extends CoreComponent {
+            constructor() {
+                super();
+                this.state = {
+                    email: '',
+                    password: '',
+                    error: null,
+                };
+            }
+
+            setupSubscriptions() {
+                this.store.subscribe('isAuthenticated', (isAuthenticated) => {
+                    if (isAuthenticated) {
+                        this.setState({ error: null });
+                        window.location.hash = '#home'; 
+                    }
+                });
+            }
+
+            // Event handler passed directly to the template
+            handleLogin = async (e) => {
+                e.preventDefault();
+                this.setState({ error: null });
+
+                // Since we are now using lit-html for rendering, we must use 
+                // the event target to get the form values, as lit-html handles event binding.
+                const form = e.target;
+                const email = form.querySelector('#email').value;
+                const password = form.querySelector('#password').value;
+
+                try {
+                    await this.api.loginUser(email, password);
+                } catch (error) {
+                    this.setState({ error: error.message });
+                }
+            }
+            
+            // Event handler passed directly to the template
+            goToRegister = (e) => {
+                e.preventDefault();
+                window.location.hash = '#register';
+            }
+
+            template() {
+                const errorAlert = this.state.error 
+                    ? html`<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">${this.state.error}</div>` 
+                    : html``;
+
+                // Template uses 'html`...`' and binds the event handler directly
+                return html`
+                    <style>
+                        @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
+                        :host { display: block; }
+                        /* Using Tailwind classes for local component styling via Shadow DOM */
+                        .form-label { display: block; margin-bottom: 0.25rem; font-weight: 500; color: var(--color-text); }
+                        .form-group { margin-bottom: 1rem; }
+                    </style>
+
+                    <div class="card">
+                        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Welcome Back</h2>
+                        
+                        ${errorAlert}
+
+                        <!-- Event handler is now bound directly using the '@submit' syntax supported by lit-html -->
+                        <form @submit=${this.handleLogin}>
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" class="form-input" required placeholder="user@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" id="password" class="form-input" required placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="btn-primary w-full mt-4">Login</button>
+                        </form>
+                        
+                        <p class="mt-6 text-center text-sm text-gray-600">
+                            Don't have an account? 
+                            <!-- Event handler is now bound directly using the '@click' syntax supported by lit-html -->
+                            <span @click=${this.goToRegister} class="link-secondary text-sm">Register here</span>
+                        </p>
+                    </div>
+                `;
+            }
+            // Removed connectedCallback/disconnectedCallback event listeners, as lit-html handles them in the template
+            connectedCallback() { super.connectedCallback(); }
+            disconnectedCallback() { super.disconnectedCallback(); }
+        }
+        customElements.define('x-login-page', LoginPageComponent);
+
+
+        // --- Registration Page Component ---
+        class RegisterPageComponent extends CoreComponent {
+            constructor() {
+                super();
+                this.state = {
+                    email: '',
+                    password: '',
+                    confirmPassword: '',
+                    error: null,
+                };
+            }
+
+            setupSubscriptions() {
+                this.store.subscribe('isAuthenticated', (isAuthenticated) => {
+                    if (isAuthenticated) {
+                         this.setState({ error: null });
+                         window.location.hash = '#home'; 
+                    }
+                });
+            }
+
+            handleRegister = async (e) => {
+                e.preventDefault();
+                this.setState({ error: null });
+
+                const form = e.target;
+                const email = form.querySelector('#email').value;
+                const password = form.querySelector('#password').value;
+                const confirmPassword = form.querySelector('#confirmPassword').value;
+                
+                if (password.length < 6) {
+                    return this.setState({ error: "Password must be at least 6 characters long." });
+                }
+                if (password !== confirmPassword) {
+                    return this.setState({ error: "Passwords do not match." });
+                }
+
+                try {
+                    await this.api.registerUser(email, password);
+                } catch (error) {
+                    this.setState({ error: error.message });
+                }
+            }
+
+            goToLogin = (e) => {
+                e.preventDefault();
+                window.location.hash = '#login';
+            }
+
+            template() {
+                const errorAlert = this.state.error 
+                    ? html`<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">${this.state.error}</div>` 
+                    : html``;
+
+                return html`
+                    <style>
+                        @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
+                        :host { display: block; }
+                        .form-label { display: block; margin-bottom: 0.25rem; font-weight: 500; color: var(--color-text); }
+                        .form-group { margin-bottom: 1rem; }
+                    </style>
+
+                    <div class="card">
+                        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
+
+                        ${errorAlert}
+
+                        <form @submit=${this.handleRegister}>
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" class="form-input" required placeholder="user@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" id="password" class="form-input" required placeholder="Minimum 6 characters">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <input type="password" id="confirmPassword" class="form-input" required placeholder="Repeat password">
+                            </div>
+                            <button type="submit" class="btn-primary w-full mt-4">Register</button>
+                        </form>
+                        
+                        <p class="mt-6 text-center text-sm text-gray-600">
+                            Already have an account? 
+                            <span @click=${this.goToLogin} class="link-secondary text-sm">Login here</span>
+                        </p>
+                    </div>
+                `;
+            }
+            connectedCallback() { super.connectedCallback(); }
+            disconnectedCallback() { super.disconnectedCallback(); }
+        }
+        customElements.define('x-register-page', RegisterPageComponent);
+
+
+        // --- Home Page Component (Simple Authenticated View) ---
+        class HomePageComponent extends CoreComponent {
+            setupSubscriptions() {
+                this.store.subscribe('user', (user) => this.setState({ user }));
+                this.store.subscribe('isAuthenticated', (isAuthenticated) => {
+                    if (!isAuthenticated) {
+                        window.location.hash = '#login';
+                    }
+                });
+            }
+            
+            handleLogout = () => {
+                this.api.logout();
+            }
+
+            template() {
+                return html`
+                    <style>
+                        @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
+                        :host { display: block; }
+                    </style>
+                    <div class="card bg-emerald-50 border border-emerald-300">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-4">Dashboard</h2>
+                        <p class="text-gray-700 mb-4">Hello, ${this.state.user?.email || 'Guest'}!</p>
+                        <p class="text-sm text-gray-500 mb-6">User ID: ${currentUserId || 'N/A'}</p>
+                        <p class="text-gray-700 mb-6">
+                            This is your authenticated homepage. New features (components) developed by other teams can be loaded here dynamically.
+                        </p>
+                        <!-- lit-html binding is cleaner than inline 'onclick' -->
+                        <button @click=${this.handleLogout} class="btn-primary" style="background-color: #ef4444;">Logout</button>
+                    </div>
+                `;
+            }
+            connectedCallback() { super.connectedCallback(); }
+            disconnectedCallback() { super.disconnectedCallback(); }
+        }
+        customElements.define('x-home-page', HomePageComponent);
+
+
+        // ====================================================================
+        // 5. APPLICATION SHELL (Routing and Layout)
+        // ====================================================================
+        class AppShellComponent extends CoreComponent {
+            setupSubscriptions() {
+                // Listen to the store for page changes
+                this.store.subscribe('page', (page) => this.setState({ page }));
+                this.store.subscribe('isAuthenticated', (isAuthenticated) => this.setState({ isAuthenticated }));
+            }
+            
+            render() {
+                // Wait for the Firebase initialization to be complete before rendering the router
+                if (!window.CORE.API) {
+                    // Use standard HTML string for the loading state before lit-html is ready
+                     this.shadowRoot.innerHTML = `
+                         <div class="flex justify-center items-center h-48">
+                            <div class="text-gray-500">Initializing Core Services...</div>
+                        </div>
+                     `;
+                    return;
+                }
+                
+                // Use lit-html's render function
+                super.render();
+                
+                // Clear any old message after rendering
+                if (this.state.page) {
+                    setTimeout(() => window.CORE.Store.setState({ message: null }), 5000);
+                }
+            }
+
+            template() {
+                let content;
+
+                switch (this.state.page) {
+                    case 'login':
+                        content = html`<x-login-page></x-login-page>`;
+                        break;
+                    case 'register':
+                        content = html`<x-register-page></x-register-page>`;
+                        break;
+                    case 'home':
+                        content = this.state.isAuthenticated 
+                            ? html`<x-home-page></x-home-page>` 
+                            : html`<x-login-page></x-login-page>`;
+                        break;
+                    default:
+                        content = html`<x-login-page></x-login-page>`;
+                }
+
+                // Global layout
+                return html`
+                    <style>
+                        :host { display: block; }
+                        /* Ensure full width and centering within the main container */
+                        .shell-container {
+                            width: 100%;
+                            min-height: 500px; /* Aesthetic height */
+                        }
+                    </style>
+                    <div class="shell-container">
+                        <!-- Global Message Display -->
+                        <x-message-display class="mb-6"></x-message-display>
+                        
+                        <!-- Page Content based on Route -->
+                        ${content}
+                    </div>
+                `;
+            }
+        }
+        customElements.define('x-app-shell', AppShellComponent);
+
+
+        // --- Simple Hash Router ---
+        const handleRoute = () => {
+            const page = window.location.hash.slice(1) || 'login';
+            window.CORE.Store.setState({ page });
+        };
+
+        // Initialize router on load and listen for changes
+        window.addEventListener('load', handleRoute);
+        window.addEventListener('hashchange', handleRoute);
+
+        // Ensure the initial hash is set if it's not present
+        if (!window.location.hash) {
+            window.location.hash = '#login';
+        }
+    </script>
+</body>
+</html>

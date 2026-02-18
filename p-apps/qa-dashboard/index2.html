@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlassQA - Automation Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        glass: {
+                            100: 'rgba(255, 255, 255, 0.05)',
+                            200: 'rgba(255, 255, 255, 0.1)',
+                            300: 'rgba(255, 255, 255, 0.2)',
+                            border: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        neon: {
+                            blue: '#3b82f6',
+                            purple: '#8b5cf6',
+                            green: '#10b981',
+                            red: '#ef4444',
+                            pink: '#ec4899'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+        }
+
+        .glass-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .glass-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2); 
+        }
+
+        .glow-text {
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+
+        .step-connector {
+            position: absolute;
+            left: 24px;
+            top: 40px;
+            bottom: -20px;
+            width: 2px;
+            background: rgba(255,255,255,0.1);
+            z-index: 0;
+        }
+        
+        .last-step .step-connector {
+            display: none;
+        }
+
+        .metric-pulse {
+            position: relative;
+        }
+        .metric-pulse::after {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border-radius: inherit;
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            animation: pulse-border 2s infinite;
+        }
+        
+        @keyframes pulse-border {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.1); }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden selection:bg-neon-purple selection:text-white">
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass-panel flex flex-col z-20">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center shadow-lg shadow-neon-purple/20">
+                <i class="fa-solid fa-cube text-white text-lg"></i>
+            </div>
+            <h1 class="font-bold text-xl tracking-wide glow-text">GlassQA</h1>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-2 mt-4">
+            <button onclick="router.navigate('dashboard')" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-gray-400 hover:text-white hover:bg-white/5 active-nav" id="nav-dashboard">
+                <i class="fa-solid fa-chart-pie w-5"></i>
+                <span class="font-medium">Dashboard</span>
+            </button>
+            <button onclick="router.navigate('journeys')" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-gray-400 hover:text-white hover:bg-white/5" id="nav-journeys">
+                <i class="fa-solid fa-road w-5"></i>
+                <span class="font-medium">User Journeys</span>
+            </button>
+            <button onclick="router.navigate('schedule')" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-gray-400 hover:text-white hover:bg-white/5" id="nav-schedule">
+                <i class="fa-solid fa-calendar-clock w-5"></i>
+                <span class="font-medium">Scheduler</span>
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-white/5">
+            <div class="glass-card p-3 rounded-xl flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-neon-green/20 text-neon-green flex items-center justify-center text-xs border border-neon-green/30">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400">System Status</div>
+                    <div class="text-xs font-semibold text-neon-green">Operational</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col relative overflow-hidden">
+        <!-- Header -->
+        <header class="h-16 glass-panel border-b border-white/5 flex items-center justify-between px-8 z-10">
+            <h2 id="page-title" class="text-lg font-medium text-white/90">Dashboard</h2>
+            <div class="flex items-center gap-4">
+                <button class="w-8 h-8 rounded-full glass-btn flex items-center justify-center text-gray-400 hover:text-white">
+                    <i class="fa-regular fa-bell"></i>
+                </button>
+                <div class="flex items-center gap-3 pl-4 border-l border-white/10">
+                    <div class="text-right hidden md:block">
+                        <div class="text-sm font-medium">Alex Chen</div>
+                        <div class="text-xs text-gray-500">QA Lead</div>
+                    </div>
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-r from-gray-700 to-gray-600 border border-white/10"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Area -->
+        <div id="content-area" class="flex-1 overflow-y-auto p-8 relative">
+            <!-- Content Injected via JS -->
+        </div>
+    </main>
+
+    <!-- Modal Template (Hidden) -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div id="modal-content" class="glass-panel w-full max-w-2xl rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300 p-6">
+            <!-- Modal Body -->
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // --- Data Mock ---
+        const store = {
+            journeys: [
+                {
+                    id: 1,
+                    name: "E-Commerce Checkout Flow",
+                    status: "passed",
+                    lastRun: "2023-10-24 14:30",
+                    coverage: 92,
+                    stepsCount: 12,
+                    schedule: { type: "Daily", time: "02:00 AM", next: "Tomorrow, 02:00 AM" },
+                    metrics: { duration: "42s", load: "1.2s", network: "3.4MB" },
+                    steps: [
+                        { id: 's1', type: 'navigate', action: 'Go to URL', value: '/home', stats: { time: '800ms' } },
+                        { id: 's2', type: 'action', action: 'Click', target: '#search-btn', stats: { time: '120ms' } },
+                        { id: 's3', type: 'input', action: 'Type', target: '#search-input', value: 'Headphones', stats: { time: '50ms' } },
+                        { id: 's4', type: 'condition', action: 'If Element Exists', target: '.promo-banner', stats: { time: '10ms' } },
+                        { id: 's5', type: 'action', action: 'Click', target: '.close-promo', parentId: 's4', stats: { time: '100ms' } },
+                        { id: 's6', type: 'assertion', action: 'Assert Text', target: '.results-count', value: '> 0', stats: { time: '20ms' } }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: "User Registration & Login",
+                    status: "failed",
+                    lastRun: "2023-10-24 10:15",
+                    coverage: 78,
+                    stepsCount: 8,
+                    schedule: { type: "Weekly", time: "Mon 08:00 AM", next: "Mon, 08:00 AM" },
+                    metrics: { duration: "Failed at 15s", load: "0.8s", network: "1.1MB" },
+                    steps: [
+                        { id: 's1', type: 'navigate', action: 'Go to URL', value: '/register' },
+                        { id: 's2', type: 'input', action: 'Type', target: '#email', value: 'test@example.com' },
+                        { id: 's3', type: 'action', action: 'Click', target: '#submit-btn' },
+                        { id: 's4', type: 'assertion', action: 'Assert URL', value: '/dashboard' } // Failed here
+                    ]
+                },
+                {
+                    id: 3,
+                    name: "Profile Update Settings",
+                    status: "pending",
+                    lastRun: "Never",
+                    coverage: 0,
+                    stepsCount: 4,
+                    schedule: { type: "Manual", time: "-", next: "-" },
+                    metrics: { duration: "-", load: "-", network: "-" },
+                    steps: [
+                        { id: 's1', type: 'navigate', action: 'Go to URL', value: '/settings' },
+                        { id: 's2', type: 'action', action: 'Click', target: '#edit-profile' }
+                    ]
+                }
+            ]
+        };
+
+        // --- Router ---
+        const router = {
+            current: 'dashboard',
+            navigate(page, params = null) {
+                this.current = page;
+                
+                // Update Nav
+                document.querySelectorAll('.nav-item').forEach(el => {
+                    el.classList.remove('bg-white/5', 'text-white');
+                    el.classList.add('text-gray-400');
+                });
+                const navId = page === 'builder' ? 'nav-journeys' : `nav-${page}`;
+                const activeNav = document.getElementById(navId);
+                if(activeNav) {
+                    activeNav.classList.add('bg-white/5', 'text-white');
+                    activeNav.classList.remove('text-gray-400');
+                }
+
+                // Render Content
+                const content = document.getElementById('content-area');
+                const title = document.getElementById('page-title');
+                
+                content.innerHTML = '';
+                
+                if (page === 'dashboard') {
+                    title.textContent = "Dashboard";
+                    renderDashboard(content);
+                } else if (page === 'journeys') {
+                    title.textContent = "User Journeys";
+                    renderJourneysList(content);
+                } else if (page === 'builder') {
+                    title.textContent = "Journey Builder";
+                    renderBuilder(content, params);
+                } else if (page === 'schedule') {
+                    title.textContent = "Automation Scheduler";
+                    renderScheduler(content);
+                }
+            }
+        };
+
+        // --- Render Functions ---
+
+        function renderDashboard(container) {
+            const total = store.journeys.length;
+            const passed = store.journeys.filter(j => j.status === 'passed').length;
+            const failed = store.journeys.filter(j => j.status === 'failed').length;
+            const stepsExecuted = store.journeys.reduce((acc, j) => acc + (j.status !== 'pending' ? j.steps.length : 0), 0);
+
+            const html = `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 slide-in">
+                    <!-- Stat Cards -->
+                    <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-neon-blue/20 rounded-full blur-xl group-hover:bg-neon-blue/30 transition-all"></div>
+                        <div class="text-gray-400 text-sm font-medium mb-2">Total Journeys</div>
+                        <div class="text-3xl font-bold text-white">${total}</div>
+                        <div class="mt-4 flex items-center text-xs text-neon-blue">
+                            <i class="fa-solid fa-arrow-trend-up mr-1"></i> +2 this week
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-neon-green/20 rounded-full blur-xl group-hover:bg-neon-green/30 transition-all"></div>
+                        <div class="text-gray-400 text-sm font-medium mb-2">Passed</div>
+                        <div class="text-3xl font-bold text-white">${passed}</div>
+                        <div class="mt-4 flex items-center text-xs text-neon-green">
+                            <i class="fa-regular fa-circle-check mr-1"></i> ${(passed/total*100).toFixed(0)}% success rate
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-neon-red/20 rounded-full blur-xl group-hover:bg-neon-red/30 transition-all"></div>
+                        <div class="text-gray-400 text-sm font-medium mb-2">Failed</div>
+                        <div class="text-3xl font-bold text-white">${failed}</div>
+                        <div class="mt-4 flex items-center text-xs text-neon-red">
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Requires attention
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-neon-purple/20 rounded-full blur-xl group-hover:bg-neon-purple/30 transition-all"></div>
+                        <div class="text-gray-400 text-sm font-medium mb-2">Steps Executed</div>
+                        <div class="text-3xl font-bold text-white">${stepsExecuted}</div>
+                        <div class="mt-4 flex items-center text-xs text-neon-purple">
+                            <i class="fa-solid fa-layer-group mr-1"></i> Across all flows
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 slide-in" style="animation-delay: 0.1s">
+                    <!-- Recent Activity -->
+                    <div class="lg:col-span-2 glass-panel rounded-2xl p-6">
+                        <h3 class="text-lg font-medium mb-6">Recent Executions</h3>
+                        <div class="space-y-4">
+                            ${store.journeys.map(j => `
+                                <div class="flex items-center justify-between p-4 glass-card rounded-xl">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-lg flex items-center justify-center ${j.status === 'passed' ? 'bg-neon-green/10 text-neon-green' : j.status === 'failed' ? 'bg-neon-red/10 text-neon-red' : 'bg-gray-500/10 text-gray-400'}">
+                                            <i class="fa-solid ${j.status === 'passed' ? 'fa-check' : j.status === 'failed' ? 'fa-xmark' : 'fa-clock'}"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-white">${j.name}</div>
+                                            <div class="text-xs text-gray-500">${j.lastRun} • ${j.stepsCount} steps</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-6">
+                                        <div class="hidden md:block text-right">
+                                            <div class="text-xs text-gray-400">Duration</div>
+                                            <div class="text-sm font-mono text-white">${j.metrics.duration}</div>
+                                        </div>
+                                        <button onclick="router.navigate('builder', ${j.id})" class="glass-btn px-3 py-1 rounded text-xs hover:text-white">Details</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Coverage Radial (CSS Only) -->
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col items-center justify-center relative">
+                        <h3 class="text-lg font-medium mb-2 absolute top-6 left-6">Test Coverage</h3>
+                        
+                        <div class="relative w-48 h-48 mt-6">
+                            <svg class="w-full h-full transform -rotate-90">
+                                <circle cx="96" cy="96" r="88" stroke="rgba(255,255,255,0.05)" stroke-width="12" fill="none"></circle>
+                                <circle cx="96" cy="96" r="88" stroke="#8b5cf6" stroke-width="12" fill="none" stroke-dasharray="552" stroke-dashoffset="${552 - (552 * 0.85)}" stroke-linecap="round"></circle>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-4xl font-bold text-white">85%</span>
+                                <span class="text-xs text-gray-400 mt-1">Total Coverage</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 w-full space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-400">Critical Paths</span>
+                                <span class="text-neon-green">98%</span>
+                            </div>
+                             <div class="w-full bg-white/5 rounded-full h-1.5">
+                                <div class="bg-neon-green h-1.5 rounded-full" style="width: 98%"></div>
+                            </div>
+                            
+                            <div class="flex justify-between text-sm pt-2">
+                                <span class="text-gray-400">Edge Cases</span>
+                                <span class="text-neon-purple">64%</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-1.5">
+                                <div class="bg-neon-purple h-1.5 rounded-full" style="width: 64%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function renderJourneysList(container) {
+            const html = `
+                <div class="flex justify-between items-center mb-6 slide-in">
+                    <div class="flex gap-4">
+                        <div class="relative">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                            <input type="text" placeholder="Search journeys..." class="glass-input pl-10 pr-4 py-2 rounded-lg w-64 text-sm">
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="glass-btn px-4 py-2 rounded-lg text-sm text-gray-300">All</button>
+                            <button class="glass-btn px-4 py-2 rounded-lg text-sm text-gray-300">Passed</button>
+                            <button class="glass-btn px-4 py-2 rounded-lg text-sm text-gray-300">Failed</button>
+                        </div>
+                    </div>
+                    <button class="bg-neon-purple hover:bg-neon-purple/80 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg shadow-neon-purple/20 transition-all">
+                        <i class="fa-solid fa-plus mr-2"></i> New Journey
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 slide-in" style="animation-delay: 0.1s">
+                    ${store.journeys.map(j => `
+                        <div class="glass-panel p-0 rounded-xl overflow-hidden group">
+                            <div class="p-5 flex items-center justify-between">
+                                <div class="flex items-center gap-5">
+                                    <div class="w-2 h-12 rounded-full ${j.status === 'passed' ? 'bg-neon-green' : j.status === 'failed' ? 'bg-neon-red' : 'bg-gray-500'}"></div>
+                                    <div>
+                                        <h3 class="text-lg font-medium text-white group-hover:text-neon-blue transition-colors cursor-pointer" onclick="router.navigate('builder', ${j.id})">${j.name}</h3>
+                                        <div class="flex items-center gap-4 mt-1 text-xs text-gray-400">
+                                            <span><i class="fa-solid fa-list-ol mr-1"></i> ${j.stepsCount} steps</span>
+                                            <span><i class="fa-regular fa-clock mr-1"></i> Last run: ${j.lastRun}</span>
+                                            <span class="${j.status === 'passed' ? 'text-neon-green' : j.status === 'failed' ? 'text-neon-red' : ''}">${j.status.toUpperCase()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-8">
+                                    <!-- Mini Metrics -->
+                                    <div class="hidden md:flex gap-6">
+                                        <div class="text-center">
+                                            <div class="text-xs text-gray-500 uppercase tracking-wider">Load</div>
+                                            <div class="text-sm font-mono text-white">${j.metrics.load}</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-xs text-gray-500 uppercase tracking-wider">Network</div>
+                                            <div class="text-sm font-mono text-white">${j.metrics.network}</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-xs text-gray-500 uppercase tracking-wider">Total Time</div>
+                                            <div class="text-sm font-mono ${j.status === 'passed' ? 'text-neon-green' : 'text-neon-red'}">${j.metrics.duration}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex gap-2">
+                                        <button onclick="router.navigate('builder', ${j.id})" class="glass-btn w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-white" title="Edit Flow">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <button class="glass-btn w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-white" title="Run Now">
+                                            <i class="fa-solid fa-play"></i>
+                                        </button>
+                                        <button class="glass-btn w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-400 hover:border-red-400/30" title="Delete">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function renderBuilder(container, journeyId) {
+            const journey = store.journeys.find(j => j.id === journeyId);
+            if (!journey) return;
+
+            const html = `
+                <div class="flex h-full gap-6 slide-in">
+                    <!-- Flow Builder (Left) -->
+                    <div class="flex-1 flex flex-col">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h1 class="text-2xl font-bold text-white mb-1 flex items-center gap-3">
+                                    ${journey.name}
+                                    <span class="px-2 py-0.5 rounded text-xs font-normal border ${journey.status === 'passed' ? 'border-neon-green text-neon-green bg-neon-green/10' : 'border-neon-red text-neon-red bg-neon-red/10'}">${journey.status}</span>
+                                </h1>
+                                <p class="text-sm text-gray-400">Construct and visualize the automation flow linearly.</p>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="router.navigate('journeys')" class="glass-btn px-4 py-2 rounded-lg text-sm">Cancel</button>
+                                <button class="bg-neon-blue hover:bg-neon-blue/80 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-lg shadow-neon-blue/20">Save Flow</button>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 glass-panel rounded-xl overflow-hidden flex flex-col">
+                            <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between text-xs text-gray-400 uppercase tracking-wider font-semibold">
+                                <div class="w-12 text-center">Ord</div>
+                                <div class="w-24">Type</div>
+                                <div class="flex-1">Action Details</div>
+                                <div class="w-32">Data/Target</div>
+                                <div class="w-24 text-right">Actions</div>
+                            </div>
+                            
+                            <div class="flex-1 overflow-y-auto p-4 space-y-0 relative">
+                                ${journey.steps.map((step, index) => {
+                                    const isConditionalChild = step.parentId ? true : false;
+                                    const isLast = index === journey.steps.length - 1;
+                                    
+                                    // Icons mapping
+                                    const icons = {
+                                        'navigate': 'fa-globe',
+                                        'action': 'fa-mouse-pointer',
+                                        'input': 'fa-keyboard',
+                                        'condition': 'fa-code-branch',
+                                        'assertion': 'fa-check-double'
+                                    };
+                                    
+                                    const colors = {
+                                        'navigate': 'text-blue-400',
+                                        'action': 'text-purple-400',
+                                        'input': 'text-yellow-400',
+                                        'condition': 'text-orange-400',
+                                        'assertion': 'text-green-400'
+                                    };
+
+                                    return `
+                                    <div class="relative group ${isLast ? 'last-step' : ''}">
+                                        <!-- Vertical Line Connector -->
+                                        <div class="step-connector" style="left: ${isConditionalChild ? '56px' : '24px'}"></div>
+                                        
+                                        <!-- Step Row -->
+                                        <div class="relative z-10 flex items-center gap-4 p-3 rounded-lg border border-transparent hover:bg-white/5 hover:border-white/10 transition-all ${isConditionalChild ? 'ml-8 bg-white/[0.02]' : ''}">
+                                            
+                                            <!-- Handle/Number -->
+                                            <div class="w-12 h-10 flex items-center justify-center font-mono text-sm text-gray-500 select-none cursor-move">
+                                                ${index + 1}
+                                            </div>
+
+                                            <!-- Type Badge -->
+                                            <div class="w-24 flex-shrink-0">
+                                                <div class="flex items-center gap-2 px-2 py-1 rounded bg-black/30 border border-white/5 text-xs">
+                                                    <i class="fa-solid ${icons[step.type]} ${colors[step.type]}"></i>
+                                                    <span class="text-gray-300 capitalize">${step.type}</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Details -->
+                                            <div class="flex-1">
+                                                <div class="text-sm text-white font-medium">${step.action}</div>
+                                                ${step.type === 'condition' ? 
+                                                    '<div class="text-xs text-orange-300 mt-0.5"><i class="fa-solid fa-arrow-turn-up fa-rotate-90 mr-1"></i> If true, execute nested steps</div>' : 
+                                                    ''}
+                                            </div>
+
+                                            <!-- Data/Target -->
+                                            <div class="w-32 truncate">
+                                                ${step.target ? `<div class="text-xs text-gray-400 font-mono bg-black/20 px-1 py-0.5 rounded inline-block truncate max-w-full" title="${step.target}">${step.target}</div>` : ''}
+                                                ${step.value ? `<div class="text-xs text-blue-300 mt-1 truncate" title="${step.value}">"${step.value}"</div>` : ''}
+                                            </div>
+
+                                            <!-- Actions -->
+                                            <div class="w-24 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button class="w-7 h-7 rounded glass-btn flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-pencil text-xs"></i></button>
+                                                <div class="flex flex-col gap-0.5">
+                                                     <button class="w-7 h-3 rounded glass-btn flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-caret-up text-[10px]"></i></button>
+                                                     <button class="w-7 h-3 rounded glass-btn flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-caret-down text-[10px]"></i></button>
+                                                </div>
+                                                <button class="w-7 h-7 rounded glass-btn flex items-center justify-center text-gray-400 hover:text-red-400"><i class="fa-solid fa-times text-xs"></i></button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Insert Trigger (Between Nodes) -->
+                                        <div class="h-4 -my-2 relative z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:h-8 group-hover:my-0">
+                                            <button class="bg-neon-purple rounded-full w-6 h-6 flex items-center justify-center shadow-lg transform scale-0 group-hover:scale-100 transition-transform hover:scale-110">
+                                                <i class="fa-solid fa-plus text-white text-xs"></i>
+                                            </button>
+                                            <div class="absolute w-full h-px bg-neon-purple/50 -z-10"></div>
+                                        </div>
+                                    </div>
+                                    `;
+                                }).join('')}
+                                
+                                <!-- Add End Node -->
+                                <button class="w-full py-3 border-2 border-dashed border-white/10 rounded-lg text-gray-500 hover:border-white/20 hover:text-white hover:bg-white/5 transition-all mt-4 flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-plus-circle"></i> Add Step to End
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Sidebar: Metrics & Config -->
+                    <div class="w-80 flex flex-col gap-6">
+                        <!-- Execution Panel -->
+                        <div class="glass-panel p-5 rounded-xl">
+                            <h3 class="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Execution Metrics</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1 text-gray-400">
+                                        <span>Total Duration</span>
+                                        <span class="text-white">${journey.metrics.duration}</span>
+                                    </div>
+                                    <div class="w-full bg-white/10 rounded-full h-1">
+                                        <div class="bg-neon-blue h-1 rounded-full" style="width: 70%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-black/20 p-2 rounded">
+                                        <div class="text-[10px] text-gray-500">Page Load</div>
+                                        <div class="text-sm font-mono text-neon-green">${journey.metrics.load}</div>
+                                    </div>
+                                    <div class="bg-black/20 p-2 rounded">
+                                        <div class="text-[10px] text-gray-500">Data Size</div>
+                                        <div class="text-sm font-mono text-neon-purple">${journey.metrics.network}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="pt-2">
+                                    <div class="text-xs text-gray-400 mb-2">Step Timing Waterfall</div>
+                                    <div class="space-y-1">
+                                        ${journey.steps.slice(0, 5).map(s => {
+                                            const width = Math.random() * 80 + 10;
+                                            const offset = Math.random() * 20;
+                                            return `
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-4 text-[10px] text-gray-500">${s.id}</div>
+                                                <div class="flex-1 h-3 bg-white/5 rounded-sm relative overflow-hidden">
+                                                    <div class="absolute h-full bg-gradient-to-r from-blue-500 to-purple-500 opacity-60 rounded-sm" style="left: ${offset}%; width: ${width}%"></div>
+                                                </div>
+                                                <div class="w-10 text-[10px] text-gray-400 text-right">${s.stats?.time || 'N/A'}</div>
+                                            </div>
+                                            `
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Schedule Mini View -->
+                        <div class="glass-panel p-5 rounded-xl">
+                            <h3 class="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Schedule</h3>
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-8 h-8 rounded bg-white/10 flex items-center justify-center">
+                                    <i class="fa-regular fa-calendar text-gray-300"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-white">${journey.schedule.type}</div>
+                                    <div class="text-xs text-gray-500">${journey.schedule.time}</div>
+                                </div>
+                            </div>
+                            <div class="text-xs bg-neon-purple/10 border border-neon-purple/30 text-neon-purple p-2 rounded text-center">
+                                Next: ${journey.schedule.next}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function renderScheduler(container) {
+            const html = `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 slide-in">
+                    <!-- List of Scheduled Jobs -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-lg font-medium">Active Schedules</h3>
+                            <button class="glass-btn px-3 py-1.5 rounded text-sm text-neon-blue"><i class="fa-solid fa-sync mr-1"></i> Sync Jobs</button>
+                        </div>
+
+                        ${store.journeys.filter(j => j.schedule.type !== 'Manual').map(j => `
+                            <div class="glass-panel p-4 rounded-xl flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex flex-col items-center justify-center w-12 h-12 bg-white/5 rounded-lg border border-white/10">
+                                        <span class="text-[10px] text-gray-400 uppercase">${j.schedule.type}</span>
+                                        <i class="fa-solid fa-clock text-neon-purple mt-1"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-white">${j.name}</h4>
+                                        <div class="text-xs text-gray-400 flex items-center gap-2">
+                                            <span><i class="fa-solid fa-play-circle text-[10px] mr-1"></i> Next: ${j.schedule.next}</span>
+                                            <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
+                                            <span>Target: Staging Env</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-2 mr-4">
+                                        <span class="text-xs text-gray-400">Active</span>
+                                        <div class="w-8 h-4 bg-neon-green/20 rounded-full relative cursor-pointer border border-neon-green/50">
+                                            <div class="absolute right-0.5 top-0.5 bottom-0.5 w-3 bg-neon-green rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                                        </div>
+                                    </div>
+                                    <button class="glass-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-white"><i class="fa-solid fa-pencil"></i></button>
+                                </div>
+                            </div>
+                        `).join('')}
+
+                         <div class="p-8 border-2 border-dashed border-white/5 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:border-white/10 hover:bg-white/5 transition-all cursor-pointer">
+                            <i class="fa-regular fa-calendar-plus text-2xl mb-2"></i>
+                            <span>Schedule a new run</span>
+                        </div>
+                    </div>
+
+                    <!-- Config Panel -->
+                    <div class="glass-panel p-6 rounded-xl h-fit">
+                        <h3 class="text-lg font-medium mb-6">Configuration</h3>
+                        
+                        <div class="space-y-5">
+                            <div>
+                                <label class="text-xs text-gray-400 uppercase font-semibold mb-2 block">Frequency</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button class="bg-neon-purple text-white py-2 rounded text-sm border border-neon-purple/50 shadow-lg shadow-neon-purple/20">Daily</button>
+                                    <button class="glass-btn text-gray-400 py-2 rounded text-sm">Weekly</button>
+                                    <button class="glass-btn text-gray-400 py-2 rounded text-sm">Once</button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-xs text-gray-400 uppercase font-semibold mb-2 block">Time (UTC)</label>
+                                <input type="time" value="02:00" class="w-full glass-input p-3 rounded-lg">
+                            </div>
+
+                            <div>
+                                <label class="text-xs text-gray-400 uppercase font-semibold mb-2 block">Environment</label>
+                                <select class="w-full glass-input p-3 rounded-lg text-sm bg-gray-900">
+                                    <option>Staging</option>
+                                    <option>Production</option>
+                                    <option>Dev-01</option>
+                                </select>
+                            </div>
+
+                             <div>
+                                <label class="text-xs text-gray-400 uppercase font-semibold mb-2 block">Notifications</label>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <input type="checkbox" checked class="accent-neon-blue bg-transparent">
+                                    <span class="text-sm text-gray-300">Email Report to Leads</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" class="accent-neon-blue bg-transparent">
+                                    <span class="text-sm text-gray-300">Slack Alert on Failure</span>
+                                </div>
+                            </div>
+
+                            <button class="w-full bg-white text-gray-900 font-bold py-3 rounded-lg hover:bg-gray-200 transition-colors mt-4">
+                                Update Schedule
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            router.navigate('dashboard');
+            
+            // Subtle animated background effect script (optional visual flair)
+            document.addEventListener('mousemove', (e) => {
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                document.body.style.backgroundPosition = `${x * 20}px ${y * 20}px`;
+            });
+        });
+
+    </script>
+</body>
+</html>

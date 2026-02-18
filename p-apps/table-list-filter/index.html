@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Filter Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @custom-variant dark (&:where(.dark, .dark *));
+        
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .filter-group {
+            position: relative;
+            padding-left: 1.5rem;
+            border-left: 2px solid #e2e8f0;
+        }
+
+        .filter-group::before {
+            content: '';
+            position: absolute;
+            left: -2px;
+            top: 0;
+            height: 1.5rem;
+            width: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900">Project Engine</h1>
+            <p class="text-slate-500 mt-2">Manage and filter your project portfolio with nested logical conditions.</p>
+        </header>
+
+        <div class="grid grid-cols-1 gap-8">
+            <!-- Filter Section -->
+            <section class="glass-card rounded-2xl p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-lg font-semibold">Advanced Filter Builder</h2>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="resetFilters()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                            Clear All
+                        </button>
+                        <button onclick="applyFilters()" class="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-all">
+                            Apply Filters
+                        </button>
+                    </div>
+                </div>
+
+                <div id="query-builder-root" class="space-y-4">
+                    <!-- Dynamic Content Loaded Here -->
+                </div>
+            </section>
+
+            <!-- Table Section -->
+            <section class="glass-card rounded-2xl overflow-hidden shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50/50 border-b border-slate-200">
+                                <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Project Name</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Budget</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Owner</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-slate-100 bg-white">
+                            <!-- Rows loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="empty-state" class="hidden py-12 text-center">
+                    <p class="text-slate-400">No items match your specific criteria.</p>
+                </div>
+                <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-200 flex justify-between items-center">
+                    <span id="results-count" class="text-sm text-slate-500 italic">Showing all items</span>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // --- Data ---
+        const MOCK_DATA = [
+            { id: 1, name: "Alpha Website Redesign", category: "Design", status: "Active", budget: 12000, owner: "Sarah Chen" },
+            { id: 2, name: "Beta Mobile App", category: "Development", status: "Pending", budget: 45000, owner: "Mike Ross" },
+            { id: 3, name: "Gamma Marketing Campaign", category: "Marketing", status: "Active", budget: 8500, owner: "Sarah Chen" },
+            { id: 4, name: "Delta Infrastructure", category: "IT", status: "Completed", budget: 120000, owner: "Alex Wright" },
+            { id: 5, name: "Epsilon Analytics Tool", category: "Development", status: "Active", budget: 32000, owner: "John Doe" },
+            { id: 6, name: "Zeta Security Audit", category: "IT", status: "Completed", budget: 15000, owner: "Mike Ross" },
+            { id: 7, name: "Eta Content Strategy", category: "Marketing", status: "Pending", budget: 5000, owner: "Sarah Chen" },
+        ];
+
+        const FIELDS = [
+            { id: 'name', label: 'Project Name', type: 'string' },
+            { id: 'category', label: 'Category', type: 'string' },
+            { id: 'status', label: 'Status', type: 'string' },
+            { id: 'budget', label: 'Budget', type: 'number' },
+            { id: 'owner', label: 'Owner', type: 'string' }
+        ];
+
+        const OPERATORS = {
+            string: [
+                { id: 'equals', label: 'Equals' },
+                { id: 'contains', label: 'Contains' },
+                { id: 'startswith', label: 'Starts With' },
+                { id: 'endswith', label: 'Ends With' }
+            ],
+            number: [
+                { id: 'equals', label: '=' },
+                { id: 'gt', label: '>' },
+                { id: 'lt', label: '<' },
+                { id: 'gte', label: '≥' },
+                { id: 'lte', label: '≤' }
+            ]
+        };
+
+        // --- State ---
+        let filterState = {
+            type: 'group',
+            operator: 'AND',
+            children: []
+        };
+
+        // --- Core Logic ---
+        function init() {
+            renderQueryBuilder();
+            updateTable(MOCK_DATA);
+        }
+
+        function createNewCondition() {
+            return {
+                type: 'condition',
+                field: FIELDS[0].id,
+                operator: OPERATORS[FIELDS[0].type][0].id,
+                value: ''
+            };
+        }
+
+        function createNewGroup() {
+            return {
+                type: 'group',
+                operator: 'AND',
+                children: [createNewCondition()]
+            };
+        }
+
+        function renderQueryBuilder() {
+            const container = document.getElementById('query-builder-root');
+            container.innerHTML = '';
+            container.appendChild(renderNode(filterState, null, 0));
+        }
+
+        function renderNode(node, parent, index) {
+            if (node.type === 'group') {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'filter-group space-y-4 bg-slate-50/50 p-4 rounded-xl border border-slate-200 mb-4';
+                
+                // Group Header
+                const header = document.createElement('div');
+                header.className = 'flex items-center gap-3 mb-2';
+                
+                const selectOp = document.createElement('select');
+                selectOp.className = 'bg-white border border-slate-300 rounded-md px-2 py-1 text-sm font-semibold text-blue-600 focus:ring-2 focus:ring-blue-500 outline-none';
+                ['AND', 'OR'].forEach(op => {
+                    const opt = document.createElement('option');
+                    opt.value = op;
+                    opt.textContent = op;
+                    if (node.operator === op) opt.selected = true;
+                    selectOp.appendChild(opt);
+                });
+                selectOp.onchange = (e) => { node.operator = e.target.value; };
+
+                const addCondBtn = document.createElement('button');
+                addCondBtn.className = 'text-xs text-slate-500 hover:text-blue-600 font-medium flex items-center gap-1';
+                addCondBtn.innerHTML = `<span>+ Condition</span>`;
+                addCondBtn.onclick = () => { node.children.push(createNewCondition()); renderQueryBuilder(); };
+
+                const addGrpBtn = document.createElement('button');
+                addGrpBtn.className = 'text-xs text-slate-500 hover:text-blue-600 font-medium flex items-center gap-1';
+                addGrpBtn.innerHTML = `<span>+ Group</span>`;
+                addGrpBtn.onclick = () => { node.children.push(createNewGroup()); renderQueryBuilder(); };
+
+                header.appendChild(selectOp);
+                header.appendChild(addCondBtn);
+                header.appendChild(addGrpBtn);
+
+                if (parent) {
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'ml-auto text-slate-400 hover:text-red-500';
+                    delBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>`;
+                    delBtn.onclick = () => { parent.children.splice(index, 1); renderQueryBuilder(); };
+                    header.appendChild(delBtn);
+                }
+
+                groupDiv.appendChild(header);
+
+                // Children
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = 'space-y-3';
+                node.children.forEach((child, i) => {
+                    childrenContainer.appendChild(renderNode(child, node, i));
+                });
+                groupDiv.appendChild(childrenContainer);
+
+                return groupDiv;
+            } else {
+                // Condition Row
+                const row = document.createElement('div');
+                row.className = 'flex flex-wrap items-center gap-2 bg-white p-3 rounded-lg border border-slate-200 shadow-sm';
+                
+                // Field Select
+                const fieldSelect = document.createElement('select');
+                fieldSelect.className = 'border-slate-200 rounded-md text-sm p-1.5 focus:border-blue-500 outline-none min-w-[140px]';
+                FIELDS.forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.id;
+                    opt.textContent = f.label;
+                    if (node.field === f.id) opt.selected = true;
+                    fieldSelect.appendChild(opt);
+                });
+                
+                // Operator Select
+                const opSelect = document.createElement('select');
+                opSelect.className = 'border-slate-200 rounded-md text-sm p-1.5 focus:border-blue-500 outline-none';
+                
+                const updateOps = () => {
+                    const fieldType = FIELDS.find(f => f.id === node.field).type;
+                    opSelect.innerHTML = '';
+                    OPERATORS[fieldType].forEach(op => {
+                        const opt = document.createElement('option');
+                        opt.value = op.id;
+                        opt.textContent = op.label;
+                        if (node.operator === op.id) opt.selected = true;
+                        opSelect.appendChild(opt);
+                    });
+                };
+                updateOps();
+
+                fieldSelect.onchange = (e) => {
+                    node.field = e.target.value;
+                    node.operator = OPERATORS[FIELDS.find(f => f.id === node.field).type][0].id;
+                    updateOps();
+                };
+                opSelect.onchange = (e) => { node.operator = e.target.value; };
+
+                // Value Input
+                const valInput = document.createElement('input');
+                valInput.className = 'border-slate-200 rounded-md text-sm p-1.5 flex-1 min-w-[120px] focus:border-blue-500 outline-none';
+                valInput.placeholder = 'Value...';
+                valInput.value = node.value;
+                valInput.oninput = (e) => { node.value = e.target.value; };
+
+                // Delete
+                const delBtn = document.createElement('button');
+                delBtn.className = 'p-1.5 text-slate-300 hover:text-red-500 transition-colors';
+                delBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>`;
+                delBtn.onclick = () => { parent.children.splice(index, 1); renderQueryBuilder(); };
+
+                row.appendChild(fieldSelect);
+                row.appendChild(opSelect);
+                row.appendChild(valInput);
+                row.appendChild(delBtn);
+
+                return row;
+            }
+        }
+
+        function applyFilters() {
+            const filtered = MOCK_DATA.filter(item => evaluateNode(item, filterState));
+            updateTable(filtered);
+        }
+
+        function evaluateNode(item, node) {
+            if (node.type === 'group') {
+                if (node.children.length === 0) return true;
+                if (node.operator === 'AND') {
+                    return node.children.every(child => evaluateNode(item, child));
+                } else {
+                    return node.children.some(child => evaluateNode(item, child));
+                }
+            } else {
+                const itemValue = item[node.field];
+                const filterValue = node.value.toLowerCase();
+                const targetValue = String(itemValue).toLowerCase();
+
+                switch (node.operator) {
+                    case 'equals': return targetValue === filterValue;
+                    case 'contains': return targetValue.includes(filterValue);
+                    case 'startswith': return targetValue.startsWith(filterValue);
+                    case 'endswith': return targetValue.endsWith(filterValue);
+                    case 'gt': return Number(itemValue) > Number(node.value);
+                    case 'lt': return Number(itemValue) < Number(node.value);
+                    case 'gte': return Number(itemValue) >= Number(node.value);
+                    case 'lte': return Number(itemValue) <= Number(node.value);
+                    default: return true;
+                }
+            }
+        }
+
+        function updateTable(data) {
+            const tbody = document.getElementById('table-body');
+            const emptyState = document.getElementById('empty-state');
+            const countLabel = document.getElementById('results-count');
+            
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                emptyState.classList.remove('hidden');
+                countLabel.textContent = '0 results found';
+            } else {
+                emptyState.classList.add('hidden');
+                countLabel.textContent = `Showing ${data.length} item${data.length === 1 ? '' : 's'}`;
+                
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-slate-50 transition-colors';
+                    
+                    const statusClass = item.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 
+                                      item.status === 'Pending' ? 'bg-amber-100 text-amber-700' : 
+                                      'bg-slate-100 text-slate-700';
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 font-medium text-slate-900">${item.name}</td>
+                        <td class="px-6 py-4 text-slate-600">${item.category}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClass}">${item.status}</span>
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 font-mono text-sm">$${item.budget.toLocaleString()}</td>
+                        <td class="px-6 py-4 text-slate-500">${item.owner}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+
+        function resetFilters() {
+            filterState = {
+                type: 'group',
+                operator: 'AND',
+                children: [createNewCondition()]
+            };
+            renderQueryBuilder();
+            updateTable(MOCK_DATA);
+        }
+
+        // Initialize
+        init();
+        // Start with one condition
+        filterState.children.push(createNewCondition());
+        renderQueryBuilder();
+
+    </script>
+</body>
+</html>

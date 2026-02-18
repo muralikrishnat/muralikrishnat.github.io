@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Plan Generator</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        body, html {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f1f1f1;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2, h3 {
+            color: #333;
+            text-align: center;
+        }
+
+        h1 {
+            font-weight: 300;
+            margin-bottom: 20px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .w3-button {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .w3-button:hover {
+            background-color: #45a049;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .plan-display {
+            padding-top: 20px;
+        }
+
+        .epic-card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-left: 5px solid #2196F3;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .epic-card h3 {
+            margin-top: 0;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            font-weight: 600;
+            color: #2196F3;
+        }
+
+        .feature-list {
+            margin-top: 15px;
+        }
+        
+        .feature-item {
+            background-color: #f1f1f1;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #607d8b;
+        }
+        
+        .feature-item p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .feature-item p strong {
+            color: #333;
+        }
+
+        .feedback-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-top: 1px dashed #ccc;
+        }
+        
+        .feedback-item {
+            background-color: #fff8e1;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 5px solid #ff9800;
+        }
+
+        .feedback-item p {
+            margin: 0;
+            font-style: italic;
+            font-size: 15px;
+            color: #555;
+        }
+
+        .feedback-item small {
+            display: block;
+            margin-top: 5px;
+            text-align: right;
+            color: #777;
+        }
+        
+        .estimated-days {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #888;
+        }
+
+        .estimated-days span {
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container w3-card-4">
+    <h1 class="w3-text-grey">Project Plan Generator</h1>
+    <div class="input-section">
+        <p>Enter your project requirements below to generate a comprehensive project plan.</p>
+        <textarea id="requirementsInput" placeholder="E.g., Build an e-commerce website with user registration, a product catalog, shopping cart functionality, and secure payment processing. The site should also have a dashboard for administrators to manage products and orders."></textarea>
+        <button id="generateBtn" class="w3-button w3-margin-top">Generate Project Plan</button>
+    </div>
+
+    <div id="loader" class="loader"></div>
+
+    <div id="planOutput" class="plan-display">
+        <h2 id="projectTitle"></h2>
+        <h3 class="w3-text-grey">Project Epics</h3>
+        <div id="epicsContainer"></div>
+        
+        <div class="feedback-section">
+            <h3 class="w3-text-grey">Feedback Iterations</h3>
+            <div id="feedbackContainer"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const generateBtn = document.getElementById('generateBtn');
+    const requirementsInput = document.getElementById('requirementsInput');
+    const loader = document.getElementById('loader');
+    const planOutput = document.getElementById('planOutput');
+    const projectTitleEl = document.getElementById('projectTitle');
+    const epicsContainer = document.getElementById('epicsContainer');
+    const feedbackContainer = document.getElementById('feedbackContainer');
+
+    const projectId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+    // The JSON schema for the desired output structure
+    const planSchema = {
+        type: "OBJECT",
+        properties: {
+            "projectTitle": { "type": "STRING" },
+            "epics": {
+                "type": "ARRAY",
+                "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "name": { "type": "STRING" },
+                        "description": { "type": "STRING" },
+                        "estimatedDays": { "type": "STRING" },
+                        "features": {
+                            "type": "ARRAY",
+                            "items": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "name": { "type": "STRING" },
+                                    "description": { "type": "STRING" },
+                                    "featureType": { "type": "STRING" },
+                                    "estimatedDays": { "type": "STRING" }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "feedbackIterations": {
+                "type": "ARRAY",
+                "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "iteration": { "type": "NUMBER" },
+                        "comments": { "type": "STRING" },
+                        "feedbackBy": { "type": "STRING" }
+                    }
+                }
+            }
+        },
+        "propertyOrdering": ["projectTitle", "epics", "feedbackIterations"]
+    };
+
+    /**
+     * Converts a JSON object to HTML elements for display.
+     * @param {Object} planData - The JSON object containing the project plan.
+     */
+    function renderProjectPlan(planData) {
+        // Set the main project title
+        projectTitleEl.textContent = planData.projectTitle;
+        
+        // Render epics
+        epicsContainer.innerHTML = '';
+        planData.epics.forEach(epic => {
+            const epicCard = document.createElement('div');
+            epicCard.className = 'epic-card w3-animate-bottom';
+            epicCard.innerHTML = `
+                <h3>${epic.name}</h3>
+                <span class="estimated-days">Est. Days: <span>${epic.estimatedDays}</span></span>
+                <p>${epic.description}</p>
+                <div class="feature-list">
+                    <h4>Features</h4>
+                    ${epic.features.map(feature => `
+                        <div class="feature-item">
+                            <strong>${feature.name}</strong>
+                            <small class="w3-right">(${feature.featureType}) - ${feature.estimatedDays} days</small>
+                            <p>${feature.description}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            epicsContainer.appendChild(epicCard);
+        });
+
+        // Render feedback iterations
+        feedbackContainer.innerHTML = '';
+        planData.feedbackIterations.forEach(feedback => {
+            const feedbackItem = document.createElement('div');
+            feedbackItem.className = 'feedback-item w3-animate-bottom';
+            feedbackItem.innerHTML = `
+                <p>${feedback.comments}</p>
+                <small>Feedback by: <strong>${feedback.feedbackBy}</strong> (Iteration ${feedback.iteration})</small>
+            `;
+            feedbackContainer.appendChild(feedbackItem);
+        });
+        
+        planOutput.style.display = 'block';
+    }
+
+    // New function to load a default plan on page load
+    function loadDefaultPlan() {
+        const defaultPlanData = {
+            "projectTitle": "E-commerce Website with Admin Dashboard",
+            "epics": [
+                {
+                    "name": "User Authentication & Profiles",
+                    "description": "Manages user registration, login, and profile information.",
+                    "estimatedDays": "15",
+                    "features": [
+                        { "name": "User Registration", "description": "Allows new users to create an account.", "featureType": "Implementation", "estimatedDays": "5" },
+                        { "name": "User Login/Logout", "description": "Enables users to sign in and out securely.", "featureType": "Implementation", "estimatedDays": "3" },
+                        { "name": "User Profile Management", "description": "Allows users to update their personal information and view order history.", "featureType": "Implementation", "estimatedDays": "7" }
+                    ]
+                },
+                {
+                    "name": "Product Catalog & Search",
+                    "description": "Displays products, handles filtering, and provides a search function.",
+                    "estimatedDays": "20",
+                    "features": [
+                        { "name": "Product Listing", "description": "Shows a list of all available products with basic details.", "featureType": "Implementation", "estimatedDays": "6" },
+                        { "name": "Product Detail Page", "description": "Displays detailed information for a single product.", "featureType": "Implementation", "estimatedDays": "6" },
+                        { "name": "Search & Filtering", "description": "Allows users to search and filter products by category, price, etc.", "featureType": "Implementation", "estimatedDays": "8" }
+                    ]
+                }
+            ],
+            "feedbackIterations": [
+                { "iteration": 1, "comments": "Initial project plan created. Awaiting review from stakeholders.", "feedbackBy": "TECHNICAL_MANAGER" },
+                { "iteration": 2, "comments": "Looks good. Let's add 'Admin Dashboard' as a new Epic to manage products and orders.", "feedbackBy": "BUSINESS_ANALYST_PRODUCT_OWNER" }
+            ]
+        };
+        renderProjectPlan(defaultPlanData);
+    }
+
+    // Event listener for the generate button
+    generateBtn.addEventListener('click', async () => {
+        const requirements = requirementsInput.value.trim();
+        if (!requirements) {
+            alert('Please enter project requirements.');
+            return;
+        }
+
+        // Show loading indicator, hide output
+        loader.style.display = 'block';
+        planOutput.style.display = 'none';
+        
+        let attempt = 0;
+        const maxAttempts = 5;
+        const baseDelay = 1000;
+
+        while (attempt < maxAttempts) {
+            try {
+                // Construct the payload for the LLM API call
+                const payload = {
+                    contents: [{
+                        parts: [{
+                            text: `Generate a comprehensive project plan in the following JSON format for a project based on these requirements: "${requirements}". Ensure the plan includes discovery, implementation, testing, marketing, and deployment details, broken down into Epics and Features. Populate a few feedback iterations as if a Technical Manager, Business Analyst, and Senior Architect have reviewed the plan. The entire response must be a single, valid JSON object.`
+                        }]
+                    }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: planSchema
+                    }
+                };
+                
+                // Fetch from the Gemini API
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                const candidate = result.candidates?.[0];
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const jsonString = candidate.content.parts[0].text;
+                    const planData = JSON.parse(jsonString);
+                    renderProjectPlan(planData);
+                    break; // Exit the loop on success
+                } else {
+                    throw new Error('No content found in API response.');
+                }
+            } catch (error) {
+                console.error(`Attempt ${attempt + 1} failed:`, error);
+                attempt++;
+                if (attempt < maxAttempts) {
+                    const delay = baseDelay * Math.pow(2, attempt);
+                    console.log(`Retrying in ${delay / 1000} seconds...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } else {
+                    // All attempts failed, show an error message
+                    alert('Failed to generate project plan. Please try again later.');
+                    break;
+                }
+            } finally {
+                if (attempt >= maxAttempts || (planOutput.style.display !== 'none')) {
+                    loader.style.display = 'none';
+                }
+            }
+        }
+    });
+
+    // Call the function to load the default plan when the page finishes loading
+    window.onload = loadDefaultPlan;
+</script>
+
+</body>
+</html>

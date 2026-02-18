@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glamorphic UI Design System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          },
+          colors: {
+            glass: {
+              100: 'rgba(255, 255, 255, 0.1)',
+              200: 'rgba(255, 255, 255, 0.2)',
+              300: 'rgba(255, 255, 255, 0.3)',
+              border: 'rgba(255, 255, 255, 0.2)',
+              text: 'rgba(255, 255, 255, 0.9)',
+              muted: 'rgba(255, 255, 255, 0.6)',
+            },
+            glam: {
+              pink: '#FF2E93',
+              purple: '#8B5CF6',
+              cyan: '#06B6D4',
+            }
+          },
+          backgroundImage: {
+            'glam-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'mesh': 'radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%)',
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            'pulse-glow': {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '.5' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0f172a;
+      color: white;
+      /* Dynamic background */
+      background-image:
+        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.15), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(255, 46, 147, 0.15), transparent 25%);
+      background-attachment: fixed;
+    }
+
+    /* Glass Utility Class */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .glass-panel-hover:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+      transform: translateY(-2px);
+      transition: all 0.3s ease;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Range Slider Styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+      margin-top: -8px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+    }
+
+    /* Checkbox Custom */
+    .checkbox-glam:checked {
+      background-color: #8B5CF6;
+      border-color: #8B5CF6;
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+    }
+  </style>
+</head>
+
+<body class="antialiased min-h-screen flex overflow-hidden">
+
+  <!-- Mobile Menu Button -->
+  <button id="mobile-menu-btn" class="lg:hidden fixed top-4 right-4 z-50 p-2 glass-panel rounded-lg text-white">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Sidebar Navigation -->
+  <aside id="sidebar"
+    class="fixed lg:static w-64 h-screen transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-40 glass-panel border-r border-glass-border flex flex-col backdrop-blur-xl">
+    <div class="p-8 border-b border-glass-border">
+      <h1
+        class="font-display font-bold text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-glam-pink to-glam-purple">
+        GLAMORPHIC
+      </h1>
+      <p class="text-xs text-glass-muted mt-2 tracking-widest uppercase">UI Design System</p>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+      <a href="#typography"
+        class="nav-item flex items-center px-4 py-3 text-glass-text rounded-lg hover:bg-glass-100 transition-all">
+        <i class="fas fa-font w-6 text-glam-pink"></i>
+        <span class="font-medium">Typography</span>
+      </a>
+      <a href="#colors"
+        class="nav-item flex items-center px-4 py-3 text-glass-text rounded-lg hover:bg-glass-100 transition-all">
+        <i class="fas fa-palette w-6 text-glam-purple"></i>
+        <span class="font-medium">Colors & Gradients</span>
+      </a>
+      <a href="#buttons"
+        class="nav-item flex items-center px-4 py-3 text-glass-text rounded-lg hover:bg-glass-100 transition-all">
+        <i class="fas fa-mouse-pointer w-6 text-glam-cyan"></i>
+        <span class="font-medium">Buttons & Actions</span>
+      </a>
+      <a href="#forms"
+        class="nav-item flex items-center px-4 py-3 text-glass-text rounded-lg hover:bg-glass-100 transition-all">
+        <i class="fas fa-keyboard w-6 text-pink-400"></i>
+        <span class="font-medium">Forms & Inputs</span>
+      </a>
+      <a href="#data"
+        class="nav-item flex items-center px-4 py-3 text-glass-text rounded-lg hover:bg-glass-100 transition-all">
+        <i class="fas fa-table w-6 text-purple-400"></i>
+        <span class="font-medium">Data Display</span>
+      </a>
+      <a href="#cards"
+        class="nav-item flex items-center px-4 py-3 text-glass-text rounded-lg hover:bg-glass-100 transition-all">
+        <i class="far fa-id-card w-6 text-indigo-400"></i>
+        <span class="font-medium">Cards & Containers</span>
+      </a>
+      <a href="#navigation"
+        class="nav-item flex items-center px-4 py-3 text-glass-text rounded-lg hover:bg-glass-100 transition-all">
+        <i class="fas fa-compass w-6 text-blue-400"></i>
+        <span class="font-medium">Navigation</span>
+      </a>
+      <a href="#feedback"
+        class="nav-item flex items-center px-4 py-3 text-glass-text rounded-lg hover:bg-glass-100 transition-all">
+        <i class="fas fa-bell w-6 text-yellow-400"></i>
+        <span class="font-medium">Feedback</span>
+      </a>
+    </nav>
+
+    <div class="p-4 border-t border-glass-border">
+      <div class="glass-panel p-4 rounded-xl flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-full bg-gradient-to-tr from-glam-pink to-glam-purple flex items-center justify-center font-bold">
+          JD</div>
+        <div>
+          <div class="text-sm font-bold">Jane Doe</div>
+          <div class="text-xs text-glass-muted">Lead Designer</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto h-screen relative scroll-smooth">
+
+    <!-- Header -->
+    <header
+      class="sticky top-0 z-30 glass-panel border-b border-glass-border backdrop-blur-xl px-8 py-4 flex justify-between items-center">
+      <h2 id="page-title" class="text-xl font-display font-semibold">Dashboard</h2>
+      <div class="flex items-center gap-4">
+        <button
+          class="w-8 h-8 rounded-full bg-glass-100 hover:bg-glass-200 flex items-center justify-center transition-colors">
+          <i class="fas fa-search text-sm"></i>
+        </button>
+        <button
+          class="w-8 h-8 rounded-full bg-glass-100 hover:bg-glass-200 flex items-center justify-center transition-colors relative">
+          <i class="fas fa-bell text-sm"></i>
+          <span class="absolute top-0 right-0 w-2 h-2 bg-glam-pink rounded-full"></span>
+        </button>
+      </div>
+    </header>
+
+    <div class="p-8 max-w-6xl mx-auto space-y-20 pb-20">
+
+      <!-- Intro Hero -->
+      <section class="text-center py-10 relative">
+        <div
+          class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-glam-purple rounded-full mix-blend-screen filter blur-[100px] opacity-30 pointer-events-none">
+        </div>
+        <h1
+          class="text-5xl md:text-7xl font-display font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-gray-400">
+          Glamorphic
+        </h1>
+        <p class="text-xl text-glass-muted font-light max-w-2xl mx-auto">
+          A high-end glassmorphism design system focusing on depth, lighting, and vibrant accents.
+        </p>
+      </section>
+
+      <!-- Typography -->
+      <section id="typography" class="space-y-6 scroll-mt-24">
+        <div class="flex items-end gap-4 mb-8 border-b border-glass-border pb-4">
+          <h2 class="text-3xl font-display font-bold">Typography</h2>
+          <span class="text-glass-muted pb-1 font-mono text-sm">font-family: 'Outfit', 'Space Grotesk'</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="glass-panel p-8 rounded-2xl space-y-6">
+            <div>
+              <p class="text-xs text-glam-pink font-mono mb-2">Display / H1</p>
+              <h1 class="text-5xl font-display font-bold leading-tight">Glass Reality</h1>
+            </div>
+            <div>
+              <p class="text-xs text-glam-pink font-mono mb-2">Heading / H2</p>
+              <h2 class="text-4xl font-display font-semibold">Visual Hierarchy</h2>
+            </div>
+            <div>
+              <p class="text-xs text-glam-pink font-mono mb-2">Heading / H3</p>
+              <h3 class="text-3xl font-display font-medium">Modern Aesthetic</h3>
+            </div>
+          </div>
+
+          <div class="glass-panel p-8 rounded-2xl space-y-6">
+            <div>
+              <p class="text-xs text-glam-cyan font-mono mb-2">Body / Large</p>
+              <p class="text-lg text-glass-text leading-relaxed">
+                Design is not just what it looks like and feels like. Design is how it works. In a world of flat design,
+                depth provides a sense of hierarchy.
+              </p>
+            </div>
+            <div>
+              <p class="text-xs text-glam-cyan font-mono mb-2">Body / Base</p>
+              <p class="text-base text-glass-muted leading-relaxed">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
+              </p>
+            </div>
+            <div>
+              <p class="text-xs text-glam-cyan font-mono mb-2">Caption / Small</p>
+              <p class="text-sm text-glass-muted opacity-80">
+                * Terms and conditions apply. Viewing experience may vary by device.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Colors -->
+      <section id="colors" class="space-y-6 scroll-mt-24">
+        <h2 class="text-3xl font-display font-bold mb-8 border-b border-glass-border pb-4">Color Palette</h2>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <!-- Primaries -->
+          <div class="space-y-3">
+            <div class="h-32 rounded-2xl bg-glam-pink shadow-[0_0_20px_rgba(255,46,147,0.4)] flex items-end p-4">
+              <span class="font-mono text-xs">#FF2E93</span>
+            </div>
+            <p class="font-medium text-center">Neon Pink</p>
+          </div>
+          <div class="space-y-3">
+            <div class="h-32 rounded-2xl bg-glam-purple shadow-[0_0_20px_rgba(139,92,246,0.4)] flex items-end p-4">
+              <span class="font-mono text-xs">#8B5CF6</span>
+            </div>
+            <p class="font-medium text-center">Electric Purple</p>
+          </div>
+          <div class="space-y-3">
+            <div class="h-32 rounded-2xl bg-glam-cyan shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-end p-4">
+              <span class="font-mono text-xs">#06B6D4</span>
+            </div>
+            <p class="font-medium text-center">Cyber Cyan</p>
+          </div>
+          <div class="space-y-3">
+            <div class="h-32 rounded-2xl bg-gradient-to-br from-glam-pink to-glam-purple flex items-end p-4">
+              <span class="font-mono text-xs">Gradient</span>
+            </div>
+            <p class="font-medium text-center">Brand Gradient</p>
+          </div>
+        </div>
+
+        <h3 class="text-xl font-display font-semibold mt-8 mb-4">Glass Opacities</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div class="glass-panel h-24 rounded-xl flex items-center justify-center">Glass 100 (Default)</div>
+          <div class="glass-panel h-24 rounded-xl flex items-center justify-center bg-white/10">Glass 200</div>
+          <div class="glass-panel h-24 rounded-xl flex items-center justify-center bg-white/20">Glass 300</div>
+          <div class="glass-panel h-24 rounded-xl flex items-center justify-center bg-black/40">Dark Glass</div>
+        </div>
+      </section>
+
+      <!-- Buttons -->
+      <section id="buttons" class="space-y-6 scroll-mt-24">
+        <h2 class="text-3xl font-display font-bold mb-8 border-b border-glass-border pb-4">Buttons & Actions</h2>
+
+        <div class="glass-panel p-10 rounded-2xl">
+          <div class="flex flex-wrap gap-6 items-center">
+            <!-- Primary -->
+            <button
+              class="px-8 py-3 rounded-xl bg-gradient-to-r from-glam-pink to-glam-purple font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5 transition-all">
+              Primary Action
+            </button>
+
+            <!-- Secondary -->
+            <button
+              class="px-8 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/30 backdrop-blur-md transition-all font-medium">
+              Secondary
+            </button>
+
+            <!-- Outline/Ghost -->
+            <button
+              class="px-8 py-3 rounded-xl border border-glam-cyan text-glam-cyan hover:bg-glam-cyan hover:text-white transition-all font-medium">
+              Outline
+            </button>
+
+            <!-- Icon Button -->
+            <button
+              class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all group">
+              <i class="fas fa-heart text-glam-pink group-hover:scale-110 transition-transform"></i>
+            </button>
+
+            <!-- Loading -->
+            <button class="px-6 py-3 rounded-xl bg-white/5 cursor-wait flex items-center gap-2 text-glass-muted">
+              <i class="fas fa-circle-notch fa-spin"></i>
+              Processing
+            </button>
+          </div>
+
+          <div class="mt-8 pt-8 border-t border-glass-border">
+            <h4 class="text-sm font-mono text-glass-muted mb-4 uppercase tracking-widest">Button Sizes</h4>
+            <div class="flex flex-wrap items-end gap-4">
+              <button class="px-3 py-1.5 text-xs rounded-lg bg-white/10 hover:bg-white/20">Small</button>
+              <button class="px-5 py-2.5 text-sm rounded-lg bg-white/10 hover:bg-white/20">Medium</button>
+              <button class="px-8 py-3.5 text-base rounded-xl bg-white/10 hover:bg-white/20">Large Button</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Forms -->
+      <section id="forms" class="space-y-6 scroll-mt-24">
+        <h2 class="text-3xl font-display font-bold mb-8 border-b border-glass-border pb-4">Forms & Inputs</h2>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+          <!-- Input Fields -->
+          <div class="glass-panel p-8 rounded-2xl space-y-6">
+            <h3 class="text-xl font-semibold mb-4">Input Fields</h3>
+
+            <div class="space-y-2">
+              <label class="text-sm text-glass-muted ml-1">Username</label>
+              <div class="relative">
+                <span class="absolute left-4 top-3.5 text-glass-muted"><i class="fas fa-user"></i></span>
+                <input type="text" placeholder="Enter username"
+                  class="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:border-glam-purple focus:bg-white/10 focus:ring-1 focus:ring-glam-purple transition-all">
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm text-glass-muted ml-1">Email Address</label>
+              <input type="email" placeholder="john@example.com"
+                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-glam-cyan focus:bg-white/10 focus:ring-1 focus:ring-glam-cyan transition-all">
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm text-glass-muted ml-1">Message</label>
+              <textarea rows="3" placeholder="Type your message..."
+                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-glam-pink focus:bg-white/10 focus:ring-1 focus:ring-glam-pink transition-all resize-none"></textarea>
+            </div>
+
+            <!-- Select -->
+            <div class="space-y-2">
+              <label class="text-sm text-glass-muted ml-1">Selection</label>
+              <div class="relative">
+                <select
+                  class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white appearance-none focus:outline-none focus:border-glam-purple cursor-pointer">
+                  <option class="bg-slate-800">Option 1</option>
+                  <option class="bg-slate-800">Option 2</option>
+                  <option class="bg-slate-800">Option 3</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-4 top-4 text-glass-muted pointer-events-none"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="glass-panel p-8 rounded-2xl space-y-8">
+            <h3 class="text-xl font-semibold mb-4">Controls & Toggles</h3>
+
+            <!-- Toggles -->
+            <div class="flex items-center justify-between">
+              <span class="text-glass-text">Notifications</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked class="sr-only peer">
+                <div
+                  class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-glam-purple shadow-inner">
+                </div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-glass-text">Dark Mode</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" class="sr-only peer">
+                <div
+                  class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-glam-pink shadow-inner">
+                </div>
+              </label>
+            </div>
+
+            <hr class="border-glass-border">
+
+            <!-- Checkboxes -->
+            <div class="space-y-3">
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="checkbox" checked
+                  class="appearance-none w-5 h-5 border border-white/30 rounded bg-white/5 checkbox-glam transition-all">
+                <span class="text-glass-text">Accept Terms</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="checkbox"
+                  class="appearance-none w-5 h-5 border border-white/30 rounded bg-white/5 checkbox-glam transition-all">
+                <span class="text-glass-text">Remember me</span>
+              </label>
+            </div>
+
+            <!-- Radios -->
+            <div class="space-y-3">
+              <label class="flex items-center space-x-3 cursor-pointer group">
+                <div class="relative">
+                  <input type="radio" name="plan" checked class="peer sr-only">
+                  <div
+                    class="w-5 h-5 border border-white/30 rounded-full bg-white/5 peer-checked:border-glam-cyan peer-checked:bg-glam-cyan/20">
+                  </div>
+                  <div
+                    class="absolute inset-0 m-auto w-2.5 h-2.5 rounded-full bg-glam-cyan transform scale-0 peer-checked:scale-100 transition-transform">
+                  </div>
+                </div>
+                <span class="text-glass-text">Personal Plan</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer group">
+                <div class="relative">
+                  <input type="radio" name="plan" class="peer sr-only">
+                  <div
+                    class="w-5 h-5 border border-white/30 rounded-full bg-white/5 peer-checked:border-glam-cyan peer-checked:bg-glam-cyan/20">
+                  </div>
+                  <div
+                    class="absolute inset-0 m-auto w-2.5 h-2.5 rounded-full bg-glam-cyan transform scale-0 peer-checked:scale-100 transition-transform">
+                  </div>
+                </div>
+                <span class="text-glass-text">Business Plan</span>
+              </label>
+            </div>
+
+            <hr class="border-glass-border">
+
+            <!-- Slider -->
+            <div class="space-y-4">
+              <div class="flex justify-between text-sm">
+                <span class="text-glass-muted">Volume</span>
+                <span class="text-white font-mono">75%</span>
+              </div>
+              <input type="range" min="0" max="100" value="75" class="w-full">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Data Display -->
+      <section id="data" class="space-y-6 scroll-mt-24">
+        <h2 class="text-3xl font-display font-bold mb-8 border-b border-glass-border pb-4">Data Display</h2>
+
+        <!-- Badges -->
+        <div class="glass-panel p-6 rounded-2xl mb-8 flex flex-wrap gap-4">
+          <span
+            class="px-3 py-1 rounded-full text-xs font-semibold bg-glam-pink/20 text-pink-200 border border-glam-pink/30">New</span>
+          <span
+            class="px-3 py-1 rounded-full text-xs font-semibold bg-glam-purple/20 text-purple-200 border border-glam-purple/30">Processing</span>
+          <span
+            class="px-3 py-1 rounded-full text-xs font-semibold bg-glam-cyan/20 text-cyan-200 border border-glam-cyan/30">Completed</span>
+          <span
+            class="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white border border-white/20">Neutral</span>
+          <span
+            class="px-3 py-1 rounded-full text-xs font-semibold bg-green-500/20 text-green-200 border border-green-500/30 flex items-center gap-1">
+            <i class="fas fa-check-circle text-[10px]"></i> Verified
+          </span>
+        </div>
+
+        <!-- Table -->
+        <div class="glass-panel rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-white/10 bg-white/5">
+                  <th class="p-4 font-semibold text-glass-muted text-sm uppercase tracking-wider">User</th>
+                  <th class="p-4 font-semibold text-glass-muted text-sm uppercase tracking-wider">Status</th>
+                  <th class="p-4 font-semibold text-glass-muted text-sm uppercase tracking-wider">Role</th>
+                  <th class="p-4 font-semibold text-glass-muted text-sm uppercase tracking-wider text-right">Revenue
+                  </th>
+                  <th class="p-4 font-semibold text-glass-muted text-sm uppercase tracking-wider text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5">
+                <tr class="hover:bg-white/5 transition-colors">
+                  <td class="p-4 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-cyan-300"></div>
+                    <span class="font-medium">Alex Morgan</span>
+                  </td>
+                  <td class="p-4">
+                    <span
+                      class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                      <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span> Active
+                    </span>
+                  </td>
+                  <td class="p-4 text-glass-muted">Frontend Dev</td>
+                  <td class="p-4 text-right font-mono">$12,400</td>
+                  <td class="p-4 text-right">
+                    <button class="text-glass-muted hover:text-white transition-colors"><i
+                        class="fas fa-ellipsis-h"></i></button>
+                  </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors">
+                  <td class="p-4 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-rose-300"></div>
+                    <span class="font-medium">Sarah Connor</span>
+                  </td>
+                  <td class="p-4">
+                    <span
+                      class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                      <span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span> Pending
+                    </span>
+                  </td>
+                  <td class="p-4 text-glass-muted">Designer</td>
+                  <td class="p-4 text-right font-mono">$8,200</td>
+                  <td class="p-4 text-right">
+                    <button class="text-glass-muted hover:text-white transition-colors"><i
+                        class="fas fa-ellipsis-h"></i></button>
+                  </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors">
+                  <td class="p-4 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-indigo-300"></div>
+                    <span class="font-medium">Michael Chen</span>
+                  </td>
+                  <td class="p-4">
+                    <span
+                      class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+                      <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> Offline
+                    </span>
+                  </td>
+                  <td class="p-4 text-glass-muted">Manager</td>
+                  <td class="p-4 text-right font-mono">$15,900</td>
+                  <td class="p-4 text-right">
+                    <button class="text-glass-muted hover:text-white transition-colors"><i
+                        class="fas fa-ellipsis-h"></i></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="p-4 border-t border-white/10 flex justify-between items-center">
+            <span class="text-xs text-glass-muted">Showing 1-3 of 12</span>
+            <div class="flex gap-2">
+              <button
+                class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-xs transition-colors"><i
+                  class="fas fa-chevron-left"></i></button>
+              <button
+                class="w-8 h-8 rounded-lg bg-glam-purple hover:bg-glam-purple/80 flex items-center justify-center text-xs transition-colors">1</button>
+              <button
+                class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-xs transition-colors">2</button>
+              <button
+                class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-xs transition-colors"><i
+                  class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cards -->
+      <section id="cards" class="space-y-6 scroll-mt-24">
+        <h2 class="text-3xl font-display font-bold mb-8 border-b border-glass-border pb-4">Cards & Containers</h2>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Standard Card -->
+          <div class="glass-panel glass-panel-hover p-6 rounded-2xl flex flex-col h-full">
+            <div
+              class="w-12 h-12 rounded-xl bg-glam-pink/20 flex items-center justify-center text-glam-pink text-xl mb-4">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Lightning Fast</h3>
+            <p class="text-glass-muted mb-6 flex-1">
+              Optimized for speed and efficiency using the latest glassmorphism techniques.
+            </p>
+            <a href="#" class="text-glam-pink text-sm font-semibold hover:underline">Learn More &rarr;</a>
+          </div>
+
+          <!-- Image Card -->
+          <div class="glass-panel glass-panel-hover p-4 rounded-2xl">
+            <div class="h-40 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 mb-4 relative overflow-hidden group">
+              <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+            </div>
+            <h3 class="text-lg font-bold mb-1">Visual Arts</h3>
+            <p class="text-sm text-glass-muted mb-4">Abstract 3D Renders</p>
+            <div class="flex items-center justify-between">
+              <div class="flex -space-x-2">
+                <div class="w-8 h-8 rounded-full border-2 border-slate-800 bg-gray-500"></div>
+                <div class="w-8 h-8 rounded-full border-2 border-slate-800 bg-gray-600"></div>
+              </div>
+              <button class="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"><i
+                  class="fas fa-heart text-glam-pink"></i></button>
+            </div>
+          </div>
+
+          <!-- Stat Card -->
+          <div class="glass-panel glass-panel-hover p-6 rounded-2xl relative overflow-hidden">
+            <div class="absolute -right-6 -top-6 w-24 h-24 bg-glam-purple rounded-full blur-[40px] opacity-40"></div>
+            <h4 class="text-glass-muted text-sm font-medium uppercase tracking-wider mb-2">Total Revenue</h4>
+            <div class="flex items-baseline gap-2 mb-4">
+              <span class="text-3xl font-bold text-white">$48,200</span>
+              <span class="text-green-400 text-sm font-medium"><i class="fas fa-arrow-up"></i> 12%</span>
+            </div>
+            <div class="w-full bg-white/10 rounded-full h-1.5">
+              <div class="bg-gradient-to-r from-glam-purple to-glam-pink h-1.5 rounded-full" style="width: 70%"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation Components -->
+      <section id="navigation" class="space-y-6 scroll-mt-24">
+        <h2 class="text-3xl font-display font-bold mb-8 border-b border-glass-border pb-4">Navigation Elements</h2>
+
+        <!-- Tabs -->
+        <div class="glass-panel p-8 rounded-2xl mb-8">
+          <h3 class="text-lg font-semibold mb-6">Pill Tabs</h3>
+          <div class="inline-flex p-1 bg-black/20 backdrop-blur-xl rounded-xl border border-white/5">
+            <button
+              class="px-6 py-2 rounded-lg bg-white/10 text-white shadow-lg font-medium text-sm transition-all">Dashboard</button>
+            <button
+              class="px-6 py-2 rounded-lg hover:bg-white/5 text-glass-muted hover:text-white font-medium text-sm transition-all">Profile</button>
+            <button
+              class="px-6 py-2 rounded-lg hover:bg-white/5 text-glass-muted hover:text-white font-medium text-sm transition-all">Settings</button>
+          </div>
+
+          <h3 class="text-lg font-semibold my-6">Underline Tabs</h3>
+          <div class="border-b border-white/10 flex gap-8">
+            <button class="pb-3 border-b-2 border-glam-pink text-glam-pink font-medium text-sm">Overview</button>
+            <button
+              class="pb-3 border-b-2 border-transparent text-glass-muted hover:text-white transition-colors font-medium text-sm">Analytics</button>
+            <button
+              class="pb-3 border-b-2 border-transparent text-glass-muted hover:text-white transition-colors font-medium text-sm">Reports</button>
+          </div>
+        </div>
+
+        <!-- Breadcrumbs -->
+        <div class="glass-panel p-6 rounded-2xl">
+          <nav class="flex text-sm text-glass-muted">
+            <ol class="flex items-center space-x-2">
+              <li><a href="#" class="hover:text-white transition-colors"><i class="fas fa-home"></i></a></li>
+              <li><span class="mx-1">/</span></li>
+              <li><a href="#" class="hover:text-white transition-colors">Projects</a></li>
+              <li><span class="mx-1">/</span></li>
+              <li><span class="text-glam-cyan font-medium">Design System</span></li>
+            </ol>
+          </nav>
+        </div>
+      </section>
+
+      <!-- Feedback & Overlays -->
+      <section id="feedback" class="space-y-6 scroll-mt-24">
+        <h2 class="text-3xl font-display font-bold mb-8 border-b border-glass-border pb-4">Feedback & Overlays</h2>
+
+        <!-- Alerts -->
+        <div class="space-y-4">
+          <div class="glass-panel p-4 rounded-xl border-l-4 border-glam-cyan flex items-start gap-4 bg-glam-cyan/5">
+            <i class="fas fa-info-circle text-glam-cyan mt-1"></i>
+            <div>
+              <h4 class="font-bold text-sm text-white">Update Available</h4>
+              <p class="text-sm text-glass-muted">A new version of the system is available. Refresh to update.</p>
+            </div>
+          </div>
+
+          <div class="glass-panel p-4 rounded-xl border-l-4 border-glam-pink flex items-start gap-4 bg-glam-pink/5">
+            <i class="fas fa-exclamation-triangle text-glam-pink mt-1"></i>
+            <div>
+              <h4 class="font-bold text-sm text-white">Connection Error</h4>
+              <p class="text-sm text-glass-muted">Unable to connect to the server. Please check your internet.</p>
+            </div>
+          </div>
+
+          <div class="glass-panel p-4 rounded-xl border-l-4 border-green-500 flex items-start gap-4 bg-green-500/5">
+            <i class="fas fa-check-circle text-green-500 mt-1"></i>
+            <div>
+              <h4 class="font-bold text-sm text-white">Success</h4>
+              <p class="text-sm text-glass-muted">Changes saved successfully.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Trigger -->
+        <div class="mt-8">
+          <h3 class="text-xl font-semibold mb-4">Modal Dialog</h3>
+          <button onclick="document.getElementById('demo-modal').classList.remove('hidden')"
+            class="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium transition-all">
+            Open Demo Modal
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Modal Implementation -->
+  <div id="demo-modal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+      onclick="document.getElementById('demo-modal').classList.add('hidden')"></div>
+
+    <!-- Modal Content -->
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+      <div class="glass-panel p-8 rounded-2xl shadow-2xl border border-white/20 relative animate-float">
+        <button onclick="document.getElementById('demo-modal').classList.add('hidden')"
+          class="absolute top-4 right-4 text-glass-muted hover:text-white transition-colors">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <div
+          class="w-16 h-16 rounded-full bg-gradient-to-br from-glam-pink to-glam-purple flex items-center justify-center text-2xl mb-6 mx-auto shadow-lg shadow-purple-500/30">
+          <i class="fas fa-gem text-white"></i>
+        </div>
+
+        <h3 class="text-2xl font-display font-bold text-center mb-2">Welcome to Glamorphic</h3>
+        <p class="text-center text-glass-muted mb-8">
+          This is a glassmorphism modal dialog. Notice the backdrop blur behind this card and the subtle border glow.
+        </p>
+
+        <div class="flex gap-4">
+          <button onclick="document.getElementById('demo-modal').classList.add('hidden')"
+            class="flex-1 py-3 rounded-xl border border-white/10 hover:bg-white/10 text-white transition-all font-medium">
+            Cancel
+          </button>
+          <button
+            class="flex-1 py-3 rounded-xl bg-gradient-to-r from-glam-pink to-glam-purple shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-white transition-all font-semibold">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sidebar active state logic
+    const navLinks = document.querySelectorAll('.nav-item');
+    const sections = document.querySelectorAll('section');
+    const sidebar = document.getElementById('sidebar');
+    const mobileBtn = document.getElementById('mobile-menu-btn');
+
+    // Mobile Menu Toggle
+    mobileBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('-translate-x-full');
+      // Toggle icon
+      const icon = mobileBtn.querySelector('i');
+      if (sidebar.classList.contains('-translate-x-full')) {
+        icon.classList.remove('fa-times');
+        icon.classList.add('fa-bars');
+      } else {
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-times');
+      }
+    });
+
+    // Close sidebar when clicking a link on mobile
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) { // lg breakpoint
+          sidebar.classList.add('-translate-x-full');
+          const icon = mobileBtn.querySelector('i');
+          icon.classList.remove('fa-times');
+          icon.classList.add('fa-bars');
+        }
+      });
+    });
+
+    // Scroll Spy for Active Navigation
+    const mainContainer = document.querySelector('main');
+    mainContainer.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        // Offset for sticky header
+        if (mainContainer.scrollTop >= (sectionTop - 200)) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('bg-white/10', 'border-l-4', 'border-glam-pink');
+        if (link.getAttribute('href').includes(current)) {
+          link.classList.add('bg-white/10');
+          // Update Page Title
+          document.getElementById('page-title').textContent = link.querySelector('span').textContent;
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

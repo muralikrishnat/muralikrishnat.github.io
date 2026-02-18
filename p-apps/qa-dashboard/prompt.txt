@@ -1,0 +1,18 @@
+Build a QA automation app with below features
+
+1. App shows dashboard with details  useful for QA lead and Automation engineer team such as Total no of user journeys, passed, failed, journey test coverage, no of steps executed/created.
+2. List of user journeys with journey name, journey status, journey steps count, last executed/created date
+3. Detailed user journey with detailed steps, view in some list representation.
+4. Edit/Add/Delete user journeys with add/edit/delete node, node is nothing but step, come up with all the user actions that can test in automation.
+5. View/Edit/Remove scheduled details - schedule details like repeat or onetime, weekly, daily. what time? when on day? next execution.
+6. come up with creative way to put the information like page load, page data, page network size, step execution time, journey execution time, journey completed At.
+7. Flow editor will be like vertical nodes, nodes are connected with path, path has option to add new node in between nodes, nodes can be moved up and down, for conditional node, two branches will start. conditional nodes have option to seperate path into multiple paths with option to add new path.
+8. Tree branching should work like if i have dropdown on the page, I should have multiple paths based on the dropdown value, means user go one of the path from three values meaning from three paths.
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking.
+Easy to understand and operate
+Use only html, css, javascript and tailwindcss
+
+
+lets make simple flow builder without graphical then if it too much to build, lets show them in order and put some conditional nodes also, come up with design that doen't disturb the theme. kind of list and can be new item inserted required place and move node among them.

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusStack - One-Phase Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #020617;
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-bg {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .glass-card.active {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+        }
+
+        .input-glass {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+        }
+
+        .input-glass:focus {
+            border-color: #3b82f6;
+            background: rgba(0, 0, 0, 0.4);
+            outline: none;
+        }
+
+        .section-appear {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <!-- Ambient Background -->
+    <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full -z-10"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full -z-10"></div>
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <h1 class="text-4xl font-extrabold tracking-tight mb-2">NexusStack <span class="gradient-text">Engine</span></h1>
+                <p class="text-slate-400">Configure your entire stack in a single view.</p>
+            </div>
+            <div id="status-pill" class="hidden px-4 py-2 rounded-full glass-bg text-xs font-semibold flex items-center gap-2 border border-blue-500/30">
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                CONFIGURATION IN PROGRESS
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left: Configurations -->
+            <div class="lg:col-span-8 space-y-8">
+                
+                <!-- 1. Project Type -->
+                <section class="glass-bg p-6 rounded-3xl">
+                    <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <i data-lucide="layers" class="w-4 h-4"></i> 1. Project Architecture
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <button onclick="setType('ui')" id="type-ui" class="glass-card p-5 rounded-2xl text-left hover:active">
+                            <i data-lucide="monitor" class="w-6 h-6 mb-3 text-blue-400"></i>
+                            <div class="font-bold">Frontend UI</div>
+                            <div class="text-xs text-slate-500 mt-1">Client-side applications</div>
+                        </button>
+                        <button onclick="setType('api')" id="type-api" class="glass-card p-5 rounded-2xl text-left">
+                            <i data-lucide="server" class="w-6 h-6 mb-3 text-purple-400"></i>
+                            <div class="font-bold">Backend API</div>
+                            <div class="text-xs text-slate-500 mt-1">Server & Data logic</div>
+                        </button>
+                        <button onclick="setType('fullstack')" id="type-fullstack" class="glass-card p-5 rounded-2xl text-left">
+                            <i data-lucide="zap" class="w-6 h-6 mb-3 text-amber-400"></i>
+                            <div class="font-bold">Full Stack</div>
+                            <div class="text-xs text-slate-500 mt-1">Unified ecosystem</div>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- 2. Methodology -->
+                <section id="method-section" class="hidden glass-bg p-6 rounded-3xl section-appear">
+                    <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <i data-lucide="workflow" class="w-4 h-4"></i> 2. Build Methodology
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button onclick="setMethod('template')" id="method-template" class="glass-card p-5 rounded-2xl text-left flex items-center gap-4">
+                            <div class="p-3 rounded-xl bg-blue-500/10 text-blue-400"><i data-lucide="copy"></i></div>
+                            <div>
+                                <div class="font-bold">Use Template</div>
+                                <div class="text-xs text-slate-500">Fast, battle-tested presets</div>
+                            </div>
+                        </button>
+                        <button onclick="setMethod('custom')" id="method-custom" class="glass-card p-5 rounded-2xl text-left flex items-center gap-4">
+                            <div class="p-3 rounded-xl bg-purple-500/10 text-purple-400"><i data-lucide="wrench"></i></div>
+                            <div>
+                                <div class="font-bold">Build Custom</div>
+                                <div class="text-xs text-slate-500">Granular tech selection</div>
+                            </div>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- 3. Dynamic Configuration -->
+                <section id="config-section" class="hidden glass-bg p-6 rounded-3xl section-appear">
+                    <h2 id="config-title" class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <i data-lucide="settings" class="w-4 h-4"></i> 3. Configuration
+                    </h2>
+                    
+                    <!-- Template List -->
+                    <div id="template-options" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Injected by JS -->
+                    </div>
+
+                    <!-- Custom Options -->
+                    <div id="custom-options" class="hidden space-y-8">
+                        <!-- Custom content dynamically generated -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right: Live Summary & Actions -->
+            <div class="lg:col-span-4">
+                <div class="sticky top-8 space-y-6">
+                    <div class="glass-bg p-6 rounded-3xl border-blue-500/20">
+                        <h3 class="text-lg font-bold mb-4 flex justify-between items-center">
+                            Live Manifest
+                            <i data-lucide="file-json" class="w-4 h-4 text-slate-500"></i>
+                        </h3>
+                        <div id="manifest-list" class="space-y-3 text-sm">
+                            <div class="text-slate-500 italic">Start configuring to see your manifest...</div>
+                        </div>
+                        <div class="mt-8 pt-6 border-t border-white/5">
+                            <button id="generate-btn" disabled class="w-full py-4 rounded-2xl bg-slate-800 text-slate-500 font-bold flex items-center justify-center gap-2 transition-all cursor-not-allowed">
+                                <i data-lucide="terminal" class="w-5 h-5"></i> Generate Stack
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tech Tip -->
+                    <div class="p-5 rounded-3xl bg-blue-500/5 border border-blue-500/10">
+                        <div class="flex gap-3">
+                            <i data-lucide="info" class="w-5 h-5 text-blue-400 shrink-0"></i>
+                            <p class="text-xs text-blue-200/70 leading-relaxed">
+                                NexusStack automatically resolves dependencies and creates shared types for full-stack selections.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            type: null,
+            method: null,
+            template: null,
+            custom: {
+                framework: null,
+                styling: null,
+                runtime: null,
+                db: null,
+                auth: [],
+                encryption: false
+            }
+        };
+
+        const templates = {
+            ui: [
+                { id: 't1', name: 'Admin Dashboard', tech: 'React, Tailwind, Recharts' },
+                { id: 't2', name: 'Modern Landing', tech: 'Vue, Framer, Tailwind' }
+            ],
+            api: [
+                { id: 't3', name: 'Express Microservice', tech: 'Node, Redis, JWT' },
+                { id: 't4', name: 'Python Data API', tech: 'FastAPI, PostgreSQL' }
+            ],
+            fullstack: [
+                { id: 't5', name: 'SaaS Starter', tech: 'Next.js, Prisma, Stripe' },
+                { id: 't6', name: 'Real-time Dash', tech: 'Svelte, Supabase, Socket.io' }
+            ]
+        };
+
+        function setType(val) {
+            state.type = val;
+            state.method = null;
+            state.template = null;
+            
+            // UI Updates
+            document.querySelectorAll('[id^="type-"]').forEach(el => el.classList.remove('active'));
+            document.getElementById(`type-${val}`).classList.add('active');
+            
+            document.getElementById('method-section').classList.remove('hidden');
+            document.getElementById('config-section').classList.add('hidden');
+            document.getElementById('status-pill').classList.remove('hidden');
+            
+            updateManifest();
+            lucide.createIcons();
+        }
+
+        function setMethod(val) {
+            state.method = val;
+            state.template = null;
+            
+            document.querySelectorAll('[id^="method-"]').forEach(el => el.classList.remove('active'));
+            document.getElementById(`method-${val}`).classList.add('active');
+            
+            document.getElementById('config-section').classList.remove('hidden');
+            
+            if (val === 'template') {
+                showTemplates();
+            } else {
+                showCustom();
+            }
+            updateManifest();
+            lucide.createIcons();
+        }
+
+        function showTemplates() {
+            document.getElementById('template-options').classList.remove('hidden');
+            document.getElementById('custom-options').classList.add('hidden');
+            document.getElementById('config-title').innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i> Select Template';
+            
+            const list = templates[state.type] || [];
+            document.getElementById('template-options').innerHTML = list.map(t => `
+                <button onclick="setTemplate('${t.id}', '${t.name}')" class="glass-card p-4 rounded-xl text-left border-l-4 ${state.template === t.id ? 'active border-l-blue-500' : 'border-l-transparent'}">
+                    <div class="font-bold text-sm">${t.name}</div>
+                    <div class="text-[10px] text-slate-500 mt-1 uppercase tracking-tight">${t.tech}</div>
+                </button>
+            `).join('');
+        }
+
+        function showCustom() {
+            document.getElementById('template-options').classList.add('hidden');
+            document.getElementById('custom-options').classList.remove('hidden');
+            document.getElementById('config-title').innerHTML = '<i data-lucide="wrench" class="w-4 h-4"></i> Configuration Details';
+            
+            let html = '';
+            
+            // Frameworks (UI / Fullstack)
+            if (state.type !== 'api') {
+                html += renderGroup('Frontend Framework', 'framework', [
+                    { id: 'react', label: 'React' },
+                    { id: 'vue', label: 'Vue 3' },
+                    { id: 'next', label: 'Next.js' }
+                ]);
+            }
+
+            // Backend (API / Fullstack)
+            if (state.type !== 'ui') {
+                html += renderGroup('Runtime / Server', 'runtime', [
+                    { id: 'node', label: 'Node.js (Express)' },
+                    { id: 'nest', label: 'NestJS' },
+                    { id: 'go', label: 'Golang' }
+                ]);
+                html += renderGroup('Database', 'db', [
+                    { id: 'mongo', label: 'MongoDB' },
+                    { id: 'postgres', label: 'PostgreSQL' },
+                    { id: 'redis', label: 'Redis' }
+                ]);
+            }
+
+            // Global Features
+            html += `
+                <div class="space-y-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Security & Services</h3>
+                    <div class="flex flex-wrap gap-3">
+                        ${['Authentication', 'Encryption', 'Logging', 'Docker'].map(f => `
+                            <label class="glass-card px-4 py-2 rounded-xl cursor-pointer flex items-center gap-2">
+                                <input type="checkbox" onchange="toggleFeat('${f}')" class="rounded bg-slate-900 border-white/10 text-blue-500 focus:ring-0">
+                                <span class="text-sm">${f}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('custom-options').innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function renderGroup(label, key, options) {
+            return `
+                <div class="space-y-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">${label}</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        ${options.map(opt => `
+                            <button onclick="setCustom('${key}', '${opt.id}')" class="glass-card p-3 rounded-xl text-sm ${state.custom[key] === opt.id ? 'active' : ''}">
+                                ${opt.label}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        window.setTemplate = (id, name) => {
+            state.template = { id, name };
+            showTemplates();
+            updateManifest();
+        };
+
+        window.setCustom = (key, val) => {
+            state.custom[key] = val;
+            showCustom();
+            updateManifest();
+        };
+
+        window.toggleFeat = (val) => {
+            const idx = state.custom.auth.indexOf(val);
+            if (idx > -1) state.custom.auth.splice(idx, 1);
+            else state.custom.auth.push(val);
+            updateManifest();
+        }
+
+        function updateManifest() {
+            const manifest = document.getElementById('manifest-list');
+            const btn = document.getElementById('generate-btn');
+            let ready = false;
+            let html = '';
+
+            if (state.type) {
+                html += `<div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
+                            <span class="text-slate-400 uppercase text-[10px]">Type</span>
+                            <span class="font-bold text-blue-400 text-xs">${state.type.toUpperCase()}</span>
+                         </div>`;
+            }
+
+            if (state.method === 'template' && state.template) {
+                html += `<div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
+                            <span class="text-slate-400 uppercase text-[10px]">Template</span>
+                            <span class="font-bold text-purple-400 text-xs">${state.template.name}</span>
+                         </div>`;
+                ready = true;
+            } else if (state.method === 'custom') {
+                const c = state.custom;
+                if (c.framework) html += `<div class="flex justify-between items-center"><span class="text-slate-500">UI</span> <span class="text-white">${c.framework}</span></div>`;
+                if (c.runtime) html += `<div class="flex justify-between items-center"><span class="text-slate-500">Server</span> <span class="text-white">${c.runtime}</span></div>`;
+                if (c.db) html += `<div class="flex justify-between items-center"><span class="text-slate-500">DB</span> <span class="text-white">${c.db}</span></div>`;
+                
+                if (c.auth.length > 0) {
+                    html += `<div class="mt-4 text-[10px] text-slate-500 uppercase tracking-tighter">Enabled Features</div>
+                             <div class="flex flex-wrap gap-1 mt-1">
+                                ${c.auth.map(f => `<span class="bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded text-[10px] border border-blue-500/20">${f}</span>`).join('')}
+                             </div>`;
+                }
+
+                // Logic for ready state
+                if (state.type === 'ui' && c.framework) ready = true;
+                if (state.type === 'api' && c.runtime && c.db) ready = true;
+                if (state.type === 'fullstack' && c.framework && c.runtime && c.db) ready = true;
+            }
+
+            manifest.innerHTML = html || '<div class="text-slate-500 italic">Select options to build manifest...</div>';
+            
+            if (ready) {
+                btn.disabled = false;
+                btn.className = "w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/20 cursor-pointer scale-100 hover:scale-[1.02]";
+                btn.innerHTML = '<i data-lucide="rocket" class="w-5 h-5"></i> Generate Stack';
+            } else {
+                btn.disabled = true;
+                btn.className = "w-full py-4 rounded-2xl bg-slate-800 text-slate-500 font-bold flex items-center justify-center gap-2 transition-all cursor-not-allowed opacity-50";
+                btn.innerHTML = '<i data-lucide="terminal" class="w-5 h-5"></i> Configure Stack';
+            }
+            lucide.createIcons();
+        }
+
+        document.getElementById('generate-btn').addEventListener('click', () => {
+            const btn = document.getElementById('generate-btn');
+            btn.innerHTML = '<span class="animate-spin h-5 w-5 border-2 border-white/30 border-t-white rounded-full"></span> Orchestrating...';
+            setTimeout(() => {
+                alert('Generation Initialized! Check console for manifest output.');
+                console.log('NexusStack Build Command Generated:', state);
+                btn.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i> Done!';
+                lucide.createIcons();
+            }, 1500);
+        });
+
+        // Init icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+

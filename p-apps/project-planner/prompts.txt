@@ -1,0 +1,185 @@
+Goal: Project Plan Generator
+
+Context: I'm building tool to generate comprehenssive project plan based on the project requirements, 
+    this plan will include all the details like discovery, implementation, testing, marketing, releases, deployments.
+
+Task: Build app simple page with only html, w3c.css and javascript. 
+this page takes project requirements in textarea or rich text editor from user.
+another section to show complete project plan. it shouuld be very attractive display and very creative.
+
+Below is the Project plan structure which you need to use to show:
+
+
+{
+    "projectTitle": "Online Food Delivery Web Application",
+    "epics":[
+        {
+            "name": "User Management",
+            "description": "Handles user registration, login, profile management, and authentication.",
+            "features": [
+                {
+                    "name": "User Registration",
+                    "description": "Allow users to create accounts with necessary details.",
+                    "featureType": "Implementation",
+                    "estimatedDays": "5"
+                },
+                {
+                    "name": "User Login",
+                    "description": "Enable users to securely log in to their accounts.",
+                    "featureType": "Implementation",
+                    "estimatedDays": "3"
+                }
+            ],
+            "estimatedDays": "23"
+        },
+        {
+            "name": "Restaurant Management",
+            "description": "Enables restaurants to register, manage menus, and update information.",
+            "features": [
+                {
+                    "name": "Restaurant Registration",
+                    "description": "Allow restaurants to register and create profiles.",
+                    "featureType": "Implementation",
+                    "estimatedDays": "5"
+                },
+                {
+                    "name": "Menu Management",
+                    "description": "Enable restaurants to add, update, and delete menu items.",
+                    "featureType": "Implementation",
+                    "estimatedDays": "7"
+                },
+                {
+                    "name": "Restaurant Profile Management",
+                    "description": "Allow restaurants to manage their profile information (address, hours, etc.).",
+                    "featureType": "Implementation",
+                    "estimatedDays": "3"
+                }
+            ],
+            "estimatedDays": "30"
+        }
+    ],
+    "feedbackIterations": [
+        {
+            "iteration": 1,
+            "comments": "Initial project plan created. Review required from stakeholders to validate scope and estimations.",
+            "feedbackBy": "TECHNICAL_MANAGER"
+        },
+        {
+            "iteration": 2,
+            "comments": "The project breakdown structure looks comprehensive. However, consider adding a feature under 'Restaurant Management' for 'Promotional Offers Management' to allow restaurants to create and manage discounts. Also, under 'User Management', a feature for 'Social Login Integration' (e.g., Google, Facebook) could enhance user experience. Finally, under 'Discovery and Analysis', consider adding 'Competitive Analysis' as a separate feature to give it more visibility and dedicated effort.",
+            "feedbackBy": "BUSINESS_ANALYST_PRODUCT_OWNER"
+        },
+        {
+            "iteration": 3,
+            "comments": "The addition of 'Social Login Integration', 'Promotional Offers Management', and 'Competitive Analysis' features is a good enhancement. From an architectural perspective, consider adding a feature under 'Deployment and Infrastructure' for 'Disaster Recovery Planning' to ensure business continuity in case of unforeseen events. Also, under 'Order Management', consider adding 'Delivery Driver Management' to handle delivery logistics.",
+            "feedbackBy": "SENIOR_ARCHITECT"
+        }
+    ]
+}
+
+
+============================================================
+============================================================
+
+Goal: Project Plan Generator
+
+Context: I'm building tool to generate comprehenssive project plan based on the project requirements, 
+    this plan will include all the details like discovery, implementation, testing, marketing, releases, deployments.
+
+Task: Build app simple page
+this page takes project requirements in textarea or rich text editor from user.
+another section to show complete project plan. it shouuld be very attractive display and very creative.
+
+Tech stack:
+- HTML
+- Tailwind CSS
+- Pure Javascript
+
+
+add list of the roles each, each role reviews the project plan and provide the feedback, 
+we need to show the progress, waiting and finished status for each role, and list of roles are in order
+1.Technical Manager
+2.Senior Architect
+3.Business Analyst
+4.Senior Technical Lead
+5.QA Lead and Tester
+6.DevOps Engineer
+7.Senior Developer
+
+Below is the Project plan structure which you need to use to show:
+
+
+{
+    "projectTitle": "Online Food Delivery Web Application",
+    "epics":[
+        {
+            "name": "User Management",
+            "description": "Handles user registration, login, profile management, and authentication.",
+            "features": [
+                {
+                    "name": "User Registration",
+                    "description": "Allow users to create accounts with necessary details.",
+                    "featureType": "Implementation",
+                    "estimatedDays": "5"
+                },
+                {
+                    "name": "User Login",
+                    "description": "Enable users to securely log in to their accounts.",
+                    "featureType": "Implementation",
+                    "estimatedDays": "3"
+                }
+            ],
+            "estimatedDays": "23"
+        },
+        {
+            "name": "Restaurant Management",
+            "description": "Enables restaurants to register, manage menus, and update information.",
+            "features": [
+                {
+                    "name": "Restaurant Registration",
+                    "description": "Allow restaurants to register and create profiles.",
+                    "featureType": "Implementation",
+                    "estimatedDays": "5"
+                },
+                {
+                    "name": "Menu Management",
+                    "description": "Enable restaurants to add, update, and delete menu items.",
+                    "featureType": "Implementation",
+                    "estimatedDays": "7"
+                },
+                {
+                    "name": "Restaurant Profile Management",
+                    "description": "Allow restaurants to manage their profile information (address, hours, etc.).",
+                    "featureType": "Implementation",
+                    "estimatedDays": "3"
+                }
+            ],
+            "estimatedDays": "30"
+        }
+    ],
+    "feedbackIterations": [
+        {
+            "iteration": 1,
+            "comments": "Initial project plan created. Review required from stakeholders to validate scope and estimations.",
+            "feedbackBy": "TECHNICAL_MANAGER"
+        },
+        {
+            "iteration": 2,
+            "comments": "The project breakdown structure looks comprehensive. However, consider adding a feature under 'Restaurant Management' for 'Promotional Offers Management' to allow restaurants to create and manage discounts. Also, under 'User Management', a feature for 'Social Login Integration' (e.g., Google, Facebook) could enhance user experience. Finally, under 'Discovery and Analysis', consider adding 'Competitive Analysis' as a separate feature to give it more visibility and dedicated effort.",
+            "feedbackBy": "BUSINESS_ANALYST_PRODUCT_OWNER"
+        },
+        {
+            "iteration": 3,
+            "comments": "The addition of 'Social Login Integration', 'Promotional Offers Management', and 'Competitive Analysis' features is a good enhancement. From an architectural perspective, consider adding a feature under 'Deployment and Infrastructure' for 'Disaster Recovery Planning' to ensure business continuity in case of unforeseen events. Also, under 'Order Management', consider adding 'Delivery Driver Management' to handle delivery logistics.",
+            "feedbackBy": "SENIOR_ARCHITECT"
+        }
+    ]
+}
+
+
+UI Layout:
+
+three rows, first row to collect project requirements and with button generate plan.
+second row to show the process progress with all roles in horizontal step indicator 
+where process progress will be moved from one role to another role, step indicator should be very creative.
+third row to show the project plan.
