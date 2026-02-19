@@ -1,0 +1,13 @@
+{
+  "name": "muralikrishnat.github.io",
+  "version": "1.0.0",
+  "description": "Full-stack developer focused on Node.js, MongoDB, containerized systems, and scalable backend architecture. I build developer tools, APIs, and automation-driven solutions.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node parse-p-apps.js"
+  },
+  "author": "Muralikrishna T<muralikrishna8811@gmail.com>",
+  "license": "ISC"
+}

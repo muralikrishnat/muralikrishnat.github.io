@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boilerplate Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            glass: {
+              50: 'rgba(255, 255, 255, 0.05)',
+              100: 'rgba(255, 255, 255, 0.1)',
+              200: 'rgba(255, 255, 255, 0.2)',
+            }
+          },
+          animation: {
+            blob: "blob 7s infinite",
+          },
+          keyframes: {
+            blob: {
+              "0%": { transform: "translate(0px, 0px) scale(1)" },
+              "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+              "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+              "100%": { transform: "translate(0px, 0px) scale(1)" }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar for a cleaner look */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover,
+    .glass-card.active {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .code-block {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  </style>
+</head>
+
+<body
+  class="bg-slate-900 text-slate-100 font-sans h-screen overflow-hidden selection:bg-indigo-500 selection:text-white">
+
+  <!-- Animated Background Elements -->
+  <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+    <div
+      class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-indigo-600 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob">
+    </div>
+    <div
+      class="absolute top-[20%] right-[-10%] w-[35rem] h-[35rem] bg-purple-600 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob"
+      style="animation-delay: 2s;"></div>
+    <div
+      class="absolute bottom-[-20%] left-[20%] w-[45rem] h-[45rem] bg-blue-600 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob"
+      style="animation-delay: 4s;"></div>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="relative z-10 h-full flex flex-col p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto gap-6">
+
+    <!-- Header & Nav -->
+    <header class="glass-panel rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg shadow-lg">
+          <i class="ph ph-hexagon text-2xl text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white">Boilerplate Hub</h1>
+          <p class="text-xs text-slate-400">Project Templates & Scaffolding</p>
+        </div>
+      </div>
+
+      <nav class="flex gap-2 p-1 glass-panel rounded-xl">
+        <button onclick="filterTemplates('all')" id="tab-all"
+          class="tab-btn px-4 py-2 text-sm font-medium rounded-lg bg-white/10 text-white transition-all shadow-sm">All</button>
+        <button onclick="filterTemplates('UI')" id="tab-ui"
+          class="tab-btn px-4 py-2 text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all">UI</button>
+        <button onclick="filterTemplates('API')" id="tab-api"
+          class="tab-btn px-4 py-2 text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all">API</button>
+        <button onclick="filterTemplates('Full Stack')" id="tab-fullstack"
+          class="tab-btn px-4 py-2 text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all">Full
+          Stack</button>
+      </nav>
+    </header>
+
+    <!-- Content Area -->
+    <main class="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden">
+
+      <!-- Left Pane: Template Grid -->
+      <div class="flex-1 h-full overflow-y-auto pr-2 pb-20 lg:pb-0" id="template-grid">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="grid-container">
+          <!-- Templates injected here -->
+        </div>
+      </div>
+
+      <!-- Right Pane: Details View (Hidden by default on mobile, side-by-side on large screens) -->
+      <div id="details-pane"
+        class="fixed inset-0 z-50 lg:static lg:z-auto lg:w-[450px] xl:w-[500px] lg:h-full lg:flex hidden flex-col transition-all duration-300 transform translate-x-full lg:translate-x-0">
+        <!-- Mobile Backdrop -->
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm lg:hidden" onclick="closeDetails()"></div>
+
+        <!-- Detail Content -->
+        <div
+          class="absolute right-0 top-0 h-full w-full max-w-md lg:max-w-none lg:relative glass-panel rounded-l-3xl lg:rounded-3xl p-6 flex flex-col overflow-hidden shadow-2xl">
+
+          <button onclick="closeDetails()"
+            class="lg:hidden absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-white z-10">
+            <i class="ph ph-x"></i>
+          </button>
+
+          <div id="empty-state" class="flex-1 flex flex-col items-center justify-center text-slate-400 hidden">
+            <i class="ph ph-cursor-click text-6xl mb-4 opacity-50"></i>
+            <p>Select a template to view details</p>
+          </div>
+
+          <div id="detail-content" class="flex-1 overflow-y-auto hidden flex-col gap-6 pr-2">
+            <!-- Header -->
+            <div class="flex items-start justify-between">
+              <div>
+                <span id="dt-category"
+                  class="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-1 block">Category</span>
+                <h2 id="dt-name" class="text-2xl font-bold text-white mb-2">Template Name</h2>
+                <p id="dt-desc" class="text-sm text-slate-300 leading-relaxed">Description goes here...</p>
+              </div>
+            </div>
+
+            <!-- Badges -->
+            <div class="flex flex-wrap gap-2">
+              <span id="dt-status"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"></span>
+              <span id="dt-author"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 bg-white/5 text-slate-300"></span>
+            </div>
+
+            <hr class="border-white/10">
+
+            <!-- Commands -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-semibold text-white flex items-center gap-2"><i
+                    class="ph ph-terminal-window text-indigo-400"></i> Installation</h3>
+                <button onclick="copyCommands()"
+                  class="text-xs flex items-center gap-1 text-slate-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-2 py-1 rounded">
+                  <i class="ph ph-copy"></i> <span id="copy-text">Copy</span>
+                </button>
+              </div>
+              <pre
+                class="code-block rounded-xl p-4 overflow-x-auto"><code id="dt-commands" class="text-sm font-mono text-green-400 whitespace-pre"></code></pre>
+            </div>
+
+            <!-- Environment / Tested On -->
+            <div>
+              <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i
+                  class="ph ph-check-circle text-indigo-400"></i> Tested Environment</h3>
+              <div class="grid grid-cols-2 gap-2" id="dt-env">
+                <!-- Env items -->
+              </div>
+            </div>
+
+            <!-- Dependencies -->
+            <div>
+              <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i
+                  class="ph ph-package text-indigo-400"></i> Key Dependencies</h3>
+              <div class="flex flex-wrap gap-2" id="dt-deps">
+                <!-- Dep items -->
+              </div>
+            </div>
+
+            <!-- Project Structure -->
+            <div>
+              <h3 class="text-sm font-semibold text-white mb-2 flex items-center gap-2"><i
+                  class="ph ph-folder-tree text-indigo-400"></i> Structure</h3>
+              <pre
+                class="code-block rounded-xl p-4 overflow-x-auto text-slate-300"><code id="dt-structure" class="text-sm font-mono whitespace-pre"></code></pre>
+            </div>
+
+            <!-- Known Issues -->
+            <div id="dt-issues-container" class="mt-auto pt-4 hidden">
+              <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex gap-3">
+                <i class="ph ph-warning-circle text-red-400 text-xl shrink-0"></i>
+                <div>
+                  <h4 class="text-sm font-semibold text-red-400 mb-1">Known Issues</h4>
+                  <p id="dt-issues" class="text-xs text-red-200/80 leading-relaxed"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Application Logic -->
+  <script>
+    // Mock Data
+    const templates = [
+      {
+        id: 't1',
+        name: 'React + Vite Supercharged',
+        category: 'UI',
+        icon: 'ph-atom',
+        description: 'A blazingly fast React setup using Vite, TailwindCSS, and Lucide icons. Pre-configured with absolute imports and ESLint.',
+        structure: `src/
+ ├── assets/
+ │   └── react.svg
+ ├── components/
+ │   └── ui/
+ ├── hooks/
+ ├── lib/
+ │   └── utils.js
+ ├── App.jsx
+ └── main.jsx`,
+        testedOn: { Node: 'v20.11.0', OS: 'macOS, Windows', NPM: '10.2.4', Vite: '^5.0.0' },
+        dependencies: { 'react': '^18.2.0', 'tailwindcss': '^3.4.1', 'clsx': '^2.1.0' },
+        installCommands: ['git clone https://github.com/example/react-vite-tw.git my-app', 'cd my-app && npm install'],
+        status: 'Verified',
+        authorType: 'Manual',
+        knownIssues: null
+      },
+      {
+        id: 't2',
+        name: 'Express Microservice Base',
+        category: 'API',
+        icon: 'ph-plugs',
+        description: 'Lightweight Express.js boilerplate optimized for Docker. Includes Winston logging, Jest testing, and global error handling.',
+        structure: `src/
+ ├── config/
+ ├── controllers/
+ ├── middlewares/
+ ├── routes/
+ ├── utils/
+ ├── app.js
+ └── server.js`,
+        testedOn: { Node: 'v18.19.0', OS: 'Linux (Alpine)', NPM: '9.8.1' },
+        dependencies: { 'express': '^4.18.2', 'winston': '^3.11.0', 'cors': '^2.8.5', 'dotenv': '^16.4.1' },
+        installCommands: ['git clone https://github.com/example/express-micro.git api-service', 'cd api-service && npm i'],
+        status: 'Drafted',
+        authorType: 'Manual',
+        knownIssues: 'Jest coverage reporting fails on Windows environments unless run via WSL.'
+      },
+      {
+        id: 't3',
+        name: 'Next.js Prisma SaaS',
+        category: 'Full Stack',
+        icon: 'ph-stack',
+        description: 'Full-stack Next.js App Router boilerplate. Comes with Prisma ORM configured for PostgreSQL, NextAuth for authentication, and Stripe webhooks.',
+        structure: `app/
+ ├── (auth)/
+ ├── (dashboard)/
+ ├── api/
+ │   └── trpc/
+ ├── layout.tsx
+ └── page.tsx
+prisma/
+ └── schema.prisma
+components/`,
+        testedOn: { Node: 'v20.x', OS: 'All', NPM: '10.x', Next: '14.1.0' },
+        dependencies: { 'next': '^14.1.0', '@prisma/client': '^5.9.1', 'next-auth': '^4.24.5' },
+        installCommands: ['npx create-next-app -e https://github.com/example/saas-starter my-saas', 'cd my-saas && npm i && npx prisma db push'],
+        status: 'Verified',
+        authorType: 'Drafted by AI',
+        knownIssues: null
+      },
+      {
+        id: 't4',
+        name: 'NestJS GraphQL API',
+        category: 'API',
+        icon: 'ph-graph',
+        description: 'Enterprise-grade NestJS application using GraphQL (Code-first approach), TypeORM, and Redis caching.',
+        structure: `src/
+ ├── auth/
+ ├── common/
+ ├── users/
+ │   ├── dto/
+ │   ├── entities/
+ │   ├── users.resolver.ts
+ │   └── users.service.ts
+ ├── app.module.ts
+ └── main.ts`,
+        testedOn: { Node: 'v20.10.0', OS: 'macOS, Linux', NPM: '10.2.3' },
+        dependencies: { '@nestjs/core': '^10.0.0', '@nestjs/graphql': '^12.0.11', 'typeorm': '^0.3.20' },
+        installCommands: ['git clone https://github.com/example/nest-gql.git nest-api', 'cd nest-api && npm install'],
+        status: 'Drafted by AI',
+        authorType: 'Drafted by AI',
+        knownIssues: 'Redis connection timeout on first start if Docker daemon is slow.'
+      },
+      {
+        id: 't5',
+        name: 'Vue 3 Nuxt Tailwind',
+        category: 'UI',
+        icon: 'ph-leaf',
+        description: 'Modern Vue.js starting point powered by Nuxt 3. Server-side rendering enabled by default, zero-config Tailwind integration.',
+        structure: `components/
+layouts/
+pages/
+ ├── index.vue
+ └── about.vue
+public/
+server/
+nuxt.config.ts
+tailwind.config.js`,
+        testedOn: { Node: 'v18+', OS: 'All', NPM: '9+', Nuxt: '3.10.0' },
+        dependencies: { 'nuxt': '^3.10.0', '@nuxtjs/tailwindcss': '^6.11.0', 'vue': '^3.4.15' },
+        installCommands: ['npx nuxi@latest init my-nuxt-app', 'cd my-nuxt-app && npm run dev'],
+        status: 'Verified',
+        authorType: 'Manual',
+        knownIssues: null
+      }
+    ];
+
+    let currentTemplate = null;
+
+    // Status Badge Styling configuration
+    const statusColors = {
+      'Verified': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      'Drafted': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+      'Drafted by AI': 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+    };
+
+    const statusIcons = {
+      'Verified': 'ph-check-circle',
+      'Drafted': 'ph-pencil-simple',
+      'Drafted by AI': 'ph-magic-wand'
+    };
+
+    // Initialize App
+    document.addEventListener('DOMContentLoaded', () => {
+      filterTemplates('all');
+      showEmptyState();
+    });
+
+    // Render Templates Grid
+    function filterTemplates(category) {
+      // Update Tabs UI
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-white/10', 'text-white', 'shadow-sm');
+        btn.classList.add('text-slate-400', 'hover:bg-white/5');
+      });
+      const activeTab = document.getElementById(`tab-${category.toLowerCase().replace(' ', '')}`);
+      if (activeTab) {
+        activeTab.classList.add('bg-white/10', 'text-white', 'shadow-sm');
+        activeTab.classList.remove('text-slate-400', 'hover:bg-white/5');
+      }
+
+      // Filter Data
+      const filtered = category === 'all' ? templates : templates.filter(t => t.category === category);
+
+      const container = document.getElementById('grid-container');
+      container.innerHTML = '';
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">No templates found in this category.</div>`;
+        return;
+      }
+
+      filtered.forEach(template => {
+        const card = document.createElement('div');
+        card.className = `glass-card rounded-2xl p-5 cursor-pointer flex flex-col h-full ${currentTemplate?.id === template.id ? 'active' : ''}`;
+        card.onclick = () => selectTemplate(template.id, card);
+
+        const statusColor = statusColors[template.status] || 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+
+        card.innerHTML = `
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="p-2.5 bg-white/5 rounded-xl border border-white/10 text-indigo-400">
+                            <i class="ph ${template.icon} text-2xl"></i>
+                        </div>
+                        <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-md ${statusColor}">
+                            ${template.status}
+                        </span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2 leading-tight">${template.name}</h3>
+                    <p class="text-sm text-slate-400 line-clamp-2 mb-4 flex-1">${template.description}</p>
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                        <span class="text-xs font-medium text-slate-500">${template.category}</span>
+                        <div class="text-xs text-indigo-400 flex items-center gap-1 hover:text-indigo-300 transition-colors">
+                            View Details <i class="ph ph-arrow-right"></i>
+                        </div>
+                    </div>
+                `;
+        container.appendChild(card);
+      });
+    }
+
+    // Show Details Pane
+    function selectTemplate(id, cardElement) {
+      const template = templates.find(t => t.id === id);
+      if (!template) return;
+
+      currentTemplate = template;
+
+      // Highlight active card
+      document.querySelectorAll('.glass-card').forEach(c => c.classList.remove('active'));
+      if (cardElement) cardElement.classList.add('active');
+
+      // Populate Data
+      document.getElementById('dt-category').textContent = template.category;
+      document.getElementById('dt-name').textContent = template.name;
+      document.getElementById('dt-desc').textContent = template.description;
+
+      // Badges
+      const sBadge = document.getElementById('dt-status');
+      sBadge.className = `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${statusColors[template.status]}`;
+      sBadge.innerHTML = `<i class="ph ${statusIcons[template.status]}"></i> ${template.status}`;
+
+      const aBadge = document.getElementById('dt-author');
+      aBadge.innerHTML = `<i class="ph ${template.authorType.includes('AI') ? 'ph-robot' : 'ph-user'}"></i> ${template.authorType}`;
+
+      // Commands
+      document.getElementById('dt-commands').textContent = template.installCommands.join('\n');
+
+      // Env Table
+      const envContainer = document.getElementById('dt-env');
+      envContainer.innerHTML = Object.entries(template.testedOn).map(([key, val]) => `
+                <div class="bg-white/5 border border-white/5 rounded-lg p-2 flex flex-col">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wide">${key}</span>
+                    <span class="text-sm font-medium text-slate-200">${val}</span>
+                </div>
+            `).join('');
+
+      // Dependencies
+      const depsContainer = document.getElementById('dt-deps');
+      depsContainer.innerHTML = Object.entries(template.dependencies).map(([pkg, ver]) => `
+                <div class="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 px-3 py-1.5 rounded-lg text-xs font-mono">
+                    <span class="text-white">${pkg}</span>
+                    <span class="text-indigo-400/60">|</span>
+                    <span>${ver}</span>
+                </div>
+            `).join('');
+
+      // Structure
+      document.getElementById('dt-structure').textContent = template.structure;
+
+      // Issues
+      const issueContainer = document.getElementById('dt-issues-container');
+      if (template.knownIssues) {
+        issueContainer.classList.remove('hidden');
+        document.getElementById('dt-issues').textContent = template.knownIssues;
+      } else {
+        issueContainer.classList.add('hidden');
+      }
+
+      // Toggle UI states
+      document.getElementById('empty-state').classList.add('hidden');
+      document.getElementById('detail-content').classList.remove('hidden');
+      document.getElementById('detail-content').classList.add('flex');
+
+      // Open mobile drawer
+      const pane = document.getElementById('details-pane');
+      pane.classList.remove('hidden');
+      // Small delay to allow display:block to apply before animating transform
+      setTimeout(() => {
+        pane.classList.remove('translate-x-full');
+      }, 10);
+    }
+
+    function showEmptyState() {
+      document.getElementById('empty-state').classList.remove('hidden');
+      document.getElementById('detail-content').classList.add('hidden');
+      document.getElementById('detail-content').classList.remove('flex');
+    }
+
+    function closeDetails() {
+      const pane = document.getElementById('details-pane');
+      pane.classList.add('translate-x-full');
+      // Wait for transition before hiding completely
+      setTimeout(() => {
+        pane.classList.add('hidden');
+      }, 300);
+
+      // Reset active card
+      currentTemplate = null;
+      document.querySelectorAll('.glass-card').forEach(c => c.classList.remove('active'));
+      showEmptyState();
+    }
+
+    // Copy Commands Logic
+    function copyCommands() {
+      if (!currentTemplate) return;
+      const textToCopy = currentTemplate.installCommands.join('\n');
+      const copyBtnText = document.getElementById('copy-text');
+      const icon = copyBtnText.previousElementSibling;
+
+      // Fallback for document.execCommand
+      const textArea = document.createElement("textarea");
+      textArea.value = textToCopy;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        copyBtnText.textContent = 'Copied!';
+        icon.className = 'ph ph-check text-green-400';
+
+        setTimeout(() => {
+          copyBtnText.textContent = 'Copy';
+          icon.className = 'ph ph-copy';
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy', err);
+      }
+      document.body.removeChild(textArea);
+    }
+  </script>
+</body>
+
+</html>

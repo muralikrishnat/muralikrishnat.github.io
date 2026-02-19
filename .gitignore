@@ -5,3 +5,5 @@ stock-reports/hdata
 stock-reports/total-stocks
 stock-reports/daily-reports
 stock-reports/strategy-reports
+
+.DS_Store

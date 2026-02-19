@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Dashboard | Boilerplate Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(180deg, rgba(79, 70, 229, 0.4) 0%, rgba(147, 51, 234, 0.4) 100%);
+            filter: blur(80px);
+            border-radius: 50%;
+            z-index: -1;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(20%, 20%); }
+        }
+
+        .active-tab {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #818cf8;
+        }
+    </style>
+</head>
+<body class="text-slate-200 antialiased p-4 md:p-8">
+    <!-- Background Decoration -->
+    <div class="blob" style="top: -100px; left: -100px;"></div>
+    <div class="blob" style="bottom: -100px; right: -100px; background: linear-gradient(180deg, rgba(6, 182, 212, 0.3) 0%, rgba(59, 130, 246, 0.3) 100%); animation-delay: -5s;"></div>
+
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-8 min-h-[85vh]">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-64 glass-panel rounded-3xl p-6 flex flex-col gap-8 h-fit">
+            <div class="flex items-center gap-3 px-2">
+                <div class="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fas fa-cubes text-xl text-white"></i>
+                </div>
+                <h1 class="font-bold text-xl tracking-tight">StackGen</h1>
+            </div>
+
+            <nav class="flex flex-col gap-2">
+                <button onclick="filterCategory('ui')" id="btn-ui" class="category-btn flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/5 active-tab">
+                    <i class="fas fa-paint-brush text-indigo-400"></i>
+                    <span class="font-medium">UI Templates</span>
+                </button>
+                <button onclick="filterCategory('api')" id="btn-api" class="category-btn flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/5 text-slate-400">
+                    <i class="fas fa-server text-emerald-400"></i>
+                    <span class="font-medium">API Core</span>
+                </button>
+                <button onclick="filterCategory('fullstack')" id="btn-fullstack" class="category-btn flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/5 text-slate-400">
+                    <i class="fas fa-layer-group text-orange-400"></i>
+                    <span class="font-medium">Full Stack</span>
+                </button>
+            </nav>
+
+            <div class="mt-auto p-4 glass-card rounded-2xl text-xs text-slate-400 border-indigo-500/20">
+                <p>v2.4.0 • Updated today</p>
+                <a href="#" class="text-indigo-400 mt-2 inline-block hover:underline">View Changelog</a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col gap-6">
+            <header class="flex justify-between items-center px-2">
+                <div>
+                    <h2 id="category-title" class="text-3xl font-bold">UI Templates</h2>
+                    <p class="text-slate-400 mt-1">Modern frontend boilerplates for rapid development.</p>
+                </div>
+                <div class="hidden md:block relative">
+                    <input type="text" placeholder="Search templates..." class="bg-white/5 border border-white/10 rounded-full px-5 py-2 pl-12 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 w-64 transition-all">
+                    <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                </div>
+            </header>
+
+            <div id="template-grid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                <!-- Template Cards will be injected here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Template Details Modal (Slide-over) -->
+    <div id="details-overlay" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div id="details-panel" class="absolute right-0 top-0 h-full w-full max-w-2xl glass-panel translate-x-full transition-transform duration-500 ease-out shadow-2xl flex flex-col">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center">
+                <h3 id="modal-title" class="text-2xl font-bold">Template Name</h3>
+                <button onclick="closeDetails()" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-8 flex flex-col gap-8">
+                <!-- Info Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="p-4 glass-card rounded-2xl">
+                        <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold block mb-1">Node</span>
+                        <span id="v-node" class="text-sm font-semibold">18+</span>
+                    </div>
+                    <div class="p-4 glass-card rounded-2xl">
+                        <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold block mb-1">NPM</span>
+                        <span id="v-npm" class="text-sm font-semibold">9+</span>
+                    </div>
+                    <div class="p-4 glass-card rounded-2xl">
+                        <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold block mb-1">Vite</span>
+                        <span id="v-vite" class="text-sm font-semibold">5.0</span>
+                    </div>
+                    <div class="p-4 glass-card rounded-2xl">
+                        <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold block mb-1">OS</span>
+                        <span id="v-os" class="text-sm font-semibold text-indigo-300">Any</span>
+                    </div>
+                </div>
+
+                <!-- Project Structure -->
+                <section>
+                    <h4 class="text-sm font-bold text-slate-400 mb-3 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fas fa-folder-tree"></i> Project Structure
+                    </h4>
+                    <pre id="modal-structure" class="bg-black/30 p-4 rounded-2xl text-xs font-mono text-indigo-300 border border-white/5"></pre>
+                </section>
+
+                <!-- Dependencies -->
+                <section>
+                    <h4 class="text-sm font-bold text-slate-400 mb-3 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fas fa-box"></i> Dependencies
+                    </h4>
+                    <div id="modal-deps" class="flex flex-wrap gap-2"></div>
+                </section>
+
+                <!-- Commands -->
+                <section>
+                    <h4 class="text-sm font-bold text-slate-400 mb-3 uppercase tracking-widest">Setup Commands</h4>
+                    <div class="bg-black/40 rounded-2xl p-4 font-mono text-sm flex flex-col gap-2 border border-indigo-500/20">
+                        <div class="flex items-center justify-between text-indigo-400">
+                            <span id="cmd-install">git clone ...</span>
+                            <button onclick="copyToClipboard('cmd-install')" class="hover:text-white"><i class="far fa-copy"></i></button>
+                        </div>
+                        <div class="flex items-center justify-between text-emerald-400">
+                            <span id="cmd-run">npm install && npm dev</span>
+                            <button onclick="copyToClipboard('cmd-run')" class="hover:text-white"><i class="far fa-copy"></i></button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="p-6 border-t border-white/10 bg-white/5">
+                <button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2">
+                    <i class="fas fa-download"></i> Download Boilerplate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const templates = {
+            ui: [
+                {
+                    id: 1,
+                    name: "Glassy Tailwind Dashboard",
+                    description: "Modern, high-contrast dashboard with glassmorphism and subtle animations.",
+                    structure: "src/\n├── components/\n├── layouts/\n├── styles/\n└── assets/",
+                    deps: ["TailwindCSS", "Lucide Icons", "Framer Motion"],
+                    versions: { node: "18.x", npm: "10.x", vite: "5.1", os: "Linux/macOS" },
+                    commands: ["npx create-stackgen-ui@latest --glass", "npm install && npm run dev"]
+                },
+                {
+                    id: 2,
+                    name: "SaaS Marketing Kit",
+                    description: "Ready-to-use landing pages, pricing tables, and auth flows.",
+                    structure: "app/\n├── marketing/\n├── auth/\n├── shared/\n└── lib/",
+                    deps: ["React", "HeadlessUI", "Zod"],
+                    versions: { node: "20.x", npm: "10.x", vite: "5.0", os: "Any" },
+                    commands: ["npx create-saas-kit", "npm i && npm run start"]
+                }
+            ],
+            api: [
+                {
+                    id: 3,
+                    name: "Express TypeScript Core",
+                    description: "Robust Node.js backend boilerplate with JWT auth and Prisma ORM.",
+                    structure: "src/\n├── controllers/\n├── middleware/\n├── routes/\n└── services/",
+                    deps: ["Express", "TypeScript", "Prisma", "Jest"],
+                    versions: { node: "20.x", npm: "10.x", vite: "N/A", os: "Any" },
+                    commands: ["git clone express-ts-boilerplate", "npm install && npm run seed"]
+                },
+                {
+                    id: 4,
+                    name: "Fastify Microservice",
+                    description: "High performance API template optimized for containerization.",
+                    structure: "dist/\nsrc/\n├── plugins/\n├── schemas/\n└── test/",
+                    deps: ["Fastify", "Ajv", "Pino", "Redis"],
+                    versions: { node: "18.x", npm: "9.x", vite: "N/A", os: "Linux" },
+                    commands: ["npm init fastify-app", "npm install && node server.js"]
+                }
+            ],
+            fullstack: [
+                {
+                    id: 5,
+                    name: "T3-Modern Stack",
+                    description: "End-to-end typesafe boilerplate using Next.js, tRPC, and Tailwind.",
+                    structure: "src/\n├── server/trpc\n├── pages/\n├── utils/\n└── env/",
+                    deps: ["Next.js", "tRPC", "Prisma", "Tailwind"],
+                    versions: { node: "20.x", npm: "10.x", vite: "Next-SWC", os: "Any" },
+                    commands: ["npx create-t3-app@latest", "npm install && npm run dev"]
+                }
+            ]
+        };
+
+        let currentCategory = 'ui';
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active-tab', 'text-slate-200');
+                btn.classList.add('text-slate-400');
+            });
+            
+            const activeBtn = document.getElementById(`btn-${cat}`);
+            activeBtn.classList.add('active-tab', 'text-slate-200');
+            activeBtn.classList.remove('text-slate-400');
+
+            document.getElementById('category-title').innerText = 
+                cat === 'ui' ? 'UI Templates' : cat === 'api' ? 'API Core' : 'Full Stack';
+            
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('template-grid');
+            grid.innerHTML = '';
+            
+            templates[currentCategory].forEach(temp => {
+                const card = document.createElement('div');
+                card.className = 'glass-card p-6 rounded-3xl flex flex-col gap-4 cursor-pointer group';
+                card.onclick = () => showDetails(temp);
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="p-3 bg-white/5 rounded-2xl group-hover:bg-indigo-500/20 transition-colors">
+                            <i class="fas ${currentCategory === 'ui' ? 'fa-code' : currentCategory === 'api' ? 'fa-plug' : 'fa-rocket'} text-xl text-indigo-400"></i>
+                        </div>
+                        <span class="text-[10px] px-3 py-1 bg-white/5 rounded-full border border-white/10 uppercase tracking-tighter">New v1.0</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg leading-tight mb-2 group-hover:text-indigo-300 transition-colors">${temp.name}</h4>
+                        <p class="text-sm text-slate-400 line-clamp-2">${temp.description}</p>
+                    </div>
+                    <div class="mt-auto flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            ${temp.deps.slice(0, 2).map(d => `<div class="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-900 flex items-center justify-center text-[8px] font-bold">${d[0]}</div>`).join('')}
+                        </div>
+                        <span class="text-xs text-indigo-400 font-medium group-hover:translate-x-1 transition-transform">Explore <i class="fas fa-chevron-right ml-1"></i></span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function showDetails(temp) {
+            document.getElementById('modal-title').innerText = temp.name;
+            document.getElementById('v-node').innerText = temp.versions.node;
+            document.getElementById('v-npm').innerText = temp.versions.npm;
+            document.getElementById('v-vite').innerText = temp.versions.vite;
+            document.getElementById('v-os').innerText = temp.versions.os;
+            document.getElementById('modal-structure').innerText = temp.structure;
+            document.getElementById('cmd-install').innerText = temp.commands[0];
+            document.getElementById('cmd-run').innerText = temp.commands[1];
+            
+            const depsCont = document.getElementById('modal-deps');
+            depsCont.innerHTML = temp.deps.map(d => 
+                `<span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-slate-300">${d}</span>`
+            ).join('');
+
+            const overlay = document.getElementById('details-overlay');
+            const panel = document.getElementById('details-panel');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            panel.classList.remove('translate-x-full');
+        }
+
+        function closeDetails() {
+            const overlay = document.getElementById('details-overlay');
+            const panel = document.getElementById('details-panel');
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+            panel.classList.add('translate-x-full');
+        }
+
+        function copyToClipboard(id) {
+            const text = document.getElementById(id).innerText;
+            const tempInput = document.createElement("input");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            
+            // Visual feedback
+            const btn = event.currentTarget;
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check text-emerald-400"></i>';
+            setTimeout(() => btn.innerHTML = originalIcon, 2000);
+        }
+
+        // Initialize
+        window.onload = () => {
+            renderGrid();
+        };
+    </script>
+</body>
+</html>
