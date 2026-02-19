@@ -136,6 +136,7 @@
                     </div>
 
                     <div class="flex items-center gap-2 bg-black/20 p-1 rounded-lg" id="view-toggles">
+                        <button id="btn-open-new-tab" onclick="openNewTab()"><i class="fa-solid fa-up-right-from-square"></i></button>
                         <button id="btn-code" onclick="setViewMode('code')" class="px-3 py-1 text-xs font-medium rounded-md bg-white/10 text-white shadow-sm transition-all">Code</button>
                         <button id="btn-preview" onclick="setViewMode('preview')" class="px-3 py-1 text-xs font-medium rounded-md text-slate-400 hover:text-white transition-all">Preview</button>
                     </div>
@@ -368,7 +369,13 @@
                 }
             }
         });
-
+        function openNewTab() {
+            if (!activeFileId) return;
+            const node = findNodeById(fileSystem, activeFileId);
+            if (node && node.path) {
+                window.open(node.path, '_blank');
+            }
+        }
         function setViewMode(mode) {
             viewMode = mode;
             const isCode = mode === 'code';
