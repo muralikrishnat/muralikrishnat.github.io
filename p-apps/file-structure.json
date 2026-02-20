@@ -1,5 +1,28 @@
 [
   {
+    "id": "root-ai-project-template-gen",
+    "name": "ai-project-template-gen",
+    "type": "folder",
+    "parentId": null,
+    "path": "/ai-project-template-gen",
+    "children": [
+      {
+        "id": "file-ai-project-template-gen-index.html",
+        "name": "index.html",
+        "type": "file",
+        "parentId": "root-ai-project-template-gen",
+        "path": "./ai-project-template-gen/index.html"
+      },
+      {
+        "id": "file-ai-project-template-gen-index2.html",
+        "name": "index2.html",
+        "type": "file",
+        "parentId": "root-ai-project-template-gen",
+        "path": "./ai-project-template-gen/index2.html"
+      }
+    ]
+  },
+  {
     "id": "root-api-generator",
     "name": "api-generator",
     "type": "folder",
@@ -347,6 +370,29 @@
     ]
   },
   {
+    "id": "root-project-scan",
+    "name": "project-scan",
+    "type": "folder",
+    "parentId": null,
+    "path": "/project-scan",
+    "children": [
+      {
+        "id": "file-project-scan-index.html",
+        "name": "index.html",
+        "type": "file",
+        "parentId": "root-project-scan",
+        "path": "./project-scan/index.html"
+      },
+      {
+        "id": "file-project-scan-index2.html",
+        "name": "index2.html",
+        "type": "file",
+        "parentId": "root-project-scan",
+        "path": "./project-scan/index2.html"
+      }
+    ]
+  },
+  {
     "id": "root-qa-dashboard",
     "name": "qa-dashboard",
     "type": "folder",
@@ -463,6 +509,38 @@
         "type": "file",
         "parentId": "root-task-execution-manager",
         "path": "./task-execution-manager/index2.html"
+      }
+    ]
+  },
+  {
+    "id": "root-user-journey-viewer",
+    "name": "user-journey-viewer",
+    "type": "folder",
+    "parentId": null,
+    "path": "/user-journey-viewer",
+    "children": [
+      {
+        "id": "file-user-journey-viewer-index.html",
+        "name": "index.html",
+        "type": "file",
+        "parentId": "root-user-journey-viewer",
+        "path": "./user-journey-viewer/index.html"
+      }
+    ]
+  },
+  {
+    "id": "root-web-desktop",
+    "name": "web-desktop",
+    "type": "folder",
+    "parentId": null,
+    "path": "/web-desktop",
+    "children": [
+      {
+        "id": "file-web-desktop-index.html",
+        "name": "index.html",
+        "type": "file",
+        "parentId": "root-web-desktop",
+        "path": "./web-desktop/index.html"
       }
     ]
   },

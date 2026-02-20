@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Flow Timeline Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+        }
+
+        .node {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .node.active {
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+            transform: scale(1.05);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .user-dot {
+            width: 14px;
+            height: 14px;
+            background: #38bdf8;
+            border-radius: 50%;
+            position: absolute;
+            z-index: 50;
+            box-shadow: 0 0 15px #38bdf8, 0 0 30px #38bdf8;
+            /* Ultra-smooth transition using transform only */
+            transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+            pointer-events: none;
+            will-change: transform;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #38bdf8;
+            margin-top: -7px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+
+        .json-key { color: #94a3b8; }
+        .json-string { color: #38bdf8; }
+        .json-num { color: #fbbf24; }
+
+        .line-path {
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 5;
+            animation: dash 20s linear infinite;
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: -500; }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .log-entry {
+            animation: slideIn 0.3s ease-out;
+            border-left: 2px solid transparent;
+        }
+        .log-info { border-left-color: #38bdf8; }
+        .log-warn { border-left-color: #fbbf24; }
+        .log-success { border-left-color: #10b981; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+                    User Journey Analytics
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">Real-time flow reconstruction and log inspection</p>
+            </div>
+            <div class="glass px-6 py-3 flex items-center gap-4">
+                <div class="text-right">
+                    <p class="text-xs text-slate-500 uppercase font-bold tracking-wider">Total Duration</p>
+                    <p id="total-time-display" class="text-xl font-mono text-emerald-400">04:22.00</p>
+                </div>
+                <i class="fa-solid fa-clock-rotate-left text-2xl text-slate-500"></i>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Main Viewport -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Map Container -->
+                <div id="flow-container" class="glass h-[500px] relative overflow-hidden border border-white/5">
+                    <svg id="svg-connections" class="absolute inset-0 w-full h-full pointer-events-none"></svg>
+                    <div id="user-dot" class="user-dot"></div>
+                    <div id="nodes-layer" class="relative w-full h-full p-12 flex flex-col justify-around">
+                        <!-- App Row 1 -->
+                        <div class="flex justify-around items-center">
+                            <div id="node-0" class="node glass p-4 w-40 text-center border-white/10 cursor-pointer hover:bg-white/5">
+                                <i class="fa-solid fa-house-chimney mb-2 text-blue-400"></i>
+                                <h3 class="text-xs font-bold uppercase tracking-tighter">Auth App</h3>
+                                <p class="text-[10px] text-slate-400">Login Page</p>
+                            </div>
+                            <div id="node-1" class="node glass p-4 w-40 text-center border-white/10 cursor-pointer hover:bg-white/5">
+                                <i class="fa-solid fa-user-shield mb-2 text-blue-400"></i>
+                                <h3 class="text-xs font-bold uppercase tracking-tighter">Auth App</h3>
+                                <p class="text-[10px] text-slate-400">MFA Verification</p>
+                            </div>
+                        </div>
+                        <!-- App Row 2 -->
+                        <div class="flex justify-around items-center">
+                            <div id="node-2" class="node glass p-4 w-40 text-center border-white/10 cursor-pointer hover:bg-white/5">
+                                <i class="fa-solid fa-gauge-high mb-2 text-purple-400"></i>
+                                <h3 class="text-xs font-bold uppercase tracking-tighter">Dashboard</h3>
+                                <p class="text-[10px] text-slate-400">Main Overview</p>
+                            </div>
+                            <div id="node-3" class="node glass p-4 w-40 text-center border-white/10 cursor-pointer hover:bg-white/5">
+                                <i class="fa-solid fa-chart-line mb-2 text-purple-400"></i>
+                                <h3 class="text-xs font-bold uppercase tracking-tighter">Dashboard</h3>
+                                <p class="text-[10px] text-slate-400">Analytics Pro</p>
+                            </div>
+                            <div id="node-4" class="node glass p-4 w-40 text-center border-white/10 cursor-pointer hover:bg-white/5">
+                                <i class="fa-solid fa-wallet mb-2 text-purple-400"></i>
+                                <h3 class="text-xs font-bold uppercase tracking-tighter">Dashboard</h3>
+                                <p class="text-[10px] text-slate-400">Billing</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating Message -->
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <div id="status-message" class="glass px-4 py-2 text-sm border-blue-500/30 flex items-center gap-3">
+                            <span class="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
+                            <span id="message-text">Initializing journey...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Section -->
+                <div class="glass p-5 border-white/5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-terminal text-emerald-400"></i>
+                            <h2 class="text-sm font-bold uppercase tracking-tight">System Logs</h2>
+                        </div>
+                        <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded text-slate-400">Live Capture</span>
+                    </div>
+                    <div id="log-container" class="h-40 overflow-y-auto custom-scrollbar space-y-2 font-mono text-[11px]">
+                        <!-- Logs will appear here -->
+                        <div class="text-slate-500 italic">No logs captured for current step.</div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="glass p-6 space-y-4">
+                    <div class="flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-widest">
+                        <span>Start</span>
+                        <span id="current-step-label">Step: 1/5</span>
+                        <span>End</span>
+                    </div>
+                    <input type="range" id="timeline-slider" min="0" max="100" value="0" class="w-full">
+                    <div class="flex justify-center gap-6">
+                        <button onclick="changeStep(-1)" class="glass px-4 py-2 hover:bg-white/10 transition"><i class="fa-solid fa-backward-step"></i></button>
+                        <button id="play-btn" class="glass w-12 h-12 flex items-center justify-center text-blue-400 hover:scale-110 transition active:scale-95">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button onclick="changeStep(1)" class="glass px-4 py-2 hover:bg-white/10 transition"><i class="fa-solid fa-forward-step"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Panels -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Data Transformation -->
+                <div class="glass p-5 h-[340px] flex flex-col border-white/5">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fa-solid fa-code text-blue-400"></i>
+                        <h2 class="text-sm font-bold uppercase">Object Transformation</h2>
+                    </div>
+                    <div class="flex-1 overflow-y-auto custom-scrollbar font-mono text-[11px] bg-black/20 rounded p-3" id="object-viewer">
+                        <!-- JSON Content -->
+                    </div>
+                </div>
+
+                <!-- Final Stats (Visible at the end) -->
+                <div id="analytics-panel" class="glass p-5 space-y-4 border-emerald-500/20 opacity-40 transition-opacity">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-square-poll-vertical text-emerald-400"></i>
+                        <h2 class="text-sm font-bold uppercase">Flow Summary</h2>
+                    </div>
+                    <div class="space-y-3" id="stats-container">
+                        <!-- Stats will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const journeyData = [
+            {
+                id: 0,
+                app: "Auth App",
+                page: "Login Page",
+                time: "0s",
+                spent: "45s",
+                actions: 4,
+                message: "User reached Login Page in Auth App",
+                request: { method: "GET", path: "/auth/login", headers: { "User-Agent": "Mozilla/5.0" } },
+                response: { status: 200, body: { login_form: true, provider: "OIDC" } },
+                logs: [
+                    { type: 'info', msg: 'Incoming request from 192.168.1.45' },
+                    { type: 'info', msg: 'Session cookie initialized' },
+                    { type: 'success', msg: 'Login template rendered successfully' }
+                ]
+            },
+            {
+                id: 1,
+                app: "Auth App",
+                page: "MFA Verification",
+                time: "45s",
+                spent: "30s",
+                actions: 2,
+                message: "User reached MFA Page in Auth App",
+                request: { method: "POST", path: "/auth/mfa", body: { code: "******" } },
+                response: { status: 200, body: { session: "jwt_token_..." } },
+                logs: [
+                    { type: 'info', msg: 'MFA challenge generated' },
+                    { type: 'warn', msg: 'User requested SMS resend (attempt 1)' },
+                    { type: 'success', msg: 'OTP verified: Authorization granted' }
+                ]
+            },
+            {
+                id: 2,
+                app: "Dashboard",
+                page: "Main Overview",
+                time: "1m 15s",
+                spent: "120s",
+                actions: 12,
+                message: "User redirected to Dashboard Overview",
+                request: { method: "GET", path: "/api/dashboard", auth: "Bearer jwt_token" },
+                response: { status: 200, widgets: ["sales", "traffic", "alerts"] },
+                logs: [
+                    { type: 'info', msg: 'JWT validation successful' },
+                    { type: 'info', msg: 'Fetching widget configuration...' },
+                    { type: 'success', msg: 'Dashboard modules loaded in 450ms' }
+                ]
+            },
+            {
+                id: 3,
+                app: "Dashboard",
+                page: "Analytics Pro",
+                time: "3m 15s",
+                spent: "50s",
+                actions: 8,
+                message: "User exploring Analytics Pro module",
+                request: { method: "POST", path: "/api/reports", body: { range: "7d" } },
+                response: { status: 200, data_points: 1540 },
+                logs: [
+                    { type: 'info', msg: 'Executing complex aggregation query' },
+                    { type: 'info', msg: 'Cache hit for report range 7d' },
+                    { type: 'success', msg: 'Data points streamed to frontend' }
+                ]
+            },
+            {
+                id: 4,
+                app: "Dashboard",
+                page: "Billing",
+                time: "4m 5s",
+                spent: "17s",
+                actions: 1,
+                message: "User reached Billing Settings",
+                request: { method: "GET", path: "/api/billing" },
+                response: { status: 200, plan: "Enterprise", renewals: "2024-12-01" },
+                logs: [
+                    { type: 'info', msg: 'Accessing encrypted billing vault' },
+                    { type: 'warn', msg: 'Subscription due for renewal in 12 days' },
+                    { type: 'success', msg: 'Invoices fetched (Count: 24)' }
+                ]
+            }
+        ];
+
+        const slider = document.getElementById('timeline-slider');
+        const userDot = document.getElementById('user-dot');
+        const playBtn = document.getElementById('play-btn');
+        const statusMsg = document.getElementById('message-text');
+        const objectViewer = document.getElementById('object-viewer');
+        const logContainer = document.getElementById('log-container');
+        const statsContainer = document.getElementById('stats-container');
+        const analyticsPanel = document.getElementById('analytics-panel');
+        const stepLabel = document.getElementById('current-step-label');
+
+        let isPlaying = false;
+        let playInterval;
+        let currentActiveIdx = -1;
+
+        function updateUI(percent) {
+            const stepCount = journeyData.length;
+            const currentStepIndex = Math.min(Math.floor((percent / 100) * stepCount), stepCount - 1);
+            const currentStep = journeyData[currentStepIndex];
+
+            // Only update logic if step actually changed (prevents flickering)
+            if (currentStepIndex !== currentActiveIdx) {
+                currentActiveIdx = currentStepIndex;
+                
+                // Update status message and labels
+                statusMsg.innerText = currentStep.message;
+                stepLabel.innerText = `Step: ${currentStepIndex + 1}/${stepCount}`;
+
+                // Handle Node Activation
+                document.querySelectorAll('.node').forEach((node, idx) => {
+                    if (idx === currentStepIndex) node.classList.add('active');
+                    else node.classList.remove('active');
+                });
+
+                // Move User Dot (Uses CSS transition for smoothness)
+                const targetNode = document.getElementById(`node-${currentStepIndex}`);
+                const rect = targetNode.getBoundingClientRect();
+                const containerRect = document.getElementById('flow-container').getBoundingClientRect();
+                
+                const x = rect.left - containerRect.left + (rect.width / 2) - 7;
+                const y = rect.top - containerRect.top + (rect.height / 2) - 7;
+                
+                userDot.style.transform = `translate(${x}px, ${y}px)`;
+
+                // Update JSON Viewer
+                renderJSON(currentStep);
+
+                // Update Logs
+                renderLogs(currentStep.logs);
+            }
+
+            // Handle Analytics panel visibility
+            if (percent > 95) {
+                analyticsPanel.style.opacity = '1';
+                renderStats();
+            } else {
+                analyticsPanel.style.opacity = '0.4';
+            }
+        }
+
+        function renderLogs(logs) {
+            logContainer.innerHTML = '';
+            logs.forEach(log => {
+                const div = document.createElement('div');
+                div.className = `log-entry glass bg-white/5 p-2 rounded flex items-start gap-3 log-${log.type}`;
+                const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                div.innerHTML = `
+                    <span class="text-slate-500 text-[9px] mt-0.5">${time}</span>
+                    <span class="flex-1">${log.msg}</span>
+                `;
+                logContainer.appendChild(div);
+            });
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function renderJSON(step) {
+            const data = {
+                timestamp: step.time,
+                request: step.request,
+                response: step.response
+            };
+            
+            const jsonStr = JSON.stringify(data, null, 2);
+            objectViewer.innerHTML = jsonStr
+                .replace(/"(\w+)":/g, '<span class="json-key">"$1"</span>:')
+                .replace(/: "([^"]+)"/g, ': <span class="json-string">"$1"</span>')
+                .replace(/: (\d+)/g, ': <span class="json-num">$1</span>');
+        }
+
+        function renderStats() {
+            if (statsContainer.children.length > 0) return;
+
+            const appTimes = {};
+            journeyData.forEach(s => {
+                appTimes[s.app] = (appTimes[s.app] || 0) + parseInt(s.spent);
+            });
+
+            let html = '';
+            Object.entries(appTimes).forEach(([app, time]) => {
+                html += `
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400">${app}</span>
+                        <span class="font-mono text-blue-400">${time}s total</span>
+                    </div>
+                    <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-500/50" style="width: ${Math.min(100, (time/200)*100)}%"></div>
+                    </div>
+                `;
+            });
+
+            html += `<hr class="border-white/5 my-4">`;
+            journeyData.forEach(s => {
+                html += `
+                    <div class="flex justify-between text-[10px] items-center">
+                        <span class="truncate w-32">${s.page}</span>
+                        <span class="text-slate-500">${s.spent} · ${s.actions} acts</span>
+                    </div>
+                `;
+            });
+
+            statsContainer.innerHTML = html;
+        }
+
+        function drawLines() {
+            const svg = document.getElementById('svg-connections');
+            svg.innerHTML = '';
+            
+            for (let i = 0; i < journeyData.length - 1; i++) {
+                const startNode = document.getElementById(`node-${i}`);
+                const endNode = document.getElementById(`node-${i+1}`);
+                if (!startNode || !endNode) continue;
+
+                const start = startNode.getBoundingClientRect();
+                const end = endNode.getBoundingClientRect();
+                const container = document.getElementById('flow-container').getBoundingClientRect();
+
+                const x1 = start.left - container.left + (start.width / 2);
+                const y1 = start.top - container.top + (start.height / 2);
+                const x2 = end.left - container.left + (end.width / 2);
+                const y2 = end.top - container.top + (end.height / 2);
+
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const dx = Math.abs(x2 - x1) * 0.5;
+                const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+                
+                line.setAttribute("d", d);
+                line.setAttribute("class", "line-path");
+                svg.appendChild(line);
+            }
+        }
+
+        function changeStep(dir) {
+            let val = parseInt(slider.value) + (dir * (100 / (journeyData.length - 1)));
+            val = Math.max(0, Math.min(100, val));
+            slider.value = val;
+            updateUI(val);
+        }
+
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            playBtn.innerHTML = isPlaying ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
+            
+            if (isPlaying) {
+                if (parseInt(slider.value) >= 100) slider.value = 0;
+                playInterval = setInterval(() => {
+                    let val = parseInt(slider.value) + 1;
+                    slider.value = val;
+                    updateUI(val);
+                    if (val >= 100) {
+                        clearInterval(playInterval);
+                        isPlaying = false;
+                        playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                    }
+                }, 40);
+            } else {
+                clearInterval(playInterval);
+            }
+        });
+
+        slider.addEventListener('input', (e) => {
+            updateUI(e.target.value);
+            if (isPlaying) {
+                isPlaying = false;
+                clearInterval(playInterval);
+                playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            }
+        });
+
+        // Initialize
+        window.onload = () => {
+            drawLines();
+            updateUI(0);
+        };
+
+        window.onresize = drawLines;
+    </script>
+</body>
+</html>

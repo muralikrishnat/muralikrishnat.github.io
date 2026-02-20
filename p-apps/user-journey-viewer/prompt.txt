@@ -1,0 +1,15 @@
+Build web page with below features:
+
+Goal: User flow timeline viewer
+
+1. Shows apps and pages under each app, show them like nodes/boxes with paths between them.
+2. Ability to control the timeline of user like time of wheel, by changing the wheel bar, user dot will move respective position on node.
+3. Animate user dot movements based on timeline.
+4. Show some message like user reached page1 in app1, page4 in app2.
+5. In the end of timeline, show how much time it took to complete the flow, how much time user spent on each app, each page, no of actions performed on each page.
+6. In some box display like request object, how the request and response object transformed from node to node.
+
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking, with suitable font-awesome icons, easy to operate.
+Use only html, css, javascript and tailwindcss

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Architect | Template Creator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            min-height: 100vh;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .step-gradient {
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+
+        .animate-pulse-slow {
+            animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .log-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .log-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .progress-bar-fill {
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="app" class="max-w-5xl mx-auto space-y-6">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+                    Project Architect
+                </h1>
+                <p class="text-slate-400 text-sm">Automated Template Synthesis Engine</p>
+            </div>
+            <div id="global-status" class="hidden glass px-4 py-2 rounded-full text-xs font-medium flex items-center gap-2">
+                <span class="spinner"></span>
+                <span id="global-status-text">Synthesizing...</span>
+            </div>
+        </header>
+
+        <!-- Configuration Panel (Step 0) -->
+        <section id="config-panel" class="glass rounded-3xl p-8 transition-all">
+            <div class="flex flex-col md:flex-row gap-8 items-center">
+                <div class="flex-1 space-y-4">
+                    <h2 class="text-xl font-semibold">Project Configuration</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div class="p-4 glass-dark rounded-xl border border-blue-500/30">
+                            <i class="fab fa-react text-blue-400 text-2xl mb-2"></i>
+                            <p class="text-xs text-slate-400">Frontend</p>
+                            <p class="text-sm font-bold">React 18</p>
+                        </div>
+                        <div class="p-4 glass-dark rounded-xl">
+                            <i class="fas fa-wind text-cyan-400 text-2xl mb-2"></i>
+                            <p class="text-xs text-slate-400">Styling</p>
+                            <p class="text-sm font-bold">Tailwind CSS</p>
+                        </div>
+                        <div class="p-4 glass-dark rounded-xl">
+                            <i class="fab fa-node-js text-green-400 text-2xl mb-2"></i>
+                            <p class="text-xs text-slate-400">Backend</p>
+                            <p class="text-sm font-bold">Node.js</p>
+                        </div>
+                        <div class="p-4 glass-dark rounded-xl">
+                            <i class="fas fa-database text-orange-400 text-2xl mb-2"></i>
+                            <p class="text-xs text-slate-400">Database</p>
+                            <p class="text-sm font-bold">PostgreSQL</p>
+                        </div>
+                        <div class="p-4 glass-dark rounded-xl">
+                            <i class="fas fa-vial text-purple-400 text-2xl mb-2"></i>
+                            <p class="text-xs text-slate-400">Testing</p>
+                            <p class="text-sm font-bold">Jest / Playwright</p>
+                        </div>
+                        <div class="p-4 glass-dark rounded-xl">
+                            <i class="fab fa-docker text-blue-500 text-2xl mb-2"></i>
+                            <p class="text-xs text-slate-400">DevOps</p>
+                            <p class="text-sm font-bold">Docker</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-64 text-center space-y-4">
+                    <button onclick="startProvisioning()" class="w-full py-4 px-6 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 group">
+                        <span>Initialize Stack</span>
+                        <i class="fas fa-rocket group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                    </button>
+                    <p class="text-xs text-slate-500 italic">Estimated setup time: ~45 seconds</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Execution Dashboard (Hidden initially) -->
+        <main id="execution-dashboard" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Steps List -->
+            <div class="lg:col-span-2 space-y-4" id="steps-container">
+                <!-- Template for Step items inserted by JS -->
+            </div>
+
+            <!-- Side Sidebar: Terminal & Logs -->
+            <div class="space-y-6">
+                <!-- Verification Console -->
+                <div class="glass rounded-2xl p-4 h-64 flex flex-col">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400">System Logs</h3>
+                        <div class="flex gap-1">
+                            <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                        </div>
+                    </div>
+                    <div id="log-display" class="log-container flex-1 overflow-y-auto font-mono text-[10px] space-y-1 text-blue-200/70 p-2 glass-dark rounded-lg">
+                        <div class="text-blue-400">> System Ready... awaiting signal</div>
+                    </div>
+                </div>
+
+                <!-- Global Stats -->
+                <div class="glass rounded-2xl p-6 space-y-4">
+                    <h3 class="text-sm font-bold">Overall Progress</h3>
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <div id="global-progress-bar" class="progress-bar-fill h-full step-gradient" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-400">
+                        <span id="progress-percent">0% Completed</span>
+                        <span id="active-step-count">Step 0/5</span>
+                    </div>
+
+                    <div class="pt-4 border-t border-white/5 space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">Console Errors:</span>
+                            <span id="error-count" class="text-green-400">0</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">Warnings:</span>
+                            <span id="warning-count" class="text-yellow-400">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Global Controls -->
+                    <div class="grid grid-cols-2 gap-2 pt-2">
+                        <button onclick="resetSetup()" class="py-2 px-3 rounded-xl glass-dark hover:bg-red-500/20 text-xs text-red-400 transition-colors">
+                            <i class="fas fa-redo-alt mr-1"></i> Restart
+                        </button>
+                        <button id="retry-btn" onclick="retryLastStep()" class="hidden py-2 px-3 rounded-xl glass-dark hover:bg-yellow-500/20 text-xs text-yellow-400 transition-colors">
+                            <i class="fas fa-undo mr-1"></i> Retry Last
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Final Success Overlay -->
+        <div id="success-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md">
+            <div class="glass p-10 rounded-3xl max-w-md w-full text-center space-y-6 fade-in border-green-500/30">
+                <div class="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto text-3xl animate-bounce">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2 class="text-2xl font-bold">Stack Provisioned</h2>
+                <p class="text-slate-400">Your project template is ready. All compatibility checks and initializations passed.</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="resetSetup()" class="py-3 px-4 glass-dark rounded-xl text-sm font-medium hover:bg-white/10">Build New</button>
+                    <button class="py-3 px-4 bg-green-600 rounded-xl text-sm font-bold hover:bg-green-500 shadow-lg shadow-green-900/30">Open Project</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STEPS_DATA = [
+            {
+                id: 'version-audit',
+                title: 'Compatibility Analysis',
+                icon: 'fa-shield-halved',
+                substeps: [
+                    { id: 'v1', label: 'Fetching latest semantic versions', status: 'pending' },
+                    { id: 'v2', label: 'Resolving dependency graph', status: 'pending' },
+                    { id: 'v3', label: 'Cross-checking peer requirements', status: 'pending' },
+                    { id: 'v4', label: 'Searching stack-specific known issues', status: 'pending' }
+                ]
+            },
+            {
+                id: 'structure-gen',
+                title: 'Project Scaffolding',
+                icon: 'fa-folder-tree',
+                substeps: [
+                    { id: 's1', label: 'Creating atomic directory structure', status: 'pending' },
+                    { id: 's2', label: 'Injecting boilerplate templates', status: 'pending' },
+                    { id: 's3', label: 'Configuring Environment variables', status: 'pending' },
+                    { id: 's4', label: 'Verifying file system permissions', status: 'pending' }
+                ]
+            },
+            {
+                id: 'package-install',
+                title: 'Dependency Synthesis',
+                icon: 'fa-cubes',
+                substeps: [
+                    { id: 'i1', label: 'Running package manager installation', status: 'pending' },
+                    { id: 'i2', label: 'Optimizing tree shaking settings', status: 'pending' },
+                    { id: 'i3', label: 'Checking install-time console errors', status: 'pending' },
+                    { id: 'i4', label: 'Validating checksums for security', status: 'pending' }
+                ]
+            },
+            {
+                id: 'runtime-init',
+                title: 'Runtime Initialization',
+                icon: 'fa-play-circle',
+                substeps: [
+                    { id: 'r1', label: 'Booting dev server environment', status: 'pending' },
+                    { id: 'r2', label: 'Monitoring browser console outputs', status: 'pending' },
+                    { id: 'r3', label: 'Measuring screen loading performance', status: 'pending' },
+                    { id: 'r4', label: 'Health check for API endpoints', status: 'pending' }
+                ]
+            },
+            {
+                id: 'ui-audit',
+                title: 'Visual Verification',
+                icon: 'fa-eye',
+                substeps: [
+                    { id: 'u1', label: 'Analyzing component hydration', status: 'pending' },
+                    { id: 'u2', label: 'Detecting CSS alignment anomalies', status: 'pending' },
+                    { id: 'u3', label: 'Verifying responsive breakpoints', status: 'pending' },
+                    { id: 'u4', label: 'Final accessibility checkpoint', status: 'pending' }
+                ]
+            }
+        ];
+
+        let currentStepIndex = 0;
+        let currentSubStepIndex = 0;
+        let isRunning = false;
+        let errorCount = 0;
+
+        function startProvisioning() {
+            document.getElementById('config-panel').classList.add('hidden');
+            document.getElementById('execution-dashboard').classList.remove('hidden');
+            document.getElementById('global-status').classList.remove('hidden');
+            renderSteps();
+            runProcess();
+        }
+
+        function renderSteps() {
+            const container = document.getElementById('steps-container');
+            container.innerHTML = STEPS_DATA.map((step, idx) => `
+                <div id="step-card-${idx}" class="glass rounded-2xl p-6 opacity-40 transition-all duration-500 scale-95 border-l-4 border-transparent">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 glass-dark rounded-xl flex items-center justify-center text-blue-400">
+                            <i class="fas ${step.icon} text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-semibold text-lg">${step.title}</h3>
+                                <span id="step-badge-${idx}" class="text-[10px] uppercase px-2 py-1 rounded-md bg-white/5 text-slate-400">Waiting</span>
+                            </div>
+                            <div class="w-full bg-white/5 h-1 mt-2 rounded-full overflow-hidden">
+                                <div id="step-progress-${idx}" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="substeps-${idx}" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 overflow-hidden h-0 transition-all duration-500">
+                        ${step.substeps.map((sub, sidx) => `
+                            <div id="sub-${idx}-${sidx}" class="flex items-center gap-3 p-3 glass-dark rounded-xl text-xs text-slate-400">
+                                <div id="icon-${idx}-${sidx}" class="w-2 h-2 rounded-full bg-slate-600"></div>
+                                <span class="flex-1">${sub.label}</span>
+                                <div id="status-text-${idx}-${sidx}" class="italic text-[9px] opacity-0">Pending</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function runProcess() {
+            isRunning = true;
+            for (let i = currentStepIndex; i < STEPS_DATA.length; i++) {
+                currentStepIndex = i;
+                const success = await processStep(i);
+                if (!success) {
+                    showRetryUI();
+                    return;
+                }
+            }
+            finishAll();
+        }
+
+        async function processStep(stepIdx) {
+            updateGlobalProgress();
+            const step = STEPS_DATA[stepIdx];
+            const card = document.getElementById(`step-card-${stepIdx}`);
+            const badge = document.getElementById(`step-badge-${stepIdx}`);
+            const substepsContainer = document.getElementById(`substeps-${stepIdx}`);
+            
+            // Activate Card
+            card.classList.remove('opacity-40', 'scale-95');
+            card.classList.add('border-blue-500/50', 'shadow-blue-500/10');
+            badge.innerText = 'Active';
+            badge.className = 'text-[10px] uppercase px-2 py-1 rounded-md bg-blue-500/20 text-blue-400 animate-pulse';
+            substepsContainer.style.height = 'auto';
+
+            log(`Starting Major Step: ${step.title}`, 'info');
+
+            for (let s = currentSubStepIndex; s < step.substeps.length; s++) {
+                currentSubStepIndex = s;
+                const success = await processSubStep(stepIdx, s);
+                if (!success) return false;
+                
+                // Update Step progress bar
+                const prog = ((s + 1) / step.substeps.length) * 100;
+                document.getElementById(`step-progress-${stepIdx}`).style.width = `${prog}%`;
+            }
+
+            // Mark Step Complete
+            badge.innerText = 'Completed';
+            badge.className = 'text-[10px] uppercase px-2 py-1 rounded-md bg-green-500/20 text-green-400';
+            card.classList.remove('border-blue-500/50');
+            card.classList.add('border-green-500/50');
+            currentSubStepIndex = 0; // Reset for next major step
+            return true;
+        }
+
+        async function processSubStep(stepIdx, subIdx) {
+            const row = document.getElementById(`sub-${stepIdx}-${subIdx}`);
+            const icon = document.getElementById(`icon-${stepIdx}-${subIdx}`);
+            const statusText = document.getElementById(`status-text-${stepIdx}-${subIdx}`);
+            
+            row.classList.add('border', 'border-blue-500/30', 'text-slate-100');
+            icon.classList.remove('bg-slate-600');
+            icon.classList.add('bg-blue-400', 'animate-pulse');
+            statusText.classList.remove('opacity-0');
+            statusText.innerText = 'Verifying...';
+
+            log(`Executing: ${STEPS_DATA[stepIdx].substeps[subIdx].label}...`);
+
+            // Random delay to simulate work
+            const delay = 1000 + Math.random() * 2000;
+            await new Promise(r => setTimeout(r, delay));
+
+            // Simulate random failure (5% chance)
+            if (Math.random() < 0.05) {
+                errorCount++;
+                document.getElementById('error-count').innerText = errorCount;
+                row.classList.add('border-red-500/50', 'bg-red-500/5');
+                icon.classList.replace('bg-blue-400', 'bg-red-500');
+                statusText.innerText = 'Failed';
+                log(`ERROR at ${STEPS_DATA[stepIdx].substeps[subIdx].label}`, 'error');
+                return false;
+            }
+
+            // Success state
+            icon.classList.remove('animate-pulse');
+            icon.classList.replace('bg-blue-400', 'bg-green-500');
+            statusText.innerText = 'Verified';
+            row.classList.replace('border-blue-500/30', 'border-green-500/20');
+            log(`Success: ${STEPS_DATA[stepIdx].substeps[subIdx].label}`, 'success');
+            
+            return true;
+        }
+
+        function updateGlobalProgress() {
+            const totalSteps = STEPS_DATA.length;
+            const progress = (currentStepIndex / totalSteps) * 100;
+            document.getElementById('global-progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-percent').innerText = `${Math.round(progress)}% Completed`;
+            document.getElementById('active-step-count').innerText = `Step ${currentStepIndex + 1}/${totalSteps}`;
+        }
+
+        function log(msg, type = 'default') {
+            const console = document.getElementById('log-display');
+            const entry = document.createElement('div');
+            const colors = {
+                error: 'text-red-400',
+                success: 'text-green-400',
+                info: 'text-blue-400 font-bold',
+                default: 'text-blue-200/70'
+            };
+            entry.className = `${colors[type]} py-0.5`;
+            entry.innerHTML = `<span class="opacity-40">[${new Date().toLocaleTimeString([], {hour12: false})}]</span> > ${msg}`;
+            console.appendChild(entry);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function showRetryUI() {
+            isRunning = false;
+            document.getElementById('retry-btn').classList.remove('hidden');
+            document.getElementById('global-status-text').innerText = 'Synthesis Blocked';
+            document.getElementById('global-status').classList.add('bg-red-500/20', 'text-red-400');
+        }
+
+        function retryLastStep() {
+            document.getElementById('retry-btn').classList.add('hidden');
+            document.getElementById('global-status-text').innerText = 'Synthesizing...';
+            document.getElementById('global-status').classList.remove('bg-red-500/20', 'text-red-400');
+            runProcess();
+        }
+
+        function resetSetup() {
+            currentStepIndex = 0;
+            currentSubStepIndex = 0;
+            errorCount = 0;
+            document.getElementById('error-count').innerText = "0";
+            document.getElementById('execution-dashboard').classList.add('hidden');
+            document.getElementById('success-modal').classList.add('hidden');
+            document.getElementById('config-panel').classList.remove('hidden');
+            document.getElementById('log-display').innerHTML = '<div class="text-blue-400">> System Ready... awaiting signal</div>';
+            document.getElementById('global-progress-bar').style.width = '0%';
+        }
+
+        function finishAll() {
+            document.getElementById('global-progress-bar').style.width = `100%`;
+            document.getElementById('progress-percent').innerText = `100% Completed`;
+            document.getElementById('global-status').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('success-modal').classList.remove('hidden');
+            }, 800);
+        }
+    </script>
+</body>
+</html>

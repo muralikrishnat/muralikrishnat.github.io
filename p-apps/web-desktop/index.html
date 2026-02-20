@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu Web Desktop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            overflow: hidden;
+            background: linear-gradient(45deg, #400040, #772953);
+            background-size: cover;
+            height: 100vh;
+            user-select: none;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .window {
+            position: absolute;
+            min-width: 300px;
+            min-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s;
+        }
+
+        .window.minimized {
+            transform: scale(0.8) translateY(100vh);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .window-header {
+            cursor: move;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .dock-item:hover .tooltip {
+            opacity: 1;
+            transform: translateX(10px);
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #4ade80;
+            width: 100%;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        .active-dot {
+            width: 4px;
+            height: 4px;
+            background: #E95420;
+            border-radius: 50%;
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <header class="fixed top-0 left-0 right-0 h-8 glass-dark flex items-center justify-between px-4 text-white text-sm z-50">
+        <div class="flex items-center space-x-4">
+            <span class="font-bold">Activities</span>
+            <div id="top-app-name" class="opacity-80">Desktop</div>
+        </div>
+        <div id="clock" class="font-medium">Feb 20 10:45 AM</div>
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-volume-up"></i>
+            <i class="fas fa-battery-three-quarters"></i>
+            <i class="fas fa-power-off"></i>
+        </div>
+    </header>
+
+    <!-- Side Dock (Launcher) -->
+    <aside id="dock" class="fixed left-0 top-8 bottom-0 w-16 glass-dark flex flex-col items-center py-4 space-y-4 z-40">
+        <!-- Apps will be injected here -->
+    </aside>
+
+    <!-- Main Desktop Area -->
+    <main id="desktop" class="relative w-full h-full pt-8 pl-16">
+        <!-- Windows will be injected here -->
+    </main>
+
+    <!-- App Templates / Registry -->
+    <script>
+        const appRegistry = [
+            { id: 'files', name: 'Files', icon: 'fa-folder-open', color: 'text-yellow-400', installed: true, type: 'explorer' },
+            { id: 'terminal', name: 'Terminal', icon: 'fa-terminal', color: 'text-gray-200', installed: true, type: 'terminal' },
+            { id: 'calc', name: 'Calculator', icon: 'fa-calculator', color: 'text-blue-400', installed: true, type: 'calculator' },
+            { id: 'mail', name: 'Evolution', icon: 'fa-envelope', color: 'text-red-400', installed: true, type: 'mail' },
+            { id: 'store', name: 'Software Center', icon: 'fa-shopping-bag', color: 'text-orange-500', installed: true, type: 'store' },
+            { id: 'settings', name: 'Settings', icon: 'fa-cog', color: 'text-gray-400', installed: false, type: 'info' }
+        ];
+
+        let runningApps = [];
+        let zIndexCounter = 10;
+
+        function init() {
+            renderDock();
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // Handle global clicks for focusing
+            document.addEventListener('mousedown', (e) => {
+                const win = e.target.closest('.window');
+                if (win) focusWindow(win.dataset.appid);
+            });
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('clock').innerText = now.toLocaleString('en-US', options);
+        }
+
+        function renderDock() {
+            const dock = document.getElementById('dock');
+            dock.innerHTML = '';
+            
+            appRegistry.filter(a => a.installed).forEach(app => {
+                const isRunning = runningApps.some(r => r.id === app.id);
+                const item = document.createElement('div');
+                item.className = 'dock-item relative group cursor-pointer p-2 rounded-lg transition hover:bg-white/10';
+                item.onclick = () => launchApp(app.id);
+                item.innerHTML = `
+                    ${isRunning ? '<div class="active-dot"></div>' : ''}
+                    <i class="fas ${app.icon} fa-2x ${app.color}"></i>
+                    <span class="tooltip absolute left-full ml-2 px-2 py-1 glass-dark text-white text-xs rounded opacity-0 pointer-events-none transition-all z-50 whitespace-nowrap">
+                        ${app.name}
+                    </span>
+                `;
+                dock.appendChild(item);
+            });
+        }
+
+        function launchApp(id) {
+            const app = appRegistry.find(a => a.id === id);
+            const running = runningApps.find(r => r.id === id);
+
+            if (running) {
+                if (running.minimized) {
+                    restoreWindow(id);
+                } else {
+                    focusWindow(id);
+                }
+                return;
+            }
+
+            const winId = `win-${id}`;
+            const win = document.createElement('div');
+            win.id = winId;
+            win.dataset.appid = id;
+            win.className = 'window glass-dark text-white';
+            win.style.left = `${100 + (runningApps.length * 30)}px`;
+            win.style.top = `${80 + (runningApps.length * 30)}px`;
+            win.style.width = '600px';
+            win.style.height = '400px';
+            win.style.zIndex = ++zIndexCounter;
+
+            win.innerHTML = `
+                <div class="window-header" onmousedown="dragWindow(event, '${winId}')">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas ${app.icon} ${app.color} text-xs"></i>
+                        <span class="text-xs font-medium">${app.name}</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="minimizeWindow('${id}')" class="hover:text-gray-400 transition"><i class="fas fa-minus text-xs"></i></button>
+                        <button onclick="closeWindow('${id}')" class="hover:text-red-500 transition"><i class="fas fa-times text-xs"></i></button>
+                    </div>
+                </div>
+                <div class="window-content flex-grow overflow-auto p-4 bg-black/20">
+                    ${getAppContent(app)}
+                </div>
+            `;
+
+            document.getElementById('desktop').appendChild(win);
+            runningApps.push({ id, minimized: false });
+            document.getElementById('top-app-name').innerText = app.name;
+            renderDock();
+        }
+
+        function getAppContent(app) {
+            switch(app.type) {
+                case 'terminal':
+                    return `
+                        <div class="font-mono text-green-400 text-sm">
+                            <p>Ubuntu 24.04 LTS (GNU/Linux 6.8.0-generic x86_64)</p>
+                            <p class="mb-2">Welcome to the web terminal. Type 'help' for commands.</p>
+                            <div id="terminal-output"></div>
+                            <div class="flex">
+                                <span class="mr-2 text-blue-400">user@ubuntu:~$</span>
+                                <input type="text" class="terminal-input" autofocus onkeydown="handleTerminal(event)">
+                            </div>
+                        </div>
+                    `;
+                case 'calculator':
+                    return `
+                        <div class="flex flex-col h-full max-w-xs mx-auto">
+                            <input type="text" id="calc-display" readonly class="w-full bg-black/40 p-4 text-right text-2xl mb-4 rounded border border-white/10" value="0">
+                            <div class="grid grid-cols-4 gap-2">
+                                ${['7','8','9','/','4','5','6','*','1','2','3','-','0','.','=','+'].map(key => `
+                                    <button onclick="calc('${key}')" class="p-4 glass hover:bg-white/20 rounded transition text-lg">${key}</button>
+                                `).join('')}
+                                <button onclick="calc('C')" class="col-span-4 p-2 mt-2 bg-red-500/50 hover:bg-red-500 rounded transition">Clear</button>
+                            </div>
+                        </div>
+                    `;
+                case 'explorer':
+                    return `
+                        <div class="grid grid-cols-4 gap-6">
+                            ${['Documents', 'Downloads', 'Music', 'Pictures', 'Videos', 'Projects'].map(folder => `
+                                <div class="flex flex-col items-center group cursor-pointer p-2 rounded hover:bg-white/5">
+                                    <i class="fas fa-folder fa-3x text-yellow-500 mb-2 shadow-lg"></i>
+                                    <span class="text-xs opacity-90">${folder}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                case 'mail':
+                    return `
+                        <div class="flex h-full">
+                            <div class="w-1/3 border-r border-white/10 pr-2">
+                                <div class="p-2 mb-2 bg-white/10 rounded text-xs">
+                                    <div class="font-bold">Canonical Security</div>
+                                    <div class="opacity-60 truncate">Welcome to Ubuntu...</div>
+                                </div>
+                                <div class="p-2 mb-2 hover:bg-white/5 rounded text-xs cursor-pointer">
+                                    <div class="font-bold">System Admin</div>
+                                    <div class="opacity-60 truncate">Monthly update report...</div>
+                                </div>
+                            </div>
+                            <div class="w-2/3 pl-4 flex items-center justify-center opacity-40">
+                                <div class="text-center">
+                                    <i class="fas fa-inbox fa-3x mb-2"></i>
+                                    <p>Select a message to read</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                case 'store':
+                    return `
+                        <div class="space-y-6">
+                            <div class="text-xl font-bold border-b border-white/10 pb-2">App Store</div>
+                            <div class="grid grid-cols-1 gap-4">
+                                ${appRegistry.map(a => `
+                                    <div class="flex items-center justify-between p-4 glass rounded-xl">
+                                        <div class="flex items-center space-x-4">
+                                            <i class="fas ${a.icon} fa-2x ${a.color}"></i>
+                                            <div>
+                                                <div class="font-medium">${a.name}</div>
+                                                <div class="text-xs opacity-60">${a.type.toUpperCase()} Application</div>
+                                            </div>
+                                        </div>
+                                        <button onclick="toggleApp('${a.id}')" class="px-4 py-1 rounded-full text-sm ${a.installed ? 'bg-red-500/50' : 'bg-green-500/50'} hover:opacity-80">
+                                            ${a.installed ? 'Uninstall' : 'Install'}
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                default:
+                    return `<div class="p-10 text-center">App version 1.0.0-stable<br>Build: WebRuntime-v12</div>`;
+            }
+        }
+
+        // Logic Functions
+        function focusWindow(id) {
+            const win = document.getElementById(`win-${id}`);
+            if (win) {
+                win.style.zIndex = ++zIndexCounter;
+                document.getElementById('top-app-name').innerText = appRegistry.find(a => a.id === id).name;
+            }
+        }
+
+        function minimizeWindow(id) {
+            const win = document.getElementById(`win-${id}`);
+            win.classList.add('minimized');
+            const app = runningApps.find(r => r.id === id);
+            app.minimized = true;
+            document.getElementById('top-app-name').innerText = 'Desktop';
+        }
+
+        function restoreWindow(id) {
+            const win = document.getElementById(`win-${id}`);
+            win.classList.remove('minimized');
+            const app = runningApps.find(r => r.id === id);
+            app.minimized = false;
+            focusWindow(id);
+        }
+
+        function closeWindow(id) {
+            const win = document.getElementById(`win-${id}`);
+            win.remove();
+            runningApps = runningApps.filter(r => r.id !== id);
+            document.getElementById('top-app-name').innerText = 'Desktop';
+            renderDock();
+        }
+
+        function toggleApp(id) {
+            const app = appRegistry.find(a => a.id === id);
+            if (app.installed) {
+                if (confirm(`Uninstall ${app.name}?`)) {
+                    app.installed = false;
+                    closeWindow(id);
+                }
+            } else {
+                app.installed = true;
+            }
+            renderDock();
+            // Refresh store view if open
+            const storeWin = document.getElementById('win-store');
+            if (storeWin) {
+                storeWin.querySelector('.window-content').innerHTML = getAppContent(appRegistry.find(a => a.id === 'store'));
+            }
+        }
+
+        function dragWindow(e, winId) {
+            const win = document.getElementById(winId);
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                win.style.top = (win.offsetTop - pos2) + "px";
+                win.style.left = (win.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        // App Specific Logics
+        function calc(val) {
+            const display = document.getElementById('calc-display');
+            if (val === 'C') display.value = '0';
+            else if (val === '=') {
+                try { display.value = eval(display.value); } catch { display.value = 'Error'; }
+            } else {
+                if (display.value === '0') display.value = val;
+                else display.value += val;
+            }
+        }
+
+        function handleTerminal(e) {
+            if (e.key === 'Enter') {
+                const input = e.target.value.toLowerCase();
+                const output = document.getElementById('terminal-output');
+                let res = '';
+                
+                if (input === 'help') res = 'Available: ls, neofetch, clear, whoami, exit';
+                else if (input === 'ls') res = 'Desktop  Documents  Downloads  Music  Pictures  Videos';
+                else if (input === 'whoami') res = 'ubuntu-user';
+                else if (input === 'clear') { output.innerHTML = ''; e.target.value = ''; return; }
+                else if (input === 'neofetch') {
+                    res = `<pre class="text-xs">
+      /\\          ubuntu-user@web-desktop
+     /  \\         -----------------------
+    /    \\        OS: Ubuntu 24.04 LTS x86_64
+   /  --  \\       Host: Web Browser Canvas
+  /  (  )  \\      Kernel: 6.8.0-generic
+ /  /    \\  \\     Uptime: ${Math.floor(performance.now()/1000)}s
+/__________\\      Shell: bash 5.2.15</pre>`;
+                }
+                else if (input !== '') res = `Command '${input}' not found.`;
+
+                output.innerHTML += `<div class="mb-1"><span class="text-blue-400">user@ubuntu:~$</span> ${e.target.value}</div>`;
+                if (res) output.innerHTML += `<div class="mb-2 opacity-80">${res}</div>`;
+                
+                e.target.value = '';
+                output.parentElement.scrollTop = output.parentElement.scrollHeight;
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

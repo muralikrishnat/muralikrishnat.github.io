@@ -1,0 +1,14 @@
+Build web page with below features:
+
+Goal: Web desktop with Ubuntu styling
+
+1. Displays desktop screen with taskbar on top.
+2. List of apps available in the desktop.
+3. Launch the app, minimize the app, close the app.
+4. Install new app, uninstall app, app information, app store.
+5. Basic apps like file explorer, email manager, calculator, terminal.
+
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking, with suitable font-awesome icons, easy to operate.
+Use only html, css, javascript and tailwindcss

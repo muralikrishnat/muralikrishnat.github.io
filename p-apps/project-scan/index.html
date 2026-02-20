@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Scan - Analysis Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top left, #1a1c2c, #0a0b10);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+        }
+
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .scan-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            position: absolute;
+            width: 100%;
+            top: 0;
+            animation: scanMove 2s linear infinite;
+            z-index: 10;
+        }
+
+        @keyframes scanMove {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .file-tree-item {
+            transition: all 0.3s ease;
+        }
+
+        .scanning-active {
+            border-left: 2px solid #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .line-highlight {
+            background: rgba(59, 130, 246, 0.2);
+            border-left: 3px solid #3b82f6;
+            transition: all 0.1s ease;
+        }
+
+        .progress-bar {
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
+                    Project Scan
+                </h1>
+                <p class="text-slate-400 text-sm">Automated structural & security analysis</p>
+            </div>
+            <div id="statusIndicator" class="hidden flex items-center gap-2 px-4 py-2 glass-dark rounded-full text-xs font-medium">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                <span id="statusLabel">SCANNING...</span>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left Panel: Controls & Explorer -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="glass p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <i data-lucide="folder-search" class="text-blue-400"></i>
+                        <h2 class="text-xl font-semibold">Initiate</h2>
+                    </div>
+                    
+                    <button id="startBtn" onclick="startScan()" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20">
+                        <i data-lucide="play" size="18"></i>
+                        Start Scan
+                    </button>
+                    
+                    <div id="progressContainer" class="hidden mt-6">
+                        <div class="flex justify-between text-xs text-slate-400 mb-2">
+                            <span id="progressLabel">Initializing...</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="progressBar" class="progress-bar w-0 h-full bg-blue-500"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live File Feed -->
+                <div class="glass p-6 h-[400px] flex flex-col">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-500">File Structure</h3>
+                        <i data-lucide="binary" size="14" class="text-slate-500"></i>
+                    </div>
+                    <div id="fileExplorer" class="flex-1 overflow-y-auto space-y-1 text-sm font-mono text-slate-300">
+                        <div class="flex items-center gap-2 p-2 rounded text-slate-500">
+                            <i data-lucide="info" size="14"></i> Ready to scan...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Live View & Results -->
+            <div class="lg:col-span-8">
+                <!-- Live Line Scanner -->
+                <div id="liveScanner" class="glass p-6 mb-6 hidden relative overflow-hidden h-64 border-blue-500/30">
+                    <div class="scan-line"></div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="cpu" class="text-blue-400 animate-pulse"></i>
+                        <span id="scanningFile" class="font-mono text-blue-400">waiting...</span>
+                    </div>
+                    <div id="codePreview" class="font-mono text-xs text-slate-400 space-y-0 overflow-hidden h-40">
+                        <!-- Simulated code lines will appear here -->
+                    </div>
+                </div>
+
+                <!-- Results Summary -->
+                <div id="resultsView" class="hidden space-y-6">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="glass p-4 text-center">
+                            <p class="text-xs text-slate-400 mb-1">Files</p>
+                            <p id="statFiles" class="text-2xl font-bold">0</p>
+                        </div>
+                        <div class="glass p-4 text-center">
+                            <p class="text-xs text-slate-400 mb-1">Found Issues</p>
+                            <p id="statIssues" class="text-2xl font-bold text-amber-400">0</p>
+                        </div>
+                        <div class="glass p-4 text-center">
+                            <p class="text-xs text-slate-400 mb-1">Tech Stack</p>
+                            <p id="statTech" class="text-sm font-bold truncate">N/A</p>
+                        </div>
+                        <div class="glass p-4 text-center">
+                            <p class="text-xs text-slate-400 mb-1">Dependencies</p>
+                            <p id="statDeps" class="text-2xl font-bold text-blue-400">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Tech Stack Analysis -->
+                    <div class="glass p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <i data-lucide="layers" class="text-blue-400"></i> Tech Analysis
+                        </h3>
+                        <div id="techGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                    </div>
+
+                    <!-- Suggestions -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass p-6 border-l-4 border-l-blue-500">
+                            <h3 class="font-bold mb-4 flex items-center gap-2">
+                                <i data-lucide="lightbulb" class="text-blue-400"></i> Project Level
+                            </h3>
+                            <ul id="projectSugg" class="space-y-3 text-sm text-slate-300"></ul>
+                        </div>
+                        <div class="glass p-6 border-l-4 border-l-amber-500">
+                            <h3 class="font-bold mb-4 flex items-center gap-2">
+                                <i data-lucide="file-warning" class="text-amber-400"></i> File Level
+                            </h3>
+                            <ul id="fileSugg" class="space-y-3 text-sm text-slate-300"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="glass h-full flex flex-col items-center justify-center p-12 text-center">
+                    <div class="bg-blue-500/10 p-6 rounded-full mb-6">
+                        <i data-lucide="upload-cloud" size="48" class="text-blue-500/50"></i>
+                    </div>
+                    <h2 class="text-2xl font-semibold mb-2">Ready to Analyze</h2>
+                    <p class="text-slate-400 max-w-sm">Select a project directory to begin structure mapping and source code inspection.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const mockProject = {
+            name: "quantum-dashboard-v2",
+            files: [
+                { name: "package.json", type: "config", content: ['{', '  "name": "app",', '  "version": "2.4.1",', '  "dependencies": {', '    "react": "^18.2.0",', '    "tailwindcss": "^3.3.0"', '  }', '}'] },
+                { name: "src/App.js", type: "logic", content: ['import React from "react"', 'import Header from "./components/Header"', '', 'function App() {', '  const [data, setData] = useState(null)', '  return <div className="app"><Header /></div>', '}'] },
+                { name: "src/components/Header.jsx", type: "component", content: ['const Header = () => {', '  return (', '    <header class="glass">', '       <h1>System UI</h1>', '    </header>', '  )', '}'] },
+                { name: "src/utils/api.js", type: "util", content: ['export const fetchData = async () => {', '  const res = await fetch("/api/v1/data")', '  const json = await res.json()', '  return json', '}'] },
+                { name: "tailwind.config.js", type: "config", content: ['module.exports = {', '  content: ["./src/**/*.{js,jsx}"],', '  theme: { extend: {} }', '}'] },
+                { name: "public/index.html", type: "asset", content: ['<!DOCTYPE html>', '<html>', '  <head><title>App</title></head>', '  <body><div id="root"></div></body>', '</html>'] },
+                { name: ".env", type: "config", content: ['DATABASE_URL=postgres://user:pass@host:5432/db', 'API_KEY=ABC123XYZ_SECURE', 'NODE_ENV=production'] }
+            ],
+            tech: [
+                { name: "React", version: "18.2.0", type: "Library" },
+                { name: "TailwindCSS", version: "3.3.0", type: "CSS Framework" },
+                { name: "PostgreSQL", version: "14.x", type: "Database" },
+                { name: "Node.js", version: "20.5.1", type: "Runtime" }
+            ],
+            suggestions: {
+                project: [
+                    "Implement unit testing for components.",
+                    "Add Husky for pre-commit linting hooks.",
+                    "Migrate .js files to TypeScript (.tsx)."
+                ],
+                file: [
+                    "package.json: 3 dependencies are outdated.",
+                    "src/utils/api.js: Hardcoded API endpoint detected.",
+                    "src/App.js: Large component detected (>100 lines)."
+                ]
+            }
+        };
+
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        async function startScan() {
+            // Reset UI
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('startBtn').classList.add('opacity-50');
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('resultsView').classList.add('hidden');
+            document.getElementById('liveScanner').classList.remove('hidden');
+            document.getElementById('progressContainer').classList.remove('hidden');
+            document.getElementById('statusIndicator').classList.remove('hidden');
+            
+            const fileExplorer = document.getElementById('fileExplorer');
+            const codePreview = document.getElementById('codePreview');
+            const scanningFileLabel = document.getElementById('scanningFile');
+            const progressBar = document.getElementById('progressBar');
+            const progressLabel = document.getElementById('progressLabel');
+            const progressPercent = document.getElementById('progressPercent');
+
+            fileExplorer.innerHTML = '';
+            
+            // Phase 1: Folder Structure Scan
+            progressLabel.innerText = "Indexing Directory...";
+            for (let i = 0; i < mockProject.files.length; i++) {
+                const file = mockProject.files[i];
+                const div = document.createElement('div');
+                div.className = 'file-tree-item flex items-center gap-2 p-2 rounded opacity-0 transform translate-x-2';
+                div.innerHTML = `<i data-lucide="file-code" size="14"></i> ${file.name}`;
+                fileExplorer.appendChild(div);
+                lucide.createIcons();
+                
+                await sleep(150);
+                div.classList.remove('opacity-0', 'translate-x-2');
+                
+                const progress = Math.round(((i + 1) / mockProject.files.length) * 30);
+                progressBar.style.width = `${progress}%`;
+                progressPercent.innerText = `${progress}%`;
+            }
+
+            // Phase 2: File by File, Line by Line
+            progressLabel.innerText = "Analyzing Content...";
+            const treeItems = fileExplorer.querySelectorAll('.file-tree-item');
+            
+            for (let i = 0; i < mockProject.files.length; i++) {
+                const file = mockProject.files[i];
+                treeItems[i].classList.add('scanning-active');
+                scanningFileLabel.innerText = `scanning: ${file.name}`;
+                
+                codePreview.innerHTML = '';
+                // Pre-populate all lines of the file
+                const lineElements = [];
+                file.content.forEach((lineText, lineIdx) => {
+                    const lineDiv = document.createElement('div');
+                    lineDiv.className = 'flex gap-4 py-0.5 px-2 font-mono';
+                    lineDiv.innerHTML = `<span class="text-slate-600 w-6 text-right select-none">${lineIdx + 1}</span> <span>${lineText.replace(/ /g, '&nbsp;')}</span>`;
+                    codePreview.appendChild(lineDiv);
+                    lineElements.push(lineDiv);
+                });
+
+                // Highlight each line sequentially
+                for (let lineIdx = 0; lineIdx < lineElements.length; lineIdx++) {
+                    const el = lineElements[lineIdx];
+                    el.classList.add('line-highlight');
+                    
+                    // Auto-scroll to current line
+                    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                    
+                    await sleep(100);
+                    
+                    // Keep previous lines slightly dimmed, or just remove highlight
+                    el.classList.remove('line-highlight');
+                    el.classList.add('text-slate-300'); // Mark as "processed"
+                }
+
+                treeItems[i].classList.remove('scanning-active');
+                treeItems[i].innerHTML += ' <i data-lucide="check" size="14" class="text-green-500 ml-auto"></i>';
+                lucide.createIcons();
+
+                const progress = 30 + Math.round(((i + 1) / mockProject.files.length) * 70);
+                progressBar.style.width = `${progress}%`;
+                progressPercent.innerText = `${progress}%`;
+            }
+
+            // Phase 3: Show Summary
+            await sleep(500);
+            showSummary();
+        }
+
+        function showSummary() {
+            document.getElementById('liveScanner').classList.add('hidden');
+            document.getElementById('resultsView').classList.remove('hidden');
+            document.getElementById('statusIndicator').classList.add('hidden');
+            document.getElementById('progressContainer').classList.add('hidden');
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('startBtn').classList.remove('opacity-50');
+            document.getElementById('startBtn').innerText = "Re-scan Project";
+
+            // Stats
+            document.getElementById('statFiles').innerText = mockProject.files.length;
+            document.getElementById('statIssues').innerText = mockProject.suggestions.file.length;
+            document.getElementById('statTech').innerText = mockProject.tech[0].name;
+            document.getElementById('statDeps').innerText = mockProject.tech.length;
+
+            // Tech Grid
+            const techGrid = document.getElementById('techGrid');
+            techGrid.innerHTML = '';
+            mockProject.tech.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'glass-dark p-3 rounded-xl flex justify-between items-center';
+                card.innerHTML = `
+                    <div>
+                        <p class="text-xs text-slate-500">${t.type}</p>
+                        <p class="font-bold text-sm">${t.name}</p>
+                    </div>
+                    <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">v${t.version}</span>
+                `;
+                techGrid.appendChild(card);
+            });
+
+            // Suggestions
+            const projList = document.getElementById('projectSugg');
+            projList.innerHTML = '';
+            mockProject.suggestions.project.forEach(s => {
+                projList.innerHTML += `<li class="flex gap-2"><i data-lucide="chevron-right" size="14" class="text-blue-500 shrink-0"></i> ${s}</li>`;
+            });
+
+            const fileList = document.getElementById('fileSugg');
+            fileList.innerHTML = '';
+            mockProject.suggestions.file.forEach(s => {
+                fileList.innerHTML += `<li class="flex gap-2"><i data-lucide="alert-triangle" size="14" class="text-amber-500 shrink-0"></i> ${s}</li>`;
+            });
+
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

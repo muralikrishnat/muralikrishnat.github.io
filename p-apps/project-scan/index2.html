@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Scan - Analysis Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top left, #1a1c2c, #0a0b10);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+        }
+
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .scan-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            position: absolute;
+            width: 100%;
+            top: 0;
+            animation: scanMove 2s linear infinite;
+            z-index: 10;
+        }
+
+        @keyframes scanMove {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .file-tree-item {
+            transition: all 0.3s ease;
+        }
+
+        .scanning-active {
+            border-left: 2px solid #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .line-highlight {
+            background: rgba(59, 130, 246, 0.2);
+            border-left: 3px solid #3b82f6;
+            transition: all 0.1s ease;
+        }
+
+        .progress-bar {
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .history-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .history-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
+                    Project Scan
+                </h1>
+                <p class="text-slate-400 text-sm">Comparison-ready structural analysis</p>
+            </div>
+            <div id="statusIndicator" class="hidden flex items-center gap-2 px-4 py-2 glass-dark rounded-full text-xs font-medium">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                <span id="statusLabel">SCANNING...</span>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left Panel: Controls & Explorer -->
+            <div class="lg:col-span-3 space-y-6">
+                <div class="glass p-5">
+                    <button id="startBtn" onclick="startScan()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20">
+                        <i data-lucide="play" size="18"></i>
+                        Start New Scan
+                    </button>
+                    
+                    <div id="progressContainer" class="hidden mt-6">
+                        <div class="flex justify-between text-[10px] text-slate-400 mb-2">
+                            <span id="progressLabel">Initializing...</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                            <div id="progressBar" class="progress-bar w-0 h-full bg-blue-500"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scan History -->
+                <div class="glass p-5 flex flex-col h-[450px]">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4 flex items-center gap-2">
+                        <i data-lucide="history" size="14"></i> History
+                    </h3>
+                    <div id="historyList" class="flex-1 overflow-y-auto space-y-2 pr-1">
+                        <p class="text-xs text-slate-600 text-center mt-10">No previous scans</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle/Right Panel: Live View & Results -->
+            <div class="lg:col-span-9">
+                <!-- Analysis Comparison Banner (Hidden by default) -->
+                <div id="diffBanner" class="hidden glass p-4 mb-6 border-l-4 border-l-green-500 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-green-500/20 p-2 rounded-lg">
+                            <i data-lucide="trending-up" class="text-green-500" size="20"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-green-400">Improvements Detected</h4>
+                            <p id="diffText" class="text-xs text-slate-400">Comparing to previous scan from 10:30 AM</p>
+                        </div>
+                    </div>
+                    <div id="diffBadges" class="flex gap-2">
+                        <!-- Dynamic diff badges -->
+                    </div>
+                </div>
+
+                <!-- Live Line Scanner -->
+                <div id="liveScanner" class="glass p-6 mb-6 hidden relative overflow-hidden h-72 border-blue-500/30">
+                    <div class="scan-line"></div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="cpu" class="text-blue-400 animate-pulse"></i>
+                        <span id="scanningFile" class="font-mono text-blue-400">waiting...</span>
+                    </div>
+                    <div id="codePreview" class="font-mono text-xs text-slate-400 space-y-0 overflow-hidden h-48"></div>
+                </div>
+
+                <!-- Results Summary -->
+                <div id="resultsView" class="hidden space-y-6">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="glass p-4 text-center">
+                            <p class="text-xs text-slate-400 mb-1">Files</p>
+                            <div class="flex items-center justify-center gap-2">
+                                <p id="statFiles" class="text-2xl font-bold">0</p>
+                                <span id="diffFiles" class="text-[10px] font-bold"></span>
+                            </div>
+                        </div>
+                        <div class="glass p-4 text-center">
+                            <p class="text-xs text-slate-400 mb-1">Issues</p>
+                            <div class="flex items-center justify-center gap-2">
+                                <p id="statIssues" class="text-2xl font-bold">0</p>
+                                <span id="diffIssues" class="text-[10px] font-bold"></span>
+                            </div>
+                        </div>
+                        <div class="glass p-4 text-center">
+                            <p class="text-xs text-slate-400 mb-1">Tech Stack</p>
+                            <p id="statTech" class="text-sm font-bold truncate mt-2">N/A</p>
+                        </div>
+                        <div class="glass p-4 text-center">
+                            <p class="text-xs text-slate-400 mb-1">Dependencies</p>
+                            <p id="statDeps" class="text-2xl font-bold text-blue-400">0</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- File Explorer (during summary) -->
+                        <div class="glass p-5 col-span-1 h-[400px] flex flex-col">
+                             <h3 class="text-xs font-semibold uppercase text-slate-500 mb-4">Structure</h3>
+                             <div id="fileExplorerSummary" class="overflow-y-auto space-y-1 text-xs font-mono text-slate-400"></div>
+                        </div>
+
+                        <!-- Analysis & Suggestions -->
+                        <div class="col-span-2 space-y-6">
+                            <div class="glass p-6">
+                                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                                    <i data-lucide="layers" class="text-blue-400"></i> Tech Grid
+                                </h3>
+                                <div id="techGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="glass p-5 border-l-4 border-l-blue-500">
+                                    <h3 class="text-xs font-bold mb-3 uppercase text-blue-400">Project Strategy</h3>
+                                    <ul id="projectSugg" class="space-y-2 text-xs text-slate-300"></ul>
+                                </div>
+                                <div class="glass p-5 border-l-4 border-l-amber-500">
+                                    <h3 class="text-xs font-bold mb-3 uppercase text-amber-400">File Warnings</h3>
+                                    <ul id="fileSugg" class="space-y-2 text-xs text-slate-300"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="glass h-full flex flex-col items-center justify-center p-12 text-center min-h-[500px]">
+                    <div class="bg-blue-500/10 p-6 rounded-full mb-6">
+                        <i data-lucide="radar" size="48" class="text-blue-500/50"></i>
+                    </div>
+                    <h2 class="text-2xl font-semibold mb-2">Ready to Pulse</h2>
+                    <p class="text-slate-400 max-w-sm">Start a scan to map project progression and compare technical health over time.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // State Management
+        let scanHistory = [];
+        let currentScan = null;
+
+        const mockTemplates = [
+            {
+                id: 1,
+                filesCount: 7,
+                issues: 3,
+                deps: 4,
+                tech: [{ name: "React", version: "18.2.0" }, { name: "Tailwind", version: "3.3.0" }],
+                suggestions: {
+                    project: ["Add TypeScript support.", "Implement unit tests."],
+                    file: ["App.js: Large component.", "api.js: Hardcoded URL."]
+                }
+            },
+            {
+                id: 2,
+                filesCount: 12,
+                issues: 1,
+                deps: 6,
+                tech: [{ name: "React", version: "18.3.1" }, { name: "Tailwind", version: "4.0.0" }, { name: "Zustand", version: "4.5.0" }],
+                suggestions: {
+                    project: ["Migrated to TypeScript - Success.", "Optimize images."],
+                    file: ["api.js: Fixed hardcoded URL."]
+                }
+            }
+        ];
+
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        async function startScan() {
+            // Pick a template (alternating for demo comparison)
+            const template = scanHistory.length % 2 === 0 ? mockTemplates[0] : mockTemplates[1];
+            
+            // Prepare UI
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('startBtn').classList.add('opacity-50');
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('resultsView').classList.add('hidden');
+            document.getElementById('diffBanner').classList.add('hidden');
+            document.getElementById('liveScanner').classList.remove('hidden');
+            document.getElementById('progressContainer').classList.remove('hidden');
+            document.getElementById('statusIndicator').classList.remove('hidden');
+            
+            const codePreview = document.getElementById('codePreview');
+            const progressBar = document.getElementById('progressBar');
+            const progressLabel = document.getElementById('progressLabel');
+            const progressPercent = document.getElementById('progressPercent');
+            
+            // Phase 1: Structure Simulation
+            progressLabel.innerText = "Indexing Directory...";
+            for (let i = 1; i <= 10; i++) {
+                progressBar.style.width = `${i * 3}%`;
+                progressPercent.innerText = `${i * 3}%`;
+                await sleep(100);
+            }
+
+            // Phase 2: Content Scan
+            progressLabel.innerText = "Analyzing Lines...";
+            const scanLines = [
+                'import { useEffect } from "react"',
+                'const config = require("./env")',
+                '// Found 12 vulnerable patterns',
+                'const api = "https://internal.prod.v1"',
+                'export default function Main() {',
+                '  return <div>Scanning...</div>',
+                '}'
+            ];
+
+            for (let j = 0; j < 3; j++) { // Simulate 3 files
+                document.getElementById('scanningFile').innerText = `src/module_${j+1}.js`;
+                codePreview.innerHTML = '';
+                for (let line of scanLines) {
+                    const lineDiv = document.createElement('div');
+                    lineDiv.className = 'flex gap-4 py-0.5 px-2 line-highlight';
+                    lineDiv.innerHTML = `<span class="text-slate-600 w-6">#</span> <span>${line}</span>`;
+                    codePreview.appendChild(lineDiv);
+                    codePreview.scrollTop = codePreview.scrollHeight;
+                    await sleep(150);
+                    lineDiv.classList.remove('line-highlight');
+                }
+                const p = 30 + (j + 1) * 20;
+                progressBar.style.width = `${p}%`;
+                progressPercent.innerText = `${p}%`;
+            }
+
+            // Finalize Scan Data
+            const newScan = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                data: template
+            };
+
+            const prevScan = scanHistory.length > 0 ? scanHistory[0] : null;
+            scanHistory.unshift(newScan);
+            
+            showSummary(newScan, prevScan);
+            updateHistoryList();
+        }
+
+        function showSummary(scan, previous) {
+            currentScan = scan;
+            const data = scan.data;
+
+            document.getElementById('liveScanner').classList.add('hidden');
+            document.getElementById('resultsView').classList.remove('hidden');
+            document.getElementById('statusIndicator').classList.add('hidden');
+            document.getElementById('progressContainer').classList.add('hidden');
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('startBtn').classList.remove('opacity-50');
+
+            // Set Stats
+            document.getElementById('statFiles').innerText = data.filesCount;
+            document.getElementById('statIssues').innerText = data.issues;
+            document.getElementById('statTech').innerText = data.tech[0].name;
+            document.getElementById('statDeps').innerText = data.deps;
+
+            // Diff Logic
+            const diffBanner = document.getElementById('diffBanner');
+            const diffBadges = document.getElementById('diffBadges');
+            const fileDiff = document.getElementById('diffFiles');
+            const issueDiff = document.getElementById('diffIssues');
+
+            if (previous) {
+                diffBanner.classList.remove('hidden');
+                document.getElementById('diffText').innerText = `Comparing to scan at ${previous.timestamp}`;
+                diffBadges.innerHTML = '';
+                
+                // Issue diff
+                const issueChange = data.issues - previous.data.issues;
+                if (issueChange < 0) {
+                    issueDiff.innerHTML = `<span class="text-green-400">↓ ${Math.abs(issueChange)}</span>`;
+                    diffBadges.innerHTML += `<span class="bg-green-500/20 text-green-400 text-[10px] px-2 py-1 rounded">Fixes: +${Math.abs(issueChange)}</span>`;
+                } else if (issueChange > 0) {
+                    issueDiff.innerHTML = `<span class="text-red-400">↑ ${issueChange}</span>`;
+                } else {
+                    issueDiff.innerText = '';
+                }
+
+                // File diff
+                const fileChange = data.filesCount - previous.data.filesCount;
+                fileDiff.innerHTML = fileChange >= 0 ? 
+                    `<span class="text-blue-400">+${fileChange}</span>` : 
+                    `<span class="text-slate-500">${fileChange}</span>`;
+                
+                if (data.deps > previous.data.deps) {
+                    diffBadges.innerHTML += `<span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-1 rounded">New Deps: +${data.deps - previous.data.deps}</span>`;
+                }
+            } else {
+                fileDiff.innerText = '';
+                issueDiff.innerText = '';
+            }
+
+            // Tech Grid
+            const techGrid = document.getElementById('techGrid');
+            techGrid.innerHTML = '';
+            data.tech.forEach(t => {
+                techGrid.innerHTML += `
+                    <div class="glass-dark p-3 rounded-xl flex justify-between items-center">
+                        <span class="text-xs font-bold">${t.name}</span>
+                        <span class="text-[10px] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">v${t.version}</span>
+                    </div>`;
+            });
+
+            // Suggestions
+            const projList = document.getElementById('projectSugg');
+            projList.innerHTML = '';
+            data.suggestions.project.forEach(s => {
+                projList.innerHTML += `<li class="flex gap-2"><i data-lucide="check-circle" size="12" class="text-blue-500 mt-0.5"></i> ${s}</li>`;
+            });
+
+            const fileList = document.getElementById('fileSugg');
+            fileList.innerHTML = '';
+            data.suggestions.file.forEach(s => {
+                fileList.innerHTML += `<li class="flex gap-2"><i data-lucide="alert-circle" size="12" class="text-amber-500 mt-0.5"></i> ${s}</li>`;
+            });
+
+            // File Explorer Summary
+            const explore = document.getElementById('fileExplorerSummary');
+            explore.innerHTML = '';
+            for(let k=0; k<data.filesCount; k++) {
+                explore.innerHTML += `<div class="p-1 border-b border-white/5 flex items-center gap-2">
+                    <i data-lucide="file" size="10"></i> source_file_${k+1}.jsx
+                </div>`;
+            }
+
+            lucide.createIcons();
+        }
+
+        function updateHistoryList() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+            scanHistory.forEach((scan, index) => {
+                const item = document.createElement('div');
+                item.className = `history-card glass-dark p-3 rounded-lg border-l-2 ${index === 0 ? 'border-blue-500' : 'border-transparent'}`;
+                item.onclick = () => showSummary(scan, scanHistory[index+1] || null);
+                
+                item.innerHTML = `
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Scan #${scanHistory.length - index}</span>
+                        <span class="text-[10px] text-slate-500">${scan.timestamp}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-medium">Issues: ${scan.data.issues}</span>
+                        <span class="text-[10px] text-blue-400">${scan.data.filesCount} Files</span>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+    </script>
+</body>
+</html>

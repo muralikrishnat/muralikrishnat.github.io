@@ -1,0 +1,21 @@
+Build web page with below features:
+
+Goal: Project template creation tool
+
+1. Display selected tech stack for project template and start button.
+2. Shows phases like latest versions of each item in the stack, finding compatable versions, search for known issues of stack.
+3. Shows status of creating project structure, installing dependencies, checking console errors for installation.
+4. Shows status of basic setup, project run status, any console errors, screen loading status, any browser console errors.
+5. Shows status of pages, any alignment issues, 
+6. Shows status of Major step and sub steps inside major step, checkpoints, verification iterations, Retry previous step, Start from step one in case of total failure.
+7. Display project structure in the end.
+
+Come up with all steps that requires to complete project setup and put them in status display, use animations as much as possible.
+
+And the project template generation is done by AI group, so think about the AI group is doing the job and status of project.
+
+
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking, with suitable font-awesome icons, easy to operate.
+Use only html, css, javascript and tailwindcss

@@ -1,0 +1,13 @@
+Build web page with below features:
+
+Goal: Project  Scan 
+1. Can start scan on project folder.
+2. Animate project folder structure scan
+3. When we start scan, the scan project will first scan list of files and then scan file by file, and file line by line.
+4. On completion, it show some summary like no of files scanned, found interesting items, what tech stack project built on, versions of the dependencies...etc.,
+5. Gives simple project level suggestions, file level suggestions.
+
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking, with suitable font-awesome icons, easy to operate.
+Use only html, css, javascript and tailwindcss
