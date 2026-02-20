@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus Distributed Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .pulse-green {
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      animation: pulse-green 2s infinite;
+    }
+
+    @keyframes pulse-green {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      }
+
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+      }
+
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+      }
+    }
+
+    /* Visualization styles */
+    #viz-container {
+      height: 400px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2rem 0;
+    }
+
+    .viz-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      position: relative;
+      z-index: 10;
+      height: 80px;
+    }
+
+    .job-node {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      background: rgba(99, 102, 241, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 50;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .flow-label {
+      position: absolute;
+      left: 2rem;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body class="p-4 md:p-8">
+
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <header class="flex justify-between items-center glass p-6">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">Nexus Distributed Hub</h1>
+        <p class="text-slate-400 text-sm">Real-time worker orchestration & job monitoring</p>
+      </div>
+      <div class="flex gap-4">
+        <div class="text-right">
+          <p class="text-xs text-slate-500 uppercase font-bold">System Status</p>
+          <p class="text-green-400 font-medium flex items-center gap-2">
+            <span class="status-dot bg-green-400 pulse-green"></span> Operational
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Visualization Section -->
+    <section class="glass p-6">
+      <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="activity" class="w-5 h-5 text-indigo-400"></i> Pipeline Flow
+      </h2>
+      <div id="viz-container" class="w-full bg-black/20 rounded-xl px-10">
+
+        <!-- Row 1: Global Queue -->
+        <div class="viz-row" id="row-queue">
+          <span class="flow-label">1. Global Queue</span>
+          <div id="queue-anchor"
+            class="w-16 h-16 glass-card rounded-xl flex items-center justify-center border-dashed border-indigo-500/30 border-2">
+            <i data-lucide="layers" class="text-indigo-400/50"></i>
+          </div>
+        </div>
+
+        <!-- Row 2: Active Agents -->
+        <div class="viz-row" id="row-agents">
+          <span class="flow-label">2. Processing Nodes</span>
+          <div id="active-workers-viz" class="flex gap-8">
+            <!-- Workers dynamic content -->
+          </div>
+        </div>
+
+        <!-- Row 3: Executed -->
+        <div class="viz-row" id="row-executed">
+          <span class="flow-label">3. Completed List</span>
+          <div id="sink-anchor"
+            class="w-16 h-16 glass-card rounded-xl flex items-center justify-center border-dashed border-green-500/30 border-2">
+            <i data-lucide="check-circle" class="text-green-400/50"></i>
+          </div>
+        </div>
+
+        <!-- SVG Background Connections -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-20" id="viz-svg">
+        </svg>
+      </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Column 1: Worker Nodes -->
+      <div class="glass p-6 space-y-4">
+        <div class="flex justify-between items-center">
+          <h2 class="text-lg font-semibold flex items-center gap-2">
+            <i data-lucide="server" class="w-5 h-5 text-blue-400"></i> Worker Nodes
+          </h2>
+          <span id="worker-count" class="bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded text-xs">0 Online</span>
+        </div>
+        <div id="worker-list" class="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+          <!-- Workers dynamic content -->
+        </div>
+      </div>
+
+      <!-- Column 2: Job Master List -->
+      <div class="glass p-6 space-y-4 lg:col-span-2">
+        <div class="flex justify-between items-center">
+          <h2 class="text-lg font-semibold flex items-center gap-2">
+            <i data-lucide="briefcase" class="w-5 h-5 text-purple-400"></i> Job Lifecycle
+          </h2>
+          <div class="flex gap-2">
+            <button onclick="addRandomJob()"
+              class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded transition shadow-lg flex items-center gap-2">
+              <i data-lucide="plus" class="w-3 h-3"></i> Deploy Job
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2 mb-4">
+          <div class="glass-card p-3 text-center">
+            <p class="text-xs text-slate-400">Waiting</p>
+            <p id="stat-waiting" class="text-xl font-bold">0</p>
+          </div>
+          <div class="glass-card p-3 text-center">
+            <p class="text-xs text-yellow-400">Executing</p>
+            <p id="stat-executing" class="text-xl font-bold">0</p>
+          </div>
+          <div class="glass-card p-3 text-center">
+            <p class="text-xs text-green-400">Passed</p>
+            <p id="stat-passed" class="text-xl font-bold">0</p>
+          </div>
+          <div class="glass-card p-3 text-center">
+            <p class="text-xs text-red-400">Failed</p>
+            <p id="stat-failed" class="text-xl font-bold">0</p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="text-slate-500 border-b border-white/10 uppercase text-[10px] font-bold tracking-widest">
+              <tr>
+                <th class="pb-3 px-2">ID</th>
+                <th class="pb-3 px-2">Task Name</th>
+                <th class="pb-3 px-2">Assigned To</th>
+                <th class="pb-3 px-2 text-center">Status</th>
+                <th class="pb-3 px-2 text-right">Runtime</th>
+              </tr>
+            </thead>
+            <tbody id="job-table-body" class="divide-y divide-white/5">
+              <!-- Jobs dynamic content -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Job Modal Detail -->
+  <div id="log-overlay"
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="glass max-w-2xl w-full p-6 shadow-2xl">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold" id="log-title">Worker Logs</h3>
+        <button onclick="closeLogs()" class="text-slate-400 hover:text-white"><i data-lucide="x"></i></button>
+      </div>
+      <div id="log-content"
+        class="bg-black/40 rounded p-4 font-mono text-xs text-green-400 h-64 overflow-y-auto space-y-1">
+        <!-- Log content -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      workers: [
+        { id: 'W-01', name: 'Alpha-Instance', type: 'AWS VM', status: 'idle', currentJob: null, load: 12, history: [] },
+        { id: 'W-02', name: 'MacStudio-Local', type: 'Local Machine', status: 'idle', currentJob: null, load: 5, history: [] },
+        { id: 'W-03', name: 'Zeta-Worker-09', type: 'Docker Agent', status: 'idle', currentJob: null, load: 24, history: [] },
+        { id: 'W-04', name: 'Beta-Instance', type: 'Azure VM', status: 'idle', currentJob: null, load: 8, history: [] }
+      ],
+      jobs: [
+        { id: 'J-1021', name: 'Data Ingestion', status: 'passed', worker: 'W-01', runtime: '4.2s' },
+        { id: 'J-1022', name: 'Model Training', status: 'failed', worker: 'W-03', runtime: '12.5s' }
+      ],
+      counter: 1023
+    };
+
+    const jobTypes = ['Image Cleanup', 'DB Migration', 'Logs Analysis', 'PDF Render', 'Cache Flush', 'Report Gen'];
+
+    function refreshIcons() {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function init() {
+      refreshIcons();
+      renderWorkers();
+      renderJobs();
+      updateStats();
+      startAutomation();
+    }
+
+    function renderWorkers() {
+      const list = document.getElementById('worker-list');
+      const vizList = document.getElementById('active-workers-viz');
+      if (!list || !vizList) return;
+
+      list.innerHTML = '';
+      vizList.innerHTML = '';
+
+      state.workers.forEach(w => {
+        const isBusy = w.status === 'busy';
+        list.innerHTML += `
+                    <div class="glass-card p-4 flex items-center justify-between group cursor-pointer" onclick="showLogs('${w.id}')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded bg-indigo-500/10 flex items-center justify-center">
+                                <i data-lucide="${w.type.includes('VM') ? 'cloud' : 'monitor'}" class="w-5 h-5 text-indigo-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-sm">${w.name}</h4>
+                                <p class="text-[10px] text-slate-500">${w.type} • CPU ${w.load}%</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] uppercase font-bold ${isBusy ? 'text-yellow-400' : 'text-green-400'}">
+                                ${w.status}
+                            </span>
+                            <p class="text-[9px] text-slate-500">${w.currentJob || 'No active task'}</p>
+                        </div>
+                    </div>
+                `;
+
+        vizList.innerHTML += `
+                    <div id="viz-node-${w.id}" class="w-16 h-16 glass-card rounded-xl flex items-center justify-center border-2 ${isBusy ? 'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.2)]' : 'border-white/5'}">
+                        <i data-lucide="cpu" class="w-6 h-6 ${isBusy ? 'text-yellow-400 animate-pulse' : 'text-slate-500'}"></i>
+                    </div>
+                `;
+      });
+      refreshIcons();
+      document.getElementById('worker-count').innerText = `${state.workers.length} Online`;
+    }
+
+    function renderJobs() {
+      const table = document.getElementById('job-table-body');
+      if (!table) return;
+      table.innerHTML = '';
+
+      state.jobs.slice().reverse().forEach(j => {
+        let statusClass = 'text-slate-400';
+        let dotClass = 'bg-slate-500';
+
+        if (j.status === 'executing') { statusClass = 'text-yellow-400'; dotClass = 'bg-yellow-400 pulse-green'; }
+        if (j.status === 'passed') { statusClass = 'text-green-400'; dotClass = 'bg-green-400'; }
+        if (j.status === 'failed') { statusClass = 'text-red-400'; dotClass = 'bg-red-400'; }
+
+        table.innerHTML += `
+                    <tr class="group hover:bg-white/5 transition-colors">
+                        <td class="py-3 px-2 font-mono text-xs text-indigo-300">#${j.id}</td>
+                        <td class="py-3 px-2 font-medium">${j.name}</td>
+                        <td class="py-3 px-2 text-slate-400 text-xs">${j.worker || '—'}</td>
+                        <td class="py-3 px-2 text-center">
+                            <span class="${statusClass} text-[10px] font-bold uppercase flex items-center justify-center gap-1.5">
+                                <span class="status-dot ${dotClass}"></span> ${j.status}
+                            </span>
+                        </td>
+                        <td class="py-3 px-2 text-right font-mono text-xs text-slate-500">${j.runtime || '--'}</td>
+                    </tr>
+                `;
+      });
+    }
+
+    function updateStats() {
+      document.getElementById('stat-waiting').innerText = state.jobs.filter(j => j.status === 'waiting').length;
+      document.getElementById('stat-executing').innerText = state.jobs.filter(j => j.status === 'executing').length;
+      document.getElementById('stat-passed').innerText = state.jobs.filter(j => j.status === 'passed').length;
+      document.getElementById('stat-failed').innerText = state.jobs.filter(j => j.status === 'failed').length;
+    }
+
+    function addRandomJob() {
+      const job = {
+        id: 'J-' + (state.counter++),
+        name: jobTypes[Math.floor(Math.random() * jobTypes.length)],
+        status: 'waiting',
+        worker: null,
+        runtime: null
+      };
+      state.jobs.push(job);
+      renderJobs();
+      updateStats();
+      animateJobFlow(job);
+    }
+
+    function animateJobFlow(job) {
+      const container = document.getElementById('viz-container');
+      const queueAnchor = document.getElementById('queue-anchor');
+      if (!container || !queueAnchor) return;
+
+      const node = document.createElement('div');
+      node.className = 'job-node';
+      node.id = `flow-${job.id}`;
+      node.innerHTML = `<span>${job.id}</span>`;
+
+      // Set initial position to the Queue row
+      const qRect = queueAnchor.getBoundingClientRect();
+      const cRect = container.getBoundingClientRect();
+
+      node.style.left = (qRect.left - cRect.left + 10) + 'px';
+      node.style.top = (qRect.top - cRect.top + 10) + 'px';
+      container.appendChild(node);
+
+      // Wait in queue row, then look for agent
+      setTimeout(() => {
+        const worker = state.workers.find(w => w.status === 'idle');
+        if (worker) {
+          processJob(job, worker, node);
+        } else {
+          node.style.backgroundColor = 'rgba(239, 68, 68, 0.4)';
+        }
+      }, 800);
+    }
+
+    function processJob(job, worker, node) {
+      worker.status = 'busy';
+      worker.currentJob = job.name;
+      job.status = 'executing';
+      job.worker = worker.name;
+
+      renderWorkers();
+      renderJobs();
+      updateStats();
+
+      const workerEl = document.getElementById(`viz-node-${worker.id}`);
+      const container = document.getElementById('viz-container');
+      const cRect = container.getBoundingClientRect();
+      const wRect = workerEl.getBoundingClientRect();
+
+      // Move to Agent Row
+      node.style.left = (wRect.left - cRect.left + 10) + 'px';
+      node.style.top = (wRect.top - cRect.top + 10) + 'px';
+      node.style.backgroundColor = 'rgba(234, 179, 8, 0.8)';
+
+      const workTime = 2500 + Math.random() * 3000;
+      setTimeout(() => {
+        const isSuccess = Math.random() > 0.15;
+        job.status = isSuccess ? 'passed' : 'failed';
+        job.runtime = (workTime / 1000).toFixed(1) + 's';
+
+        worker.status = 'idle';
+        worker.currentJob = null;
+        worker.history.unshift({ job: job.id, name: job.name, result: job.status, time: new Date().toLocaleTimeString() });
+
+        // Move to Completed Row
+        const sinkAnchor = document.getElementById('sink-anchor');
+        const sRect = sinkAnchor.getBoundingClientRect();
+
+        node.style.left = (sRect.left - cRect.left + 10) + 'px';
+        node.style.top = (sRect.top - cRect.top + 10) + 'px';
+        node.style.backgroundColor = isSuccess ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)';
+        node.style.opacity = '0';
+
+        renderWorkers();
+        renderJobs();
+        updateStats();
+
+        setTimeout(() => node.remove(), 1000);
+      }, workTime);
+    }
+
+    function showLogs(workerId) {
+      const worker = state.workers.find(w => w.id === workerId);
+      if (!worker) return;
+      const overlay = document.getElementById('log-overlay');
+      const content = document.getElementById('log-content');
+      const title = document.getElementById('log-title');
+
+      title.innerText = `Internal Logs: ${worker.name}`;
+      content.innerHTML = worker.history.length === 0
+        ? '<div class="text-slate-500 italic">No recent logs available for this node.</div>'
+        : worker.history.map(h => `
+                    <div>
+                        <span class="text-slate-500">[${h.time}]</span> 
+                        <span class="text-indigo-400">task_exec:</span> 
+                        <span class="text-white">${h.name} (${h.job})</span> -> 
+                        <span class="${h.result === 'passed' ? 'text-green-400' : 'text-red-400'}">${h.result.toUpperCase()}</span>
+                    </div>
+                `).join('');
+
+      overlay.classList.remove('hidden');
+    }
+
+    function closeLogs() {
+      document.getElementById('log-overlay').classList.add('hidden');
+    }
+
+    function startAutomation() {
+      setInterval(() => {
+        const busyCount = state.jobs.filter(j => j.status === 'executing').length;
+        if (busyCount < state.workers.length) {
+          addRandomJob();
+        }
+      }, 7000);
+    }
+
+    window.addEventListener('load', () => {
+      if (typeof lucide === 'undefined') {
+        const checkLucide = setInterval(() => {
+          if (typeof lucide !== 'undefined') {
+            init();
+            clearInterval(checkLucide);
+          }
+        }, 100);
+      } else {
+        init();
+      }
+    });
+  </script>
+</body>
+
+</html>

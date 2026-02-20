@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glass Web Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .scrollbar::-webkit-scrollbar {
+      width: 6px
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px
+    }
+
+    .cmd-bubble {
+      animation: fadeIn .25s ease-in-out
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+  </style>
+</head>
+
+<body class="text-white h-screen flex overflow-hidden">
+
+  <!-- Sidebar -->
+  <div class="w-80 glass p-4 flex flex-col">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold"><i class="fa-solid fa-layer-group mr-2"></i>Sessions</h2>
+      <button onclick="addTab()" class="bg-indigo-500 px-3 py-1 rounded-lg text-sm hover:bg-indigo-600">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </div>
+
+    <div id="tabList" class="space-y-2 overflow-y-auto scrollbar max-h-40"></div>
+
+    <div class="mt-4">
+      <h3 class="text-sm text-gray-300 mb-2"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Global History</h3>
+      <div id="globalHistory" class="space-y-1 text-sm text-gray-400 max-h-40 overflow-y-auto scrollbar"></div>
+    </div>
+
+    <div class="mt-4">
+      <h3 class="text-sm text-gray-300 mb-2"><i class="fa-solid fa-folder-open mr-2"></i>Recent Folders</h3>
+      <div id="recentDirs" class="space-y-1 text-sm text-gray-400"></div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="flex-1 flex flex-col p-4">
+
+    <div class="glass rounded-xl p-3 mb-3 flex justify-between items-center">
+      <div>
+        <span id="branch" class="text-green-400 mr-4"><i class="fa-brands fa-git-alt"></i> main</span>
+        <span id="cwd" class="text-blue-400"><i class="fa-solid fa-folder"></i> /home/user</span>
+      </div>
+      <div id="status" class="text-sm text-gray-300"></div>
+    </div>
+
+    <div id="output" class="glass rounded-xl flex-1 p-4 overflow-y-auto scrollbar space-y-4"></div>
+
+    <div class="glass rounded-xl p-3 mt-3">
+      <div class="flex items-center space-x-2">
+        <span class="text-green-400">$</span>
+        <input id="commandInput" type="text" class="bg-transparent flex-1 outline-none" placeholder="Type a command..."
+          onkeydown="handleCommand(event)" />
+        <span id="aiHint" class="text-xs text-indigo-400"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let tabs = [];
+    let activeTab = null;
+    let commandStats = {};
+    let recentDirs = new Set();
+    let globalHistory = [];
+
+    function addTab() {
+      const id = 'tab-' + Date.now();
+      tabs.push({ id, history: [] });
+      activeTab = id;
+      renderTabs();
+      renderOutput();
+    }
+
+    function renderTabs() {
+      const list = document.getElementById('tabList');
+      list.innerHTML = '';
+      tabs.forEach(tab => {
+        const div = document.createElement('div');
+        div.className = `p-2 rounded-lg cursor-pointer ${tab.id === activeTab ? 'bg-indigo-600' : 'bg-white/10 hover:bg-white/20'}`;
+        div.innerHTML = `<i class="fa-solid fa-terminal mr-2"></i>${tab.id}`;
+        div.onclick = () => { activeTab = tab.id; renderTabs(); renderOutput(); };
+        list.appendChild(div);
+      });
+    }
+
+    function renderOutput() {
+      const output = document.getElementById('output');
+      output.innerHTML = '';
+      const tab = tabs.find(t => t.id === activeTab);
+      if (!tab) return;
+
+      tab.history.forEach((entry, index) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'cmd-bubble glass rounded-lg p-3';
+        wrapper.innerHTML = `
+      <div class="flex justify-between items-center">
+        <div class="text-green-400"><i class="fa-solid fa-chevron-right"></i> ${entry.command}</div>
+        <div class="space-x-3 text-xs text-gray-400">
+          <button onclick="rerunCommand(${index})" class="hover:text-green-400"><i class="fa-solid fa-rotate"></i></button>
+          <button onclick="copyOutput(${index})" class="hover:text-blue-400"><i class="fa-solid fa-copy"></i></button>
+          <button onclick="deleteCommand(${index})" class="hover:text-red-400"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>
+      <div class="text-gray-300 mt-2 text-sm">${entry.output}</div>
+    `;
+        output.appendChild(wrapper);
+      });
+      output.scrollTop = output.scrollHeight;
+    }
+
+    function handleCommand(e) {
+      if (e.key === 'Enter') {
+        const input = document.getElementById('commandInput');
+        const cmd = input.value.trim();
+        if (!cmd) return;
+        executeCommand(cmd);
+        input.value = '';
+      } else showAIHint(e.target.value);
+    }
+
+    function executeCommand(cmd) {
+      const tab = tabs.find(t => t.id === activeTab);
+      if (!tab) return;
+
+      commandStats[cmd] = commandStats[cmd] || { count: 0, last: null };
+      commandStats[cmd].count++;
+      commandStats[cmd].last = new Date().toLocaleTimeString();
+
+      globalHistory.unshift(cmd);
+      renderGlobalHistory();
+
+      let output = '';
+      let statusMsg = '';
+
+      if (cmd.startsWith('cd ')) {
+        const dir = cmd.replace('cd ', '');
+        document.getElementById('cwd').innerHTML = `<i class="fa-solid fa-folder"></i> ${dir}`;
+        recentDirs.add(dir);
+        renderRecentDirs();
+        output = `Changed directory to ${dir}`;
+        statusMsg = 'Directory updated successfully.';
+      }
+      else if (cmd === 'git branch') {
+        output = 'main';
+        statusMsg = 'Git branch retrieved quickly.';
+      }
+      else if (cmd === 'history') {
+        output = tab.history.map(h => h.command).join('<br>');
+        statusMsg = 'Showing command history.';
+      }
+      else {
+        output = `Command executed: ${cmd}`;
+        statusMsg = commandStats[cmd].count > 3 ? 'Too many executions.' : 'Going good so far.';
+      }
+
+      tab.history.push({ command: cmd, output });
+      renderOutput();
+
+      document.getElementById('status').innerText =
+        `${statusMsg} | Executed ${commandStats[cmd].count} times | Last: ${commandStats[cmd].last}`;
+    }
+
+    function rerunCommand(index) {
+      const tab = tabs.find(t => t.id === activeTab);
+      if (!tab) return;
+      executeCommand(tab.history[index].command);
+    }
+
+    function copyOutput(index) {
+      const tab = tabs.find(t => t.id === activeTab);
+      if (!tab) return;
+      navigator.clipboard.writeText(tab.history[index].output);
+      document.getElementById('status').innerText = 'Output copied to clipboard.';
+    }
+
+    function deleteCommand(index) {
+      const tab = tabs.find(t => t.id === activeTab);
+      if (!tab) return;
+      tab.history.splice(index, 1);
+      renderOutput();
+      document.getElementById('status').innerText = 'Command deleted from session.';
+    }
+
+    function renderRecentDirs() {
+      const container = document.getElementById('recentDirs');
+      container.innerHTML = '';
+      recentDirs.forEach(dir => {
+        const div = document.createElement('div');
+        div.className = 'cursor-pointer hover:text-white';
+        div.innerHTML = `<i class="fa-solid fa-angle-right mr-1"></i>${dir}`;
+        div.onclick = () => executeCommand('cd ' + dir);
+        container.appendChild(div);
+      });
+    }
+
+    function renderGlobalHistory() {
+      const container = document.getElementById('globalHistory');
+      container.innerHTML = '';
+      [...new Set(globalHistory)].forEach(cmd => {
+        const div = document.createElement('div');
+        div.className = 'cursor-pointer hover:text-white truncate';
+        div.innerHTML = `<i class="fa-solid fa-terminal mr-1"></i>${cmd}`;
+        div.onclick = () => {
+          document.getElementById('commandInput').value = cmd;
+          document.getElementById('commandInput').focus();
+        };
+        container.appendChild(div);
+      });
+    }
+
+    function showAIHint(text) {
+      const hint = document.getElementById('aiHint');
+      if (text.startsWith('g')) hint.innerText = 'Did you mean: git branch?';
+      else if (text.startsWith('c')) hint.innerText = 'Try: cd /folder-name';
+      else hint.innerText = '';
+    }
+
+    addTab();
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Worker Job Orchestrator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .worker-pulse {
+      animation: pulseWorker 2s infinite;
+    }
+
+    @keyframes pulseWorker {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0px rgba(56, 189, 248, 0.7);
+      }
+
+      50% {
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.9);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.4s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .flow-job {
+      transition: all 0.8s ease;
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white min-h-screen p-6">
+
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <header class="flex items-center justify-between">
+      <h1 class="text-3xl font-bold flex items-center gap-2">
+        <i data-lucide="cpu"></i>
+        Worker Job Orchestrator
+      </h1>
+      <button onclick="addJob()" class="px-4 py-2 rounded-xl glass hover:bg-white/10 transition">
+        + Add Job
+      </button>
+    </header>
+
+    <!-- Enhanced Queue Flow -->
+    <div class="glass rounded-2xl p-6 space-y-6">
+      <h2 class="text-lg font-semibold flex items-center gap-2">
+        <i data-lucide="git-branch"></i>
+        Queue Processing Flow
+      </h2>
+
+      <!-- Global Queue Row -->
+      <div>
+        <div class="text-sm text-yellow-400 mb-2">Global Queue</div>
+        <div id="globalQueue" class="flex gap-3 flex-wrap min-h-[60px]"></div>
+      </div>
+
+      <!-- Workers Row -->
+      <div>
+        <div class="text-sm text-sky-400 mb-2">Workers</div>
+        <div id="flowWorkers" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+      </div>
+
+      <!-- Completed Row -->
+      <div>
+        <div class="text-sm text-emerald-400 mb-2">Completed Jobs</div>
+        <div id="completedJobs" class="flex gap-3 flex-wrap min-h-[60px]"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <div class="glass rounded-2xl p-5">
+        <h2 class="font-semibold text-lg mb-4 flex items-center gap-2">
+          <i data-lucide="server"></i>
+          Online Workers
+        </h2>
+        <div id="workers" class="space-y-3"></div>
+      </div>
+
+      <div class="glass rounded-2xl p-5">
+        <h2 class="font-semibold text-lg mb-4 flex items-center gap-2">
+          <i data-lucide="list-checks"></i>
+          Jobs
+        </h2>
+        <div id="jobs" class="space-y-3 max-h-96 overflow-auto"></div>
+      </div>
+
+      <div class="glass rounded-2xl p-5">
+        <h2 class="font-semibold text-lg mb-4 flex items-center gap-2">
+          <i data-lucide="activity"></i>
+          Worker Activity
+        </h2>
+        <div id="workerDetails" class="text-sm space-y-2"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    const workers = [
+      { id: 1, name: 'VM-1', jobs: [], busy: false },
+      { id: 2, name: 'VM-2', jobs: [], busy: false },
+      { id: 3, name: 'Local-1', jobs: [], busy: false }
+    ];
+
+    const jobs = [];
+    const globalQueue = [];
+    const completed = [];
+
+    function renderFlow() {
+      const queueEl = document.getElementById('globalQueue');
+      const workersEl = document.getElementById('flowWorkers');
+      const completedEl = document.getElementById('completedJobs');
+
+      queueEl.innerHTML = '';
+      workersEl.innerHTML = '';
+      completedEl.innerHTML = '';
+
+      globalQueue.forEach(j => {
+        queueEl.innerHTML += `
+        <div class="flow-job px-3 py-1 rounded-lg bg-yellow-400/20 text-yellow-300 text-xs animate-bounce">
+          ${j.name}
+        </div>`;
+      });
+
+      workers.forEach(w => {
+        workersEl.innerHTML += `
+        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+          <div class="font-medium mb-2">${w.name}</div>
+          <div class="space-y-1">
+            ${w.busy
+            ? `<div class="flow-job px-2 py-1 rounded bg-sky-400/20 text-sky-300 text-xs animate-pulse">Processing...</div>`
+            : '<div class="text-xs text-white/40">Idle</div>'}
+          </div>
+        </div>
+      `;
+      });
+
+      completed.forEach(j => {
+        const color = j.status === 'passed'
+          ? 'text-emerald-300 bg-emerald-400/20'
+          : 'text-red-300 bg-red-400/20';
+        completedEl.innerHTML += `
+        <div class="flow-job px-3 py-1 rounded-lg ${color} text-xs fade-in">
+          ${j.name}
+        </div>`;
+      });
+    }
+
+    function renderWorkers() {
+      const container = document.getElementById('workers');
+      container.innerHTML = '';
+      workers.forEach(w => {
+        container.innerHTML += `
+        <div class="p-3 rounded-xl bg-white/5 flex justify-between items-center ${w.busy ? 'worker-pulse' : ''}">
+          <div>
+            <div class="font-medium">${w.name}</div>
+            <div class="text-xs text-white/60">Executed: ${w.jobs.length}</div>
+          </div>
+          <span class="text-xs ${w.busy ? 'text-sky-400' : 'text-emerald-400'}">
+            ${w.busy ? 'Busy' : 'Online'}
+          </span>
+        </div>`;
+      });
+    }
+
+    function renderJobs() {
+      const container = document.getElementById('jobs');
+      container.innerHTML = '';
+      jobs.forEach(j => {
+        container.innerHTML += `
+        <div class="p-3 rounded-xl bg-white/5 fade-in flex justify-between">
+          <div>
+            <div class="font-medium">${j.name}</div>
+            <div class="text-xs ${statusColor(j.status)}">${j.status}</div>
+          </div>
+        </div>`;
+      });
+    }
+
+    function renderWorkerDetails() {
+      const container = document.getElementById('workerDetails');
+      container.innerHTML = '';
+      workers.forEach(w => {
+        container.innerHTML += `
+        <div class="bg-white/5 p-3 rounded-xl">
+          <div class="font-medium mb-1">${w.name}</div>
+          ${w.jobs.map(j => `<div class="text-xs text-white/70">• ${j.name} (${j.status})</div>`).join('') || '<div class="text-xs text-white/40">No jobs yet</div>'}
+        </div>`;
+      });
+    }
+
+    function statusColor(status) {
+      switch (status) {
+        case 'waiting': return 'text-yellow-400';
+        case 'executing': return 'text-sky-400';
+        case 'passed': return 'text-emerald-400';
+        case 'failed': return 'text-red-400';
+        default: return 'text-white';
+      }
+    }
+
+    function addJob() {
+      const job = {
+        id: Date.now(),
+        name: 'Job-' + (jobs.length + 1),
+        status: 'waiting'
+      };
+
+      jobs.push(job);
+      globalQueue.push(job);
+      renderAll();
+    }
+
+    function workerLoop() {
+      workers.forEach(worker => {
+        if (!worker.busy && globalQueue.length > 0) {
+          const job = globalQueue.shift();
+          worker.busy = true;
+          job.status = 'executing';
+          renderAll();
+
+          setTimeout(() => {
+            job.status = Math.random() > 0.2 ? 'passed' : 'failed';
+            worker.jobs.push(job);
+            worker.busy = false;
+            completed.push(job);
+            renderAll();
+          }, 2000 + Math.random() * 2000);
+        }
+      });
+    }
+
+    function renderAll() {
+      renderWorkers();
+      renderJobs();
+      renderWorkerDetails();
+      renderFlow();
+    }
+
+    setInterval(workerLoop, 1000);
+
+    renderAll();
+  </script>
+
+</body>
+
+</html>

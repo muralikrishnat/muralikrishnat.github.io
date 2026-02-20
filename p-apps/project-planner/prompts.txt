@@ -183,3 +183,30 @@ three rows, first row to collect project requirements and with button generate p
 second row to show the process progress with all roles in horizontal step indicator 
 where process progress will be moved from one role to another role, step indicator should be very creative.
 third row to show the project plan.
+
+
+
+
+
+
+
+
+
+
+
+
+Build web page with below features:
+
+1. User provide project description.
+2. Process to show converting the project description into detailed project plan with Epics, features and stories along with estimations.
+3. Story has details like depends on, estimation story points, skill set, estimated sprint.
+4. project description will go one by one AI agents like Technical Manager, Senior Architect, Business Analyst, Technical Lead, QA Lead, Dev Ops, Senior Dev...etc.,
+5. The AI agent process will make sure all aspect of project implementation covered.
+6. Make conversion process animated and progressive.
+7. Feedback from AI agent during process pipeline.
+
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking, with suitable font-awesome icons, easy to operate.
+Use suitable animations.
+Use only html, css, javascript and tailwindcss

@@ -218,6 +218,22 @@
     ]
   },
   {
+    "id": "root-life-event-tracker",
+    "name": "life-event-tracker",
+    "type": "folder",
+    "parentId": null,
+    "path": "/life-event-tracker",
+    "children": [
+      {
+        "id": "file-life-event-tracker-index.html",
+        "name": "index.html",
+        "type": "file",
+        "parentId": "root-life-event-tracker",
+        "path": "./life-event-tracker/index.html"
+      }
+    ]
+  },
+  {
     "id": "root-llm-chat-app",
     "name": "llm-chat-app",
     "type": "folder",
@@ -313,6 +329,20 @@
         "type": "file",
         "parentId": "root-project-planner",
         "path": "./project-planner/index5.html"
+      },
+      {
+        "id": "file-project-planner-index6.html",
+        "name": "index6.html",
+        "type": "file",
+        "parentId": "root-project-planner",
+        "path": "./project-planner/index6.html"
+      },
+      {
+        "id": "file-project-planner-index7.html",
+        "name": "index7.html",
+        "type": "file",
+        "parentId": "root-project-planner",
+        "path": "./project-planner/index7.html"
       }
     ]
   },
@@ -373,6 +403,27 @@
         "type": "file",
         "parentId": "root-styleguide-page",
         "path": "./styleguide-page/index.html"
+      },
+      {
+        "id": "file-styleguide-page-index2.html",
+        "name": "index2.html",
+        "type": "file",
+        "parentId": "root-styleguide-page",
+        "path": "./styleguide-page/index2.html"
+      },
+      {
+        "id": "file-styleguide-page-index3.html",
+        "name": "index3.html",
+        "type": "file",
+        "parentId": "root-styleguide-page",
+        "path": "./styleguide-page/index3.html"
+      },
+      {
+        "id": "file-styleguide-page-index4.html",
+        "name": "index4.html",
+        "type": "file",
+        "parentId": "root-styleguide-page",
+        "path": "./styleguide-page/index4.html"
       }
     ]
   },
@@ -389,6 +440,59 @@
         "type": "file",
         "parentId": "root-table-list-filter",
         "path": "./table-list-filter/index.html"
+      }
+    ]
+  },
+  {
+    "id": "root-task-execution-manager",
+    "name": "task-execution-manager",
+    "type": "folder",
+    "parentId": null,
+    "path": "/task-execution-manager",
+    "children": [
+      {
+        "id": "file-task-execution-manager-index.html",
+        "name": "index.html",
+        "type": "file",
+        "parentId": "root-task-execution-manager",
+        "path": "./task-execution-manager/index.html"
+      },
+      {
+        "id": "file-task-execution-manager-index2.html",
+        "name": "index2.html",
+        "type": "file",
+        "parentId": "root-task-execution-manager",
+        "path": "./task-execution-manager/index2.html"
+      }
+    ]
+  },
+  {
+    "id": "root-web-terminal",
+    "name": "web-terminal",
+    "type": "folder",
+    "parentId": null,
+    "path": "/web-terminal",
+    "children": [
+      {
+        "id": "file-web-terminal-index.html",
+        "name": "index.html",
+        "type": "file",
+        "parentId": "root-web-terminal",
+        "path": "./web-terminal/index.html"
+      },
+      {
+        "id": "file-web-terminal-index2.html",
+        "name": "index2.html",
+        "type": "file",
+        "parentId": "root-web-terminal",
+        "path": "./web-terminal/index2.html"
+      },
+      {
+        "id": "file-web-terminal-index3.html",
+        "name": "index3.html",
+        "type": "file",
+        "parentId": "root-web-terminal",
+        "path": "./web-terminal/index3.html"
       }
     ]
   }

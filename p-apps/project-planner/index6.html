@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Project Architect | Multi-Agent Planner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at top left, #1e1b4b, #0f172a, #020617);
+      min-height: 100vh;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1.5rem;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .agent-node {
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .agent-active {
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+      border-color: rgba(99, 102, 241, 0.6);
+      transform: scale(1.05);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    .agent-complete {
+      border-color: rgba(34, 197, 94, 0.5);
+      background: rgba(34, 197, 94, 0.05);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body class="p-4 md:p-8">
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <header class="text-center mb-12 fade-in">
+      <h1
+        class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400 mb-4">
+        AI Project Architect
+      </h1>
+      <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+        Transforming high-level visions into comprehensive technical execution plans through a specialized multi-agent
+        pipeline.
+      </p>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <!-- Left Panel: Input & Agents -->
+      <div class="lg:col-span-5 space-y-6">
+        <!-- Input Box -->
+        <div class="glass p-6 fade-in">
+          <label class="block text-sm font-medium text-slate-300 mb-3 uppercase tracking-wider">Project Concept</label>
+          <textarea id="projectInput"
+            class="w-full h-32 bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all resize-none"
+            placeholder="Describe your project (e.g., 'A decentralized marketplace for digital assets with real-time bidding...')"></textarea>
+          <button id="generateBtn"
+            class="mt-4 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group">
+            <i class="fas fa-wand-magic-sparkles group-hover:rotate-12 transition-transform"></i>
+            Initialize AI Pipeline
+          </button>
+        </div>
+
+        <!-- Agent Pipeline -->
+        <div class="glass p-6 overflow-hidden">
+          <h3 class="text-sm font-medium text-slate-300 mb-6 uppercase tracking-wider flex items-center gap-2">
+            <i class="fas fa-network-wired text-indigo-400"></i>
+            Specialist Pipeline
+          </h3>
+          <div id="agentPipeline" class="space-y-4">
+            <!-- Agents rendered via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Output Plan -->
+      <div class="lg:col-span-7">
+        <div class="glass h-full min-h-[600px] flex flex-col">
+          <div class="p-6 border-b border-white/10 flex justify-between items-center">
+            <h3 class="text-xl font-semibold text-slate-100 flex items-center gap-2">
+              <i class="fas fa-clipboard-list text-indigo-400"></i>
+              Project Execution Blueprint
+            </h3>
+            <div id="statusBadge" class="hidden px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-400">
+              IDLE
+            </div>
+          </div>
+
+          <div id="planOutput" class="p-6 flex-grow overflow-y-auto custom-scrollbar">
+            <!-- Empty State -->
+            <div id="emptyState" class="h-full flex flex-col items-center justify-center text-slate-500 space-y-4">
+              <div class="w-16 h-16 rounded-full bg-slate-800/50 flex items-center justify-center">
+                <i class="fas fa-microchip text-2xl"></i>
+              </div>
+              <p>Enter project details to generate a plan</p>
+            </div>
+
+            <!-- Content Area -->
+            <div id="blueprintContent" class="hidden space-y-8"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast"
+    class="fixed bottom-8 right-8 glass-card px-6 py-4 rounded-xl border-indigo-500/50 transform translate-y-24 opacity-0 transition-all duration-500 flex items-center gap-3 z-50">
+    <div class="text-indigo-400"><i class="fas fa-info-circle"></i></div>
+    <div id="toastText" class="text-sm text-slate-200"></div>
+  </div>
+
+  <script>
+    const agents = [
+      { id: 'tm', name: 'Technical Manager', icon: 'fa-user-tie', color: 'blue', feedback: 'Defining project scope, team composition, and timelines...' },
+      { id: 'sa', name: 'Senior Architect', icon: 'fa-layer-group', color: 'purple', feedback: 'Mapping system components and scalability requirements...' },
+      { id: 'ba', name: 'Business Analyst', icon: 'fa-chart-pie', color: 'emerald', feedback: 'Extracting user features and business logic...' },
+      { id: 'tl', name: 'Technical Lead', icon: 'fa-code-branch', color: 'amber', feedback: 'Breaking down technical tasks and complexity...' },
+      { id: 'qa', name: 'QA Lead', icon: 'fa-bug-slash', color: 'rose', feedback: 'Designing test coverage and quality gateways...' },
+      { id: 'devops', name: 'DevOps Engineer', icon: 'fa-infinity', color: 'cyan', feedback: 'Planning CI/CD pipeline and infrastructure...' },
+      { id: 'dev', name: 'Senior Developer', icon: 'fa-terminal', color: 'indigo', feedback: 'Estimating implementation effort and story points...' }
+    ];
+
+    const pipelineContainer = document.getElementById('agentPipeline');
+    const generateBtn = document.getElementById('generateBtn');
+    const emptyState = document.getElementById('emptyState');
+    const blueprintContent = document.getElementById('blueprintContent');
+    const statusBadge = document.getElementById('statusBadge');
+    const projectInput = document.getElementById('projectInput');
+
+    function initAgents() {
+      pipelineContainer.innerHTML = agents.map(agent => `
+                <div id="agent-${agent.id}" class="agent-node glass-card p-4 flex items-center gap-4 opacity-50 grayscale">
+                    <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-lg">
+                        <i class="fas ${agent.icon} text-${agent.color}-400"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-medium text-slate-200 text-sm">${agent.name}</h4>
+                            <span class="status-icon text-slate-600"><i class="fas fa-circle-notch fa-spin hidden"></i></span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1 agent-message">Waiting...</p>
+                    </div>
+                </div>
+            `).join('');
+    }
+
+    async function processPipeline() {
+      const description = projectInput.value.trim();
+      if (!description) {
+        showToast("Please provide a project description first.");
+        return;
+      }
+
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+      blueprintContent.innerHTML = '';
+      blueprintContent.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      statusBadge.classList.remove('hidden');
+      statusBadge.innerText = 'PROCESSING';
+      statusBadge.className = 'px-3 py-1 rounded-full text-xs font-medium bg-indigo-900/50 text-indigo-300';
+
+      for (let i = 0; i < agents.length; i++) {
+        const agent = agents[i];
+        const node = document.getElementById(`agent-${agent.id}`);
+
+        node.classList.remove('opacity-50', 'grayscale');
+        node.classList.add('agent-active');
+        node.querySelector('.agent-message').innerText = agent.feedback;
+        node.querySelector('.status-icon i').classList.remove('hidden');
+
+        await new Promise(r => setTimeout(r, 1800));
+
+        updateBlueprint(agent);
+
+        node.classList.remove('agent-active');
+        node.classList.add('agent-complete');
+        node.querySelector('.status-icon').innerHTML = '<i class="fas fa-check-circle text-emerald-400"></i>';
+        node.querySelector('.agent-message').innerText = 'Analysis complete.';
+      }
+
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Regenerate Plan';
+      statusBadge.innerText = 'COMPLETED';
+      statusBadge.className = 'px-3 py-1 rounded-full text-xs font-medium bg-emerald-900/50 text-emerald-300';
+      showToast("Project plan generated successfully!");
+    }
+
+    function updateBlueprint(agent) {
+      emptyState.classList.add('hidden');
+      blueprintContent.classList.remove('hidden');
+
+      let html = '';
+
+      if (agent.id === 'tm') {
+        html = `
+                    <div class="fade-in space-y-4">
+                        <h4 class="text-indigo-400 font-bold uppercase tracking-widest text-[10px]">Project Resources & Timeline</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="glass-card p-4 rounded-xl border border-blue-500/20">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <i class="fas fa-calendar-alt text-blue-400"></i>
+                                    <span class="text-sm text-slate-400">Estimated Duration</span>
+                                </div>
+                                <div class="text-2xl font-bold text-slate-100">45 Working Days</div>
+                                <div class="text-[10px] text-slate-500 mt-1">~9 Sprints (Weekly cycles)</div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl border border-purple-500/20">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <i class="fas fa-users text-purple-400"></i>
+                                    <span class="text-sm text-slate-400">Project Team Size</span>
+                                </div>
+                                <div class="text-2xl font-bold text-slate-100">6 Members</div>
+                                <div class="text-[10px] text-slate-500 mt-1">Cross-functional specialist unit</div>
+                            </div>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl">
+                            <h5 class="text-xs font-semibold text-slate-300 mb-3 flex items-center gap-2">
+                                <i class="fas fa-brain text-indigo-400"></i> Required Skill Matrix
+                            </h5>
+                            <div class="flex flex-wrap gap-2">
+                                ${['Full Stack Development (Node/React)', 'Cloud Architecture (AWS/Azure)', 'UI/UX Interface Design', 'DevOps & CI/CD', 'Quality Assurance Automation', 'Agile Product Management'].map(skill =>
+          `<span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-slate-300 border border-white/10">${skill}</span>`
+        ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+      } else if (agent.id === 'ba') {
+        html = `
+                    <div class="fade-in space-y-4">
+                        <h4 class="text-emerald-400 font-bold uppercase tracking-widest text-[10px]">Feature Identification</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="glass-card p-4 rounded-xl">
+                                <h5 class="font-semibold text-slate-100 text-sm">Security Gateway</h5>
+                                <p class="text-[11px] text-slate-400 mt-1">Implementing Zero Trust architecture and OAuth2.0 protocols.</p>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <h5 class="font-semibold text-slate-100 text-sm">Real-time Synchronization</h5>
+                                <p class="text-[11px] text-slate-400 mt-1">Bidirectional data flow for collaborative environments.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+      } else if (agent.id === 'dev') {
+        html = `
+                    <div class="fade-in space-y-4">
+                        <h4 class="text-amber-400 font-bold uppercase tracking-widest text-[10px]">Sprint Backlog</h4>
+                        <div class="space-y-4">
+                            ${generateStoryCard('STORY-101', 'Core API Authentication Service', '5', 'Backend, Security', '1', 'Initial Setup')}
+                            ${generateStoryCard('STORY-102', 'Global Event Listener Pattern', '3', 'Frontend (React)', '1', 'Project Framework')}
+                            ${generateStoryCard('STORY-103', 'Database Optimization & Indexing', '8', 'DBA, Backend', '2', 'STORY-101')}
+                        </div>
+                    </div>
+                `;
+      }
+
+      if (html) {
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        blueprintContent.appendChild(div);
+      }
+    }
+
+    function generateStoryCard(id, title, pts, skills, sprint, deps) {
+      return `
+                <div class="glass-card p-4 rounded-xl border-l-4 border-amber-500 hover:border-amber-400 transition-all">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] font-mono text-amber-500">${id}</span>
+                        <div class="flex gap-2">
+                             <span class="px-1.5 py-0.5 rounded bg-slate-800 text-[9px] text-slate-400">Sprint ${sprint}</span>
+                             <span class="px-1.5 py-0.5 rounded bg-amber-900/30 text-[9px] text-amber-300">${pts} SP</span>
+                        </div>
+                    </div>
+                    <h5 class="font-bold text-slate-100 text-sm mb-2">${title}</h5>
+                    <div class="flex flex-col gap-2 text-[10px]">
+                        <div>
+                            <span class="text-slate-500 font-semibold">SKILLS:</span>
+                            <span class="text-slate-300 ml-1">${skills}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 font-semibold">DEPENDS ON:</span>
+                            <span class="text-slate-300 ml-1">${deps}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastText').innerText = text;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3000);
+    }
+
+    generateBtn.addEventListener('click', () => {
+      initAgents();
+      processPipeline();
+    });
+
+    initAgents();
+  </script>
+</body>
+
+</html>

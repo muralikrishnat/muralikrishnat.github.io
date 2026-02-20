@@ -28,11 +28,6 @@
             background-image: radial-gradient(circle, #334155 1px, transparent 1px);
         }
 
-        /* Hide default drag image */
-        .dragging-ghost {
-            opacity: 0.5;
-        }
-
         /* Node Styles */
         .flow-node {
             position: absolute;
@@ -45,7 +40,7 @@
             z-index: 10;
         }
         .flow-node.selected {
-            ring: 2px solid #3b82f6; /* blue-500 */
+            outline: 2px solid #3b82f6; /* blue-500 */
             z-index: 20;
         }
 
@@ -59,7 +54,7 @@
             top: 50%;
             transform: translateY(-50%);
             cursor: crosshair;
-            transition: transform 0.1s;
+            transition: transform 0.1s, background-color 0.2s;
             z-index: 5;
         }
         .port:hover {
@@ -69,7 +64,6 @@
             left: -6px;
             background-color: #64748b;
         }
-        /* Grouping selectors to ensure all output types are on the right */
         .port-output, .port-output-true, .port-output-false {
             right: -6px;
         }
@@ -77,28 +71,71 @@
             background-color: #3b82f6;
         }
         .port-output-true {
-            background-color: #22c55e; /* green */
+            background-color: #22c55e;
         }
         .port-output-false {
-            background-color: #ef4444; /* red */
+            background-color: #ef4444;
         }
         
-        /* SVG Connection styling */
+        /* --- Connection Styles --- */
+        /* Invisible hitbox to make clicking connections easier */
+        path.connection-hitbox {
+            fill: none;
+            stroke: transparent;
+            stroke-width: 25px; /* Wide area to catch hover/clicks */
+            cursor: pointer;
+            pointer-events: stroke;
+        }
+        
         path.connection {
             fill: none;
             stroke: #64748b;
             stroke-width: 2px;
-            transition: stroke 0.2s;
+            transition: stroke 0.2s, stroke-width 0.2s;
+            pointer-events: none; /* Hitbox catches the events */
         }
-        path.connection:hover {
+        
+        /* Hover state */
+        .connection-group:hover path.connection {
             stroke: #94a3b8;
-            stroke-width: 4px;
-            cursor: pointer;
+            stroke-width: 3px;
         }
-        path.connection.selected {
+        /* Selected state */
+        .connection-group.selected path.connection {
             stroke: #3b82f6;
             stroke-width: 3px;
         }
+        
+        /* Delete Button on Connection Path */
+        .delete-btn {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            cursor: pointer;
+        }
+        /* Show delete button when path is hovered or selected */
+        .connection-group:hover .delete-btn,
+        .connection-group.selected .delete-btn {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        /* Inner group handles the scale to prevent origin layout issues */
+        .delete-icon-group {
+            transition: transform 0.2s;
+            transform-origin: 0 0; /* Scales uniformly from coordinate 0,0 */
+        }
+        .delete-btn:hover .delete-icon-group {
+            transform: scale(1.2);
+        }
+        
+        .delete-btn circle {
+            transition: fill 0.2s;
+        }
+        .delete-btn:hover circle {
+            fill: #dc2626; /* Darker red on hover */
+        }
+
         path.temp-connection {
             fill: none;
             stroke: #94a3b8;
@@ -170,8 +207,8 @@
                 <ul class="list-disc pl-4 space-y-1">
                     <li>Drag nodes to canvas</li>
                     <li>Connect output dots to input dots</li>
-                    <li>Click node to edit properties</li>
-                    <li>Select & Press Del to remove</li>
+                    <li>Hover path to show delete icon</li>
+                    <li>Click item to edit properties</li>
                 </ul>
             </div>
         </div>
@@ -191,12 +228,12 @@
         </svg>
 
         <!-- Nodes Layer -->
-        <div id="nodes-layer" class="absolute inset-0 w-full h-full z-10 origin-top-left">
-            <!-- Nodes will be injected here via JS -->
+        <div id="nodes-layer" class="absolute inset-0 w-full h-full z-10 origin-top-left pointer-events-none">
+            <!-- Nodes will be injected here via JS (pointer-events-none on parent so we can click paths behind it, children get pointer-events-auto) -->
         </div>
 
         <!-- Toolbar -->
-        <div class="absolute top-4 left-4 z-20 flex gap-2 bg-slate-800 p-1.5 rounded-lg border border-slate-700 shadow-lg">
+        <div class="absolute top-4 left-4 z-20 flex gap-2 bg-slate-800 p-1.5 rounded-lg border border-slate-700 shadow-lg pointer-events-auto">
             <button onclick="zoomCanvas(0.1)" class="p-2 hover:bg-slate-700 rounded text-slate-300" title="Zoom In">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
             </button>
@@ -212,19 +249,19 @@
     <!-- Right Sidebar: Properties -->
     <div id="properties-panel" class="w-80 bg-slate-800 border-l border-slate-700 z-30 flex flex-col shadow-xl transform transition-transform duration-300 translate-x-full absolute right-0 h-full">
         <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900">
-            <h2 class="font-bold text-slate-100">Node Properties</h2>
-            <button onclick="closePanel()" class="text-slate-400 hover:text-white">
+            <h2 class="font-bold text-slate-100">Properties</h2>
+            <button onclick="deselectNode()" class="text-slate-400 hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
         <div id="properties-content" class="p-5 flex-1 overflow-y-auto space-y-4">
             <!-- Dynamic Form Content -->
-            <div class="text-center text-slate-500 mt-10">Select a node to edit its properties</div>
+            <div class="text-center text-slate-500 mt-10">Select an item to edit</div>
         </div>
         <div class="p-4 border-t border-slate-700 bg-slate-900">
-            <button onclick="deleteSelectedNode()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-2 px-4 rounded border border-red-500/50 flex items-center justify-center gap-2 transition-colors">
+            <button id="sidebar-delete-btn" onclick="deleteSelectedItem()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-2 px-4 rounded border border-red-500/50 flex items-center justify-center gap-2 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                Delete Node
+                <span id="delete-btn-text">Delete Item</span>
             </button>
         </div>
     </div>
@@ -241,10 +278,11 @@
             draggingNode: null,
             dragOffset: { x: 0, y: 0 },
             selectedNodeId: null,
+            selectedConnectionId: null,
             connecting: {
                 active: false,
                 sourceNodeId: null,
-                sourcePort: null, // 'output' | 'true' | 'false'
+                sourcePort: null,
                 tempLine: null
             },
             panning: false,
@@ -308,7 +346,7 @@
             }
         };
 
-        // --- Drag & Drop (Sidebar -> Canvas) ---
+        // --- Drag & Drop ---
 
         function handleDragStart(e) {
             e.dataTransfer.setData('type', e.target.dataset.type);
@@ -324,7 +362,6 @@
             const type = e.dataTransfer.getData('type');
             if (!type) return;
 
-            // Calculate canvas coordinates
             const rect = canvasContainer.getBoundingClientRect();
             const x = (e.clientX - rect.left - state.pan.x) / state.scale;
             const y = (e.clientY - rect.top - state.pan.y) / state.scale;
@@ -341,13 +378,11 @@
                 type,
                 x,
                 y,
-                w: 220, // default width
-                data: {} // Dynamic data from properties
+                w: 220,
+                data: {}
             };
 
-            // Initialize default data
             config.fields.forEach(f => node.data[f.name] = '');
-
             state.nodes.push(node);
             renderNode(node);
         }
@@ -356,25 +391,21 @@
             const config = nodeConfig[node.type];
             const div = document.createElement('div');
             div.id = `node-${node.id}`;
-            div.className = `flow-node bg-slate-800 rounded-lg border border-slate-700 select-none`;
+            div.className = `flow-node bg-slate-800 rounded-lg border border-slate-700 select-none pointer-events-auto`;
             div.style.left = `${node.x}px`;
             div.style.top = `${node.y}px`;
             div.style.width = `${node.w}px`;
 
-            // Inner HTML
             let inputsHtml = '';
             if (config.inputs.length) {
-                // Changed from onmousedown to onmouseup for proper drag-and-drop support
                 inputsHtml = `<div class="port port-input" onmouseup="finishConnection(event, ${node.id})" title="Input"></div>`;
             }
 
             let outputsHtml = '';
             config.outputs.forEach((out, index) => {
-                const isBool = out === 'true' || out === 'false';
                 const colorClass = out === 'true' ? 'port-output-true' : (out === 'false' ? 'port-output-false' : 'port-output');
-                const offset = config.outputs.length > 1 ? (index === 0 ? -15 : 15) : 0; // simple spacing for 2 outputs
+                const offset = config.outputs.length > 1 ? (index === 0 ? -15 : 15) : 0;
                 const style = config.outputs.length > 1 ? `top: calc(50% + ${offset}px)` : '';
-                
                 outputsHtml += `<div class="port ${colorClass}" style="${style}" onmousedown="startConnection(event, ${node.id}, '${out}')" title="${out}"></div>`;
             });
 
@@ -384,7 +415,7 @@
                     ${config.icon}
                     <span class="font-semibold text-sm pointer-events-none">${config.title} <span class="text-xs opacity-75">#${node.id}</span></span>
                 </div>
-                <div class="p-3 text-xs text-slate-300" onclick="selectNode(${node.id})">
+                <div class="p-3 text-xs text-slate-300 cursor-pointer hover:bg-slate-700/50 transition-colors" onclick="selectNode(${node.id})">
                     <div class="mb-1 opacity-50 uppercase tracking-wider font-bold" style="font-size: 0.65rem">${node.type.toUpperCase()}</div>
                     <div class="truncate">${node.data.name || node.data.actionType || node.data.message || 'Configure...'}</div>
                 </div>
@@ -403,18 +434,16 @@
             }
         }
 
-        // --- Interaction: Dragging Nodes ---
+        // --- Interaction ---
 
         function startNodeDrag(e, nodeId) {
             e.stopPropagation();
-            if (e.button !== 0) return; // Only left click
+            if (e.button !== 0) return;
 
             const node = state.nodes.find(n => n.id === nodeId);
             state.draggingNode = node;
             
-            // Calculate offset within the node
             const rect = document.getElementById(`node-${nodeId}`).getBoundingClientRect();
-            // We need to account for scale in the offset
             state.dragOffset = {
                 x: (e.clientX - rect.left) / state.scale,
                 y: (e.clientY - rect.top) / state.scale
@@ -423,21 +452,19 @@
             selectNode(nodeId);
         }
 
-        // --- Interaction: Canvas Pan ---
         function handleCanvasMouseDown(e) {
-            if (e.target === canvasContainer || e.target === nodesLayer || e.target === connectionsLayer) {
-                 if (e.button === 0 || e.button === 1) { // Left or Middle click
+            // Initiate Pan
+            if (e.target === canvasContainer || e.target === nodesLayer || e.target === connectionsLayer || e.target.tagName === 'svg') {
+                 if (e.button === 0 || e.button === 1) {
                     state.panning = true;
                     state.panStart = { x: e.clientX, y: e.clientY };
                     canvasContainer.style.cursor = 'grabbing';
                  }
-                 // Deselect if clicking empty space
-                 if(!state.connecting.active) deselectNode();
+                 if(!state.connecting.active) deselectAll();
             }
         }
 
         function handleCanvasMouseMove(e) {
-            // Panning
             if (state.panning) {
                 const dx = e.clientX - state.panStart.x;
                 const dy = e.clientY - state.panStart.y;
@@ -450,7 +477,6 @@
                 return;
             }
 
-            // Dragging Node
             if (state.draggingNode) {
                 const rect = canvasContainer.getBoundingClientRect();
                 const x = (e.clientX - rect.left - state.pan.x) / state.scale - state.dragOffset.x;
@@ -461,7 +487,6 @@
                 updateNodePosition(state.draggingNode);
             }
 
-            // Drawing Temp Connection
             if (state.connecting.active) {
                 updateTempConnection(e);
             }
@@ -472,7 +497,6 @@
             state.panning = false;
             canvasContainer.style.cursor = 'default';
 
-            // End Connection Drag (if dropped on empty space or cancelled)
             if (state.connecting.active) {
                 state.connecting.active = false;
                 if (state.connecting.tempLine) {
@@ -482,18 +506,15 @@
             }
         }
 
-        // --- Viewport Transform ---
         function updateCanvasTransform() {
             nodesLayer.style.transform = `translate(${state.pan.x}px, ${state.pan.y}px) scale(${state.scale})`;
             connectionsLayer.style.transform = `translate(${state.pan.x}px, ${state.pan.y}px) scale(${state.scale})`;
-            
-            // Grid background position update to simulate infinity
             canvasContainer.style.backgroundPosition = `${state.pan.x}px ${state.pan.y}px`;
             canvasContainer.style.backgroundSize = `${20 * state.scale}px ${20 * state.scale}px`;
         }
 
         function zoomCanvas(delta) {
-            state.scale = Math.max(0.5, Math.min(2, state.scale + delta));
+            state.scale = Math.max(0.4, Math.min(2, state.scale + delta));
             updateCanvasTransform();
         }
 
@@ -509,24 +530,19 @@
             e.stopPropagation();
             e.preventDefault();
 
-            // Always starting a new connection from an Output
             state.connecting.active = true;
             state.connecting.sourceNodeId = nodeId;
             state.connecting.sourcePort = portType;
 
-            // Create Temp Line SVG
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.setAttribute('class', 'temp-connection');
             connectionsLayer.appendChild(path);
             state.connecting.tempLine = path;
             
-            // Initial update
             updateTempConnection(e);
         }
 
-        // New function to handle dropping a connection onto an input
         function finishConnection(e, nodeId) {
-            // We rely on handleCanvasMouseUp to clean up if this fails (or succeeds and clears state)
             if (state.connecting.active) {
                 completeConnection(nodeId);
             }
@@ -534,7 +550,6 @@
 
         function updateTempConnection(e) {
             const rect = canvasContainer.getBoundingClientRect();
-            // Mouse Pos relative to canvas transform
             const mouseX = (e.clientX - rect.left - state.pan.x) / state.scale;
             const mouseY = (e.clientY - rect.top - state.pan.y) / state.scale;
 
@@ -546,9 +561,8 @@
         }
 
         function completeConnection(targetNodeId) {
-            if (state.connecting.sourceNodeId === targetNodeId) return; // Self connection check
+            if (state.connecting.sourceNodeId === targetNodeId) return; 
 
-            // Check duplicates
             const exists = state.connections.find(c => 
                 c.sourceNodeId === state.connecting.sourceNodeId && 
                 c.targetNodeId === targetNodeId &&
@@ -567,28 +581,22 @@
             state.connections.push(conn);
             renderConnection(conn);
 
-            // Cleanup
             state.connecting.active = false;
             state.connecting.tempLine.remove();
             state.connecting.tempLine = null;
         }
 
         function getPortPosition(node, type) {
-            // Simplified port calculation
             const el = document.getElementById(`node-${node.id}`);
             const w = node.w;
-            const h = el ? el.offsetHeight : 50; // estimate if not rendered yet, but it should be
+            const h = el ? el.offsetHeight : 50; 
             
             let x, y;
-            
             if (type === 'input') {
                 x = node.x;
                 y = node.y + h / 2;
             } else {
-                // Outputs
                 x = node.x + w;
-                
-                // If multiple outputs, offset them
                 const config = nodeConfig[node.type];
                 if (config.outputs.length > 1) {
                     const index = config.outputs.indexOf(type);
@@ -602,24 +610,68 @@
         }
 
         function calculateBezierPath(x1, y1, x2, y2) {
-            const dist = Math.abs(x2 - x1) * 0.5;
-            const cp1x = x1 + dist; // Control point 1
-            const cp2x = x2 - dist; // Control point 2
+            const dist = Math.max(Math.abs(x2 - x1) * 0.5, 50); // Ensure minimum control point distance
+            const cp1x = x1 + dist;
+            const cp2x = x2 - dist;
             return `M ${x1} ${y1} C ${cp1x} ${y1}, ${cp2x} ${y2}, ${x2} ${y2}`;
         }
 
         function renderConnection(conn) {
+            // Group to hold hitbox, visual path, and delete button
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            group.id = `conn-${conn.id}`;
+            group.setAttribute('class', 'connection-group');
+            
+            // Invisible thicker path for hit detection
+            const hitPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            hitPath.setAttribute('class', 'connection-hitbox');
+            
+            // Visual path
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.id = `conn-${conn.id}`;
             path.setAttribute('class', 'connection');
             
-            // Add click listener to select/delete
-            path.addEventListener('click', (e) => {
+            // Generate Delete Button exactly as pure SVG elements
+            const deleteBtn = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            deleteBtn.setAttribute('class', 'delete-btn');
+            
+            // Add an inner group that handles the hover scale to avoid origin calculation bugs
+            const iconGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            iconGroup.setAttribute('class', 'delete-icon-group');
+            
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', '0');
+            circle.setAttribute('cy', '0');
+            circle.setAttribute('r', '10');
+            circle.setAttribute('fill', '#ef4444'); // Red
+            
+            const cross = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            cross.setAttribute('d', 'M-3.5 -3.5 L3.5 3.5 M3.5 -3.5 L-3.5 3.5');
+            cross.setAttribute('stroke', '#ffffff');
+            cross.setAttribute('stroke-width', '2');
+            cross.setAttribute('stroke-linecap', 'round');
+            
+            iconGroup.appendChild(circle);
+            iconGroup.appendChild(cross);
+            deleteBtn.appendChild(iconGroup);
+
+            // Setup listeners
+            const selectConnFn = (e) => {
                 e.stopPropagation();
                 selectConnection(conn.id);
+            };
+            hitPath.addEventListener('click', selectConnFn);
+            path.addEventListener('click', selectConnFn);
+
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteConnection(conn.id);
             });
 
-            connectionsLayer.appendChild(path);
+            group.appendChild(hitPath);
+            group.appendChild(path);
+            group.appendChild(deleteBtn);
+            connectionsLayer.appendChild(group);
+            
             updateConnectionPath(conn);
         }
 
@@ -627,14 +679,29 @@
             const sourceNode = state.nodes.find(n => n.id === conn.sourceNodeId);
             const targetNode = state.nodes.find(n => n.id === conn.targetNodeId);
             
-            if (!sourceNode || !targetNode) return; // Should remove connection if node missing
+            if (!sourceNode || !targetNode) return;
 
             const start = getPortPosition(sourceNode, conn.sourcePort);
             const end = getPortPosition(targetNode, 'input');
 
             const d = calculateBezierPath(start.x, start.y, end.x, end.y);
-            const el = document.getElementById(`conn-${conn.id}`);
-            if (el) el.setAttribute('d', d);
+            const group = document.getElementById(`conn-${conn.id}`);
+            
+            if (group) {
+                const path = group.querySelector('.connection');
+                const hitPath = group.querySelector('.connection-hitbox');
+                const deleteBtn = group.querySelector('.delete-btn');
+
+                if (path) path.setAttribute('d', d);
+                if (hitPath) hitPath.setAttribute('d', d);
+
+                if (deleteBtn) {
+                    // Place the icon exactly halfway through the curve coordinates
+                    const midX = (start.x + end.x) / 2;
+                    const midY = (start.y + end.y) / 2;
+                    deleteBtn.setAttribute('transform', `translate(${midX}, ${midY})`);
+                }
+            }
         }
 
         function updateConnectionsForNode(nodeId) {
@@ -648,32 +715,51 @@
         // --- Properties Panel & Selection ---
 
         function selectNode(nodeId) {
-            deselectNode();
+            deselectAll();
             state.selectedNodeId = nodeId;
             
-            // Visual highlight
             const el = document.getElementById(`node-${nodeId}`);
             if (el) el.classList.add('selected');
 
-            // Open Panel
             propertiesPanel.classList.remove('translate-x-full');
-            
             renderProperties(nodeId);
         }
+        
+        function selectConnection(connId) {
+            deselectAll(); 
+            state.selectedConnectionId = connId;
+            
+            const el = document.getElementById(`conn-${connId}`);
+            if(el) el.classList.add('selected');
+            
+            propertiesPanel.classList.remove('translate-x-full');
+            renderConnectionProperties(connId);
+        }
 
-        function deselectNode() {
+        function deselectAll() {
+            // Clear Node Selection
             if (state.selectedNodeId) {
                 const el = document.getElementById(`node-${state.selectedNodeId}`);
                 if (el) el.classList.remove('selected');
                 state.selectedNodeId = null;
-                propertiesPanel.classList.add('translate-x-full');
             }
-            // Also deselect connections
-            document.querySelectorAll('.connection.selected').forEach(el => el.classList.remove('selected'));
+            
+            // Clear Connection Selection
+            if (state.selectedConnectionId) {
+                const el = document.getElementById(`conn-${state.selectedConnectionId}`);
+                if (el) el.classList.remove('selected');
+                state.selectedConnectionId = null;
+            }
+            
+            propertiesPanel.classList.add('translate-x-full');
         }
+        
+        // Expose deselectNode for the UI close button mapping
+        function deselectNode() { deselectAll(); }
 
         function renderProperties(nodeId) {
             const node = state.nodes.find(n => n.id === nodeId);
+            if(!node) return;
             const config = nodeConfig[node.type];
             
             let html = `
@@ -706,21 +792,44 @@
                 } else {
                     html += `<input type="text" value="${value}" oninput="updateNodeData(${nodeId}, '${field.name}', this.value)" placeholder="${field.placeholder}" class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">`;
                 }
-
                 html += `</div>`;
             });
 
             propertiesContent.innerHTML = html;
+            document.getElementById('delete-btn-text').textContent = 'Delete Node';
+        }
+
+        function renderConnectionProperties(connId) {
+            const conn = state.connections.find(c => c.id === connId);
+            if (!conn) return;
+
+            let html = `
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Connection ID</label>
+                    <input type="text" value="${conn.id}" disabled class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-500 text-sm">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Details</label>
+                    <div class="bg-slate-900 border border-slate-700 rounded p-3 text-sm text-slate-300 space-y-2">
+                        <div><span class="text-slate-500">From:</span> Node ${conn.sourceNodeId} <span class="text-xs bg-slate-800 px-1 rounded text-slate-400 border border-slate-700">${conn.sourcePort}</span></div>
+                        <div><span class="text-slate-500">To:</span> Node ${conn.targetNodeId} <span class="text-xs bg-slate-800 px-1 rounded text-slate-400 border border-slate-700">input</span></div>
+                    </div>
+                </div>
+                <div class="text-xs text-slate-500 mt-6 italic">
+                    Tip: You can quickly delete this connection by clicking the red 'X' on the path.
+                </div>
+            `;
+
+            propertiesContent.innerHTML = html;
+            document.getElementById('delete-btn-text').textContent = 'Delete Connection';
         }
 
         function updateNodeData(nodeId, field, value) {
             const node = state.nodes.find(n => n.id === nodeId);
             if (node) {
                 node.data[field] = value;
-                // Update visual summary on node card
                 const el = document.getElementById(`node-${nodeId}`);
                 if (el) {
-                    // This is a rough refresh of the visual text
                     const summary = node.data.name || node.data.actionType || node.data.message || 'Configure...';
                     const summaryEl = el.querySelector('.truncate');
                     if(summaryEl) summaryEl.textContent = summary;
@@ -730,18 +839,19 @@
 
         // --- Deletion ---
         
-        function selectConnection(connId) {
-            deselectNode(); // Deselect nodes first
+        function deleteConnection(connId) {
+            state.connections = state.connections.filter(c => c.id !== connId);
             const el = document.getElementById(`conn-${connId}`);
-            if(el) el.classList.add('selected');
+            if (el) el.remove();
             
-            // Allow deletion with Delete key
-            state.selectedConnectionId = connId;
+            if (state.selectedConnectionId === connId) {
+                deselectAll();
+            }
         }
 
-        function deleteSelectedNode() {
+        function deleteSelectedItem() {
             if (state.selectedNodeId) {
-                // Remove connections attached to this node
+                // Remove related connections
                 state.connections = state.connections.filter(c => {
                     const related = c.sourceNodeId === state.selectedNodeId || c.targetNodeId === state.selectedNodeId;
                     if (related) {
@@ -756,33 +866,25 @@
                 const el = document.getElementById(`node-${state.selectedNodeId}`);
                 if (el) el.remove();
 
-                deselectNode();
+                deselectAll();
+            } else if (state.selectedConnectionId) {
+                deleteConnection(state.selectedConnectionId);
             }
         }
         
         // --- Keyboard Shortcuts ---
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Delete' || e.key === 'Backspace') {
-                if(e.target.tagName === 'INPUT') return; // Don't delete while typing
-                
-                if (state.selectedNodeId) {
-                    deleteSelectedNode();
-                } else if (state.selectedConnectionId) {
-                     // Delete Connection
-                    state.connections = state.connections.filter(c => c.id !== state.selectedConnectionId);
-                    const el = document.getElementById(`conn-${state.selectedConnectionId}`);
-                    if(el) el.remove();
-                    state.selectedConnectionId = null;
-                }
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return; 
+                deleteSelectedItem();
             }
         });
 
-        // Initialize with one Start node
+        // Init
         window.onload = () => {
            createNode('start', 50, 100);
            updateCanvasTransform();
         };
-
     </script>
 </body>
 </html>

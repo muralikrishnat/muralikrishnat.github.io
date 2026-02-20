@@ -1,0 +1,12 @@
+Build web page with below features:
+
+1. User can add events like date of birth, journey date, loan due date, home rent date...etc.,
+2. User can list of events on the traditional calender view.
+3. User can switch to timeline wheel mode with events places on the timeline. timeline will be vertical scroll.
+4. User can see no of days to go or no of days passed on event date.
+5. User can add/edit/delete the event item.
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking, with suitable font awesome icons, easy to operate.
+Use suitable animations.
+Use only html, css, javascript and tailwindcss

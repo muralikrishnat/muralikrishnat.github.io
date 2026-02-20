@@ -1,0 +1,14 @@
+Build web page with below features:
+
+Goal: Styleguide for components
+1. Shows categories like typography, colors, buttons, form inputs, data.
+2. Cover 2 or more variations for each component.
+3. Cover page level errors, field level errors.
+4. Cover components such as bread crumbs, tabs, buttons, table, list, table with filter, pagination.
+5. Cover components such as modals, tool tips, info bubbles, notifications, toast messages, loading indicators.
+6. Cover components such as skeleton loader, progress bar, spinners.
+7. All form fields such as textbox, radio, checkbox, textarea, auto complete textbox, password, file upload, drag and drop, range, calender.
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking, with suitable font awesome icons, easy to operate.
+Use only html, css, javascript and tailwindcss

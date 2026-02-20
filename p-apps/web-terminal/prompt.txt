@@ -1,0 +1,17 @@
+Build web page with below features:
+
+Goal: Web terminal
+1. Ability to add new tabs
+2. Ability to see list of tabs (with history)
+3. Shows command line executions in very visual appealing way.
+4. Simple way to change the directory
+5. Shows information like git branch, currect directoty, stats of currect command like how many times command was executed, what was last time executed.
+6. Shows previous folders that worked on, easy to change working directory.
+7. Shows AI hint like command is correct, suggestion Auto completion words for commands, suggestions if command is wrong.
+8. History with previous tabs and entire session with commands and their output.
+9. Use some creative way to show command and execution output.
+10. Show some execution status somewhere like AI commentry such as going good so far, looks like it failed, too many times, taking too long, that was quick....etc.,
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking, with suitable icons, easy to operate.
+Use only html, css, javascript and tailwindcss

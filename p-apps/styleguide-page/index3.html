@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina UI - Glassmorphic Styleguide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            background-attachment: fixed;
+            color: #f8fafc;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .glass-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .tooltip-box {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .has-tooltip:hover .tooltip-box {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navigation Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 glass-panel m-4 hidden lg:block overflow-y-auto">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Lumina UI</h1>
+            <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest">Styleguide v1.0</p>
+        </div>
+        <nav class="px-4 pb-8">
+            <div class="mb-4">
+                <p class="text-[10px] font-bold text-slate-500 uppercase px-2 mb-2">Foundation</p>
+                <a href="#typography" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-colors">
+                    <i class="fa-solid fa-font w-5"></i> Typography
+                </a>
+                <a href="#colors" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-colors">
+                    <i class="fa-solid fa-palette w-5"></i> Colors
+                </a>
+            </div>
+
+            <div class="mb-4">
+                <p class="text-[10px] font-bold text-slate-500 uppercase px-2 mb-2">Components</p>
+                <a href="#buttons" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-colors">
+                    <i class="fa-solid fa-square-check w-5"></i> Buttons
+                </a>
+                <a href="#forms" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-colors">
+                    <i class="fa-solid fa-keyboard w-5"></i> Form Inputs
+                </a>
+                <a href="#data" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-colors">
+                    <i class="fa-solid fa-table w-5"></i> Data & Tables
+                </a>
+                <a href="#navigation" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-colors">
+                    <i class="fa-solid fa-route w-5"></i> Navigation
+                </a>
+            </div>
+
+            <div class="mb-4">
+                <p class="text-[10px] font-bold text-slate-500 uppercase px-2 mb-2">Feedback</p>
+                <a href="#overlays" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-colors">
+                    <i class="fa-solid fa-layer-group w-5"></i> Modals & Overlays
+                </a>
+                <a href="#status" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-colors">
+                    <i class="fa-solid fa-bell w-5"></i> Notifications
+                </a>
+                <a href="#loading" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-colors">
+                    <i class="fa-solid fa-spinner w-5"></i> Loaders
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-72 p-4 lg:p-8">
+        
+        <!-- Header -->
+        <header class="mb-12 glass-panel p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-3xl font-bold">Component Architecture</h2>
+                <p class="text-slate-400">Comprehensive glassmorphic design system for modern web applications.</p>
+            </div>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" placeholder="Search components..." class="glass-input pl-12 pr-4 py-3 rounded-xl w-full md:w-64">
+            </div>
+        </header>
+
+        <!-- Page Level Error Section -->
+        <section class="mb-12">
+            <div class="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center gap-4 text-red-200">
+                <i class="fa-solid fa-circle-exclamation text-xl"></i>
+                <div>
+                    <p class="font-semibold">Critical Error: System Sync Failed</p>
+                    <p class="text-sm opacity-80">The requested resources could not be synchronized with the remote server. Please check your connection.</p>
+                </div>
+                <button class="ml-auto px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition-colors text-xs uppercase font-bold tracking-wider">Retry</button>
+            </div>
+        </section>
+
+        <!-- Typography Section -->
+        <section id="typography" class="mb-16">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400"><i class="fa-solid fa-font"></i></span>
+                Typography
+            </h3>
+            <div class="glass-panel p-8 grid md:grid-cols-2 gap-8">
+                <div>
+                    <h1 class="text-5xl font-extrabold mb-4">Heading 1</h1>
+                    <h2 class="text-4xl font-bold mb-4">Heading 2</h2>
+                    <h3 class="text-3xl font-semibold mb-4">Heading 3</h3>
+                    <h4 class="text-2xl font-semibold mb-4 text-slate-200">Heading 4</h4>
+                </div>
+                <div class="space-y-4">
+                    <p class="text-lg text-slate-100">Body Large: Design is not just what it looks like and feels like.</p>
+                    <p class="text-base text-slate-300">Body Medium: Design is how it works. Lumina UI provides a fluid experience for users across all platforms.</p>
+                    <p class="text-sm text-slate-400">Body Small: This font size is typically used for supporting text, meta information, and secondary labels.</p>
+                    <div class="p-4 bg-white/5 rounded-lg border-l-4 border-indigo-500 italic text-slate-300">
+                        "The details are not the details. They make the design." - Charles Eames
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Colors Section -->
+        <section id="colors" class="mb-16">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center text-pink-400"><i class="fa-solid fa-palette"></i></span>
+                Colors
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div class="glass-card p-4 rounded-xl text-center">
+                    <div class="w-full aspect-square bg-blue-500 rounded-lg mb-3 shadow-lg shadow-blue-500/20"></div>
+                    <p class="font-medium text-sm">Primary Blue</p>
+                    <p class="text-xs text-slate-400">#3B82F6</p>
+                </div>
+                <div class="glass-card p-4 rounded-xl text-center">
+                    <div class="w-full aspect-square bg-indigo-500 rounded-lg mb-3 shadow-lg shadow-indigo-500/20"></div>
+                    <p class="font-medium text-sm">Indigo</p>
+                    <p class="text-xs text-slate-400">#6366F1</p>
+                </div>
+                <div class="glass-card p-4 rounded-xl text-center">
+                    <div class="w-full aspect-square bg-emerald-500 rounded-lg mb-3 shadow-lg shadow-emerald-500/20"></div>
+                    <p class="font-medium text-sm">Success</p>
+                    <p class="text-xs text-slate-400">#10B981</p>
+                </div>
+                <div class="glass-card p-4 rounded-xl text-center">
+                    <div class="w-full aspect-square bg-amber-500 rounded-lg mb-3 shadow-lg shadow-amber-500/20"></div>
+                    <p class="font-medium text-sm">Warning</p>
+                    <p class="text-xs text-slate-400">#F59E0B</p>
+                </div>
+                <div class="glass-card p-4 rounded-xl text-center">
+                    <div class="w-full aspect-square bg-rose-500 rounded-lg mb-3 shadow-lg shadow-rose-500/20"></div>
+                    <p class="font-medium text-sm">Danger</p>
+                    <p class="text-xs text-slate-400">#F43F5E</p>
+                </div>
+                <div class="glass-card p-4 rounded-xl text-center">
+                    <div class="w-full aspect-square bg-slate-500 rounded-lg mb-3 shadow-lg shadow-slate-500/20"></div>
+                    <p class="font-medium text-sm">Secondary</p>
+                    <p class="text-xs text-slate-400">#64748B</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Buttons Section -->
+        <section id="buttons" class="mb-16">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400"><i class="fa-solid fa-square-check"></i></span>
+                Buttons
+            </h3>
+            <div class="glass-panel p-8 space-y-8">
+                <!-- Sizes -->
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Button Sizes</p>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <button class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-xs font-semibold rounded-lg transition-all">Small Button</button>
+                        <button class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-sm font-semibold rounded-lg transition-all">Default Button</button>
+                        <button class="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-base font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20">Large Action</button>
+                    </div>
+                </div>
+                <hr class="border-white/5">
+                <!-- Variations -->
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Glass Styles</p>
+                        <div class="flex flex-wrap gap-4">
+                            <button class="px-5 py-2.5 glass-panel hover:bg-white/10 text-white font-medium">Ghost Glass</button>
+                            <button class="px-5 py-2.5 glass-panel bg-white/10 border-white/20 hover:border-white/40 text-white font-medium">Elevated</button>
+                            <button class="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-medium rounded-lg shadow-lg">Gradient</button>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Icon Buttons</p>
+                        <div class="flex gap-4">
+                            <button class="w-10 h-10 flex items-center justify-center glass-panel hover:text-indigo-400 transition-colors"><i class="fa-solid fa-plus"></i></button>
+                            <button class="w-10 h-10 flex items-center justify-center bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:bg-rose-500/30 rounded-full"><i class="fa-solid fa-trash"></i></button>
+                            <button class="px-5 py-2.5 bg-slate-700/50 hover:bg-slate-700 rounded-lg flex items-center gap-2"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Data</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Forms Section -->
+        <section id="forms" class="mb-16">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400"><i class="fa-solid fa-keyboard"></i></span>
+                Form Elements
+            </h3>
+            <div class="glass-panel p-8">
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Standard Textbox -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-slate-300">Standard Textbox</label>
+                        <input type="text" placeholder="Enter username..." class="w-full glass-input px-4 py-2.5 rounded-lg">
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-slate-300">Password</label>
+                        <div class="relative">
+                            <input type="password" value="secretpassword" class="w-full glass-input px-4 py-2.5 rounded-lg pr-12">
+                            <button class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"><i class="fa-solid fa-eye-slash"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Auto-complete / Search -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-slate-300">Auto-complete</label>
+                        <div class="relative">
+                            <input type="text" placeholder="Search countries..." class="w-full glass-input px-4 py-2.5 rounded-lg">
+                            <div class="absolute top-full left-0 w-full glass-panel mt-1 py-1 z-10 hidden group-focus-within:block">
+                                <div class="px-4 py-2 hover:bg-white/5 cursor-pointer">United States</div>
+                                <div class="px-4 py-2 hover:bg-white/5 cursor-pointer">United Kingdom</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Field Level Error -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-red-400">Email Address (Error State)</label>
+                        <input type="email" value="invalid-email@" class="w-full bg-red-500/10 border border-red-500/30 text-white px-4 py-2.5 rounded-lg focus:outline-none focus:border-red-500">
+                        <p class="text-xs text-red-400"><i class="fa-solid fa-circle-exclamation mr-1"></i> Please enter a valid email address.</p>
+                    </div>
+
+                    <!-- Textarea -->
+                    <div class="space-y-2 md:col-span-2">
+                        <label class="text-sm font-medium text-slate-300">Biography</label>
+                        <textarea rows="3" class="w-full glass-input px-4 py-2.5 rounded-lg" placeholder="Write something about yourself..."></textarea>
+                    </div>
+
+                    <!-- Selection Controls -->
+                    <div class="space-y-4">
+                        <label class="text-sm font-medium text-slate-300 block">Checkboxes & Radios</label>
+                        <div class="flex items-center gap-6">
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <div class="w-5 h-5 rounded border border-white/20 flex items-center justify-center group-hover:border-indigo-500 transition-colors">
+                                    <i class="fa-solid fa-check text-[10px] text-transparent"></i>
+                                </div>
+                                <span class="text-sm text-slate-400 group-hover:text-white">Checkbox</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <div class="w-5 h-5 rounded-full border-2 border-indigo-500 flex items-center justify-center">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
+                                </div>
+                                <span class="text-sm text-white">Radio Selected</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Range Slider -->
+                    <div class="space-y-4">
+                        <label class="text-sm font-medium text-slate-300 block">Volume Control</label>
+                        <input type="range" class="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+
+                    <!-- File Upload / Drag & Drop -->
+                    <div class="md:col-span-3">
+                        <div class="border-2 border-dashed border-white/10 rounded-xl p-10 text-center hover:border-indigo-500/50 hover:bg-white/5 transition-all cursor-pointer">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-400 mb-4"></i>
+                            <h4 class="text-lg font-semibold">Click or drag files to this area to upload</h4>
+                            <p class="text-sm text-slate-400">Support for a single or bulk upload. Strictly prohibit from uploading company data or other band files.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Display Section -->
+        <section id="data" class="mb-16">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400"><i class="fa-solid fa-table"></i></span>
+                Data & Tables
+            </h3>
+            
+            <!-- Table with Filters -->
+            <div class="glass-panel overflow-hidden">
+                <div class="p-6 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <h4 class="font-bold">Recent Transactions</h4>
+                    <div class="flex items-center gap-2">
+                        <select class="glass-input px-3 py-1.5 rounded-lg text-sm">
+                            <option>All Status</option>
+                            <option>Completed</option>
+                            <option>Pending</option>
+                        </select>
+                        <button class="px-4 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm transition-colors">
+                            <i class="fa-solid fa-filter mr-2"></i> Filter
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-white/5 text-slate-400 text-xs uppercase tracking-widest">
+                                <th class="px-6 py-4 font-semibold">User</th>
+                                <th class="px-6 py-4 font-semibold">Date</th>
+                                <th class="px-6 py-4 font-semibold">Amount</th>
+                                <th class="px-6 py-4 font-semibold">Status</th>
+                                <th class="px-6 py-4 font-semibold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-[10px] font-bold">JD</div>
+                                        <span class="text-sm font-medium">Jane Doe</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-slate-400">Oct 24, 2023</td>
+                                <td class="px-6 py-4 text-sm font-semibold">$1,240.00</td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Completed</span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="text-slate-400 hover:text-white"><i class="fa-solid fa-ellipsis"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center text-[10px] font-bold">AS</div>
+                                        <span class="text-sm font-medium">Alex Smith</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-slate-400">Oct 23, 2023</td>
+                                <td class="px-6 py-4 text-sm font-semibold">$450.00</td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 text-[10px] font-bold uppercase tracking-wider">Pending</span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="text-slate-400 hover:text-white"><i class="fa-solid fa-ellipsis"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div class="p-4 border-t border-white/5 flex items-center justify-between">
+                    <p class="text-xs text-slate-500">Showing 1 to 2 of 48 entries</p>
+                    <div class="flex gap-1">
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg glass-panel text-slate-400 cursor-not-allowed"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-xs">1</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg glass-panel hover:bg-white/5 text-xs">2</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg glass-panel hover:bg-white/5 text-xs">3</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg glass-panel hover:bg-white/5 text-slate-400"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Components -->
+        <section id="navigation" class="mb-16">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400"><i class="fa-solid fa-route"></i></span>
+                Navigation
+            </h3>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Breadcrumbs -->
+                <div class="glass-panel p-6">
+                    <p class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Breadcrumbs</p>
+                    <nav class="flex items-center gap-2 text-sm">
+                        <a href="#" class="text-slate-400 hover:text-white"><i class="fa-solid fa-house text-xs"></i></a>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-600"></i>
+                        <a href="#" class="text-slate-400 hover:text-white">Documents</a>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-600"></i>
+                        <span class="text-indigo-400 font-medium">Project Report.pdf</span>
+                    </nav>
+                </div>
+                <!-- Tabs -->
+                <div class="glass-panel p-6">
+                    <p class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Tabs</p>
+                    <div class="flex border-b border-white/10 mb-4">
+                        <button class="px-4 py-2 border-b-2 border-indigo-500 text-indigo-400 font-medium text-sm">Account</button>
+                        <button class="px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium text-sm transition-colors">Security</button>
+                        <button class="px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium text-sm transition-colors">Notifications</button>
+                    </div>
+                    <div class="text-sm text-slate-400">Manage your profile settings and public information.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Overlays Section -->
+        <section id="overlays" class="mb-16">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400"><i class="fa-solid fa-layer-group"></i></span>
+                Modals & Overlays
+            </h3>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Modal Trigger -->
+                <div class="glass-panel p-6 flex flex-col items-center justify-center gap-4 text-center">
+                    <i class="fa-solid fa-window-maximize text-3xl text-slate-500"></i>
+                    <h5 class="font-bold">Modal Windows</h5>
+                    <button onclick="toggleModal('demo-modal')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm transition-all">Launch Modal</button>
+                </div>
+                <!-- Tooltip Example -->
+                <div class="glass-panel p-6 flex flex-col items-center justify-center gap-4 text-center">
+                    <i class="fa-solid fa-circle-question text-3xl text-slate-500"></i>
+                    <h5 class="font-bold">Context Tooltips</h5>
+                    <div class="relative has-tooltip">
+                        <button class="px-4 py-2 glass-panel border-white/10 hover:bg-white/5 rounded-lg text-sm">Hover for Hint</button>
+                        <div class="tooltip-box absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 glass-panel border-white/20 text-xs text-slate-200 shadow-2xl pointer-events-none">
+                            <div class="relative z-10">This is a glassmorphic tooltip that adapts to its environment.</div>
+                            <div class="absolute w-2 h-2 glass-panel border-white/20 rotate-45 -bottom-1 left-1/2 -translate-x-1/2 -z-10 bg-inherit border-t-0 border-l-0"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Info Bubble -->
+                <div class="glass-panel p-6 flex flex-col items-center justify-center gap-4 text-center">
+                    <i class="fa-solid fa-circle-info text-3xl text-blue-400"></i>
+                    <h5 class="font-bold">Info Bubbles</h5>
+                    <div class="bg-blue-500/10 border border-blue-500/20 px-3 py-2 rounded-lg text-[11px] text-blue-200">
+                        Pro tip: You can use Cmd+K to search quickly.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading & Progress Section -->
+        <section id="loading" class="mb-16">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center text-yellow-400"><i class="fa-solid fa-spinner"></i></span>
+                Loaders & Progress
+            </h3>
+            <div class="glass-panel p-8">
+                <div class="grid md:grid-cols-2 gap-12">
+                    <!-- Progress & Spinners -->
+                    <div class="space-y-8">
+                        <div>
+                            <p class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Progress Bars</p>
+                            <div class="w-full h-2 bg-white/5 rounded-full overflow-hidden mb-2">
+                                <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 w-3/4 rounded-full"></div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-slate-400 font-bold">
+                                <span>UPLOADING...</span>
+                                <span>75%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Spinners</p>
+                            <div class="flex items-center gap-6">
+                                <i class="fa-solid fa-circle-notch fa-spin text-2xl text-indigo-400"></i>
+                                <i class="fa-solid fa-spinner fa-spin text-2xl text-slate-400"></i>
+                                <div class="flex items-center gap-2 text-sm text-slate-400">
+                                    <i class="fa-solid fa-arrows-rotate fa-spin"></i> Processing...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Skeleton Loader -->
+                    <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Skeleton States</p>
+                        <div class="glass-card p-4 rounded-xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full skeleton"></div>
+                            <div class="flex-1 space-y-2">
+                                <div class="h-4 w-1/3 rounded-md skeleton"></div>
+                                <div class="h-3 w-3/4 rounded-md skeleton"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Backdrop -->
+    <div id="demo-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+        <div class="glass-panel w-full max-w-lg shadow-2xl border-white/20 transform transition-all">
+            <div class="p-6 border-b border-white/5 flex items-center justify-between">
+                <h4 class="text-xl font-bold">System Configuration</h4>
+                <button onclick="toggleModal('demo-modal')" class="text-slate-400 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-slate-300">Are you sure you want to apply these changes to the production server? This action will restart several background services.</p>
+                <div class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg flex gap-3 text-amber-200 text-sm">
+                    <i class="fa-solid fa-triangle-exclamation mt-1"></i>
+                    <span>Estimated downtime is approximately 15-30 seconds.</span>
+                </div>
+            </div>
+            <div class="p-6 border-t border-white/5 flex justify-end gap-3">
+                <button onclick="toggleModal('demo-modal')" class="px-5 py-2 glass-panel border-white/10 hover:bg-white/5 text-sm font-medium">Cancel</button>
+                <button class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-bold transition-all">Apply Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed bottom-8 right-8 z-[100] flex flex-col gap-3">
+        <!-- Toast Example -->
+        <div class="glass-panel p-4 min-w-[280px] shadow-2xl border-emerald-500/30 flex items-center gap-4 animate-bounce-short">
+            <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <p class="text-sm font-bold">Successfully Saved</p>
+                <p class="text-[11px] text-slate-400">Your profile was updated.</p>
+            </div>
+            <button class="ml-auto text-slate-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Trigger -->
+    <button class="fixed bottom-6 left-6 lg:hidden w-12 h-12 rounded-full bg-indigo-600 shadow-lg shadow-indigo-500/30 flex items-center justify-center z-40">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <script>
+        // Modal Toggle
+        function toggleModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.toggle('hidden');
+        }
+
+        // Dropdown toggle logic
+        document.querySelectorAll('.glass-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                if (this.placeholder.includes('Search countries')) {
+                    this.nextElementSibling.classList.remove('hidden');
+                }
+            });
+            input.addEventListener('blur', function() {
+                setTimeout(() => {
+                    if (this.nextElementSibling) {
+                        this.nextElementSibling.classList.add('hidden');
+                    }
+                }, 200);
+            });
+        });
+
+        // Simple Smooth Scroll
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

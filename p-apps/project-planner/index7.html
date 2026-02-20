@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Project Planner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/7a4d4b8b6f.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b, #0ea5e9);
+      min-height: 100vh;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .progress-bar {
+      transition: width 0.5s ease-in-out;
+    }
+
+    .agent-active {
+      box-shadow: 0 0 25px rgba(14, 165, 233, 0.7);
+    }
+  </style>
+</head>
+
+<body class="text-white">
+
+  <div class="max-w-7xl mx-auto p-6 space-y-6">
+
+    <div class="glass rounded-3xl p-8 shadow-2xl">
+      <h1 class="text-3xl font-bold mb-4 flex items-center gap-3">
+        <i class="fa-solid fa-robot text-cyan-400"></i>
+        AI Multi-Agent Project Planner
+      </h1>
+
+      <textarea id="projectInput" placeholder="Describe your project here..."
+        class="w-full h-32 p-4 rounded-xl bg-white/10 border border-white/20 focus:outline-none"></textarea>
+      <button onclick="startProcess()"
+        class="mt-4 px-6 py-3 bg-cyan-500 hover:bg-cyan-600 rounded-xl font-semibold transition">
+        <i class="fa-solid fa-play mr-2"></i>Generate Project Plan
+      </button>
+    </div>
+
+    <div class="glass rounded-3xl p-6">
+      <div class="w-full bg-white/10 rounded-full h-4 overflow-hidden">
+        <div id="progressBar" class="progress-bar bg-cyan-400 h-4 w-0"></div>
+      </div>
+    </div>
+
+    <div id="agentsContainer" class="grid md:grid-cols-3 gap-6"></div>
+
+    <div id="outputSection" class="glass rounded-3xl p-6 hidden">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-diagram-project text-green-400"></i>
+        Generated Project Plan
+      </h2>
+      <div id="projectPlan" class="space-y-4"></div>
+    </div>
+
+  </div>
+
+  <script>
+
+    const agents = [
+      { name: "Technical Manager", icon: "fa-user-tie", feedback: "Defining scope and delivery milestones." },
+      { name: "Senior Architect", icon: "fa-sitemap", feedback: "Designing system architecture and scalability." },
+      { name: "Business Analyst", icon: "fa-chart-line", feedback: "Breaking down requirements into features." },
+      { name: "Technical Lead", icon: "fa-code", feedback: "Creating development strategy." },
+      { name: "QA Lead", icon: "fa-bug", feedback: "Defining testing strategy and coverage." },
+      { name: "DevOps Engineer", icon: "fa-server", feedback: "Planning CI/CD and infrastructure." },
+      { name: "Senior Developer", icon: "fa-laptop-code", feedback: "Detailing stories and estimations." }
+    ];
+
+    function renderAgents() {
+      const container = document.getElementById('agentsContainer');
+      container.innerHTML = '';
+      agents.forEach((agent, index) => {
+        container.innerHTML += `
+            <div id="agent-${index}" class="glass rounded-2xl p-5 opacity-50 transition duration-500">
+                <h3 class="text-lg font-semibold flex items-center gap-2">
+                    <i class="fa-solid ${agent.icon} text-cyan-400"></i>${agent.name}
+                </h3>
+                <p class="text-sm mt-2" id="feedback-${index}"></p>
+            </div>
+        `;
+      });
+    }
+
+    function startProcess() {
+      const input = document.getElementById('projectInput').value.trim();
+      if (!input) return alert('Please enter project description');
+
+      renderAgents();
+      document.getElementById('outputSection').classList.add('hidden');
+      let progress = 0;
+      let current = 0;
+
+      const interval = setInterval(() => {
+        if (current > 0) {
+          document.getElementById(`agent-${current - 1}`).classList.remove('agent-active');
+        }
+
+        if (current < agents.length) {
+          const agentCard = document.getElementById(`agent-${current}`);
+          agentCard.classList.remove('opacity-50');
+          agentCard.classList.add('agent-active');
+          document.getElementById(`feedback-${current}`).innerText = agents[current].feedback;
+
+          progress = ((current + 1) / agents.length) * 100;
+          document.getElementById('progressBar').style.width = progress + '%';
+          current++;
+        } else {
+          clearInterval(interval);
+          generateProjectPlan(input);
+        }
+      }, 1200);
+    }
+
+    function generateProjectPlan(description) {
+      const planContainer = document.getElementById('projectPlan');
+      planContainer.innerHTML = '';
+
+      const epics = [
+        { title: "User Management", stories: ["User Login", "User Registration"] },
+        { title: "Core Features", stories: ["Main Dashboard", "Data Processing Engine"] },
+        { title: "Deployment", stories: ["CI/CD Setup", "Cloud Deployment"] }
+      ];
+
+      let totalStoryPoints = 0;
+      let totalStories = 0;
+
+      epics.forEach(epic => {
+        const epicDiv = document.createElement('div');
+        epicDiv.className = 'glass rounded-xl p-4 fade-in';
+
+        epicDiv.innerHTML = `
+            <h3 class="text-xl font-semibold text-cyan-300">Epic: ${epic.title}</h3>
+            <div class="mt-3 space-y-2">
+                ${epic.stories.map(story => {
+          const sp = Math.floor(Math.random() * 8) + 3;
+          totalStoryPoints += sp;
+          totalStories++;
+          return `
+                    <div class="bg-white/10 p-3 rounded-lg">
+                        <h4 class="font-semibold">Story: ${story}</h4>
+                        <ul class="text-sm mt-1 space-y-1">
+                            <li>Depends on: API Layer</li>
+                            <li>Story Points: ${sp}</li>
+                            <li>Skill Set: Node.js, MongoDB</li>
+                            <li>Estimated Sprint: Sprint ${Math.floor(Math.random() * 4) + 1}</li>
+                        </ul>
+                    </div>`;
+        }).join('')}
+            </div>
+        `;
+
+        planContainer.appendChild(epicDiv);
+      });
+
+      // ---- Summary Calculation ----
+      const velocityPerSprint = 20; // avg story points
+      const sprintDurationDays = 14;
+      const totalSprints = Math.ceil(totalStoryPoints / velocityPerSprint);
+      const estimatedDays = totalSprints * sprintDurationDays;
+      const teamMembers = 5;
+      const testingIterations = totalSprints;
+
+      const summaryDiv = document.createElement('div');
+      summaryDiv.className = 'glass rounded-2xl p-6 mb-6 fade-in';
+      summaryDiv.innerHTML = `
+        <h3 class="text-xl font-bold text-green-300 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie"></i>Project Summary
+        </h3>
+        <div class="grid md:grid-cols-4 gap-4 text-sm">
+            <div class="bg-white/10 p-4 rounded-xl">
+                <p class="opacity-70">Estimated Days</p>
+                <p class="text-lg font-semibold">${estimatedDays} Days</p>
+            </div>
+            <div class="bg-white/10 p-4 rounded-xl">
+                <p class="opacity-70">Team Members</p>
+                <p class="text-lg font-semibold">${teamMembers}</p>
+            </div>
+            <div class="bg-white/10 p-4 rounded-xl">
+                <p class="opacity-70">No. of Sprints</p>
+                <p class="text-lg font-semibold">${totalSprints}</p>
+            </div>
+            <div class="bg-white/10 p-4 rounded-xl">
+                <p class="opacity-70">Testing Iterations</p>
+                <p class="text-lg font-semibold">${testingIterations}</p>
+            </div>
+        </div>
+    `;
+
+      planContainer.prepend(summaryDiv);
+
+      document.getElementById('outputSection').classList.remove('hidden');
+    }
+
+  </script>
+
+</body>
+
+</html>

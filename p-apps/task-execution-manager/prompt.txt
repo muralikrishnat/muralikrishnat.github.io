@@ -1,0 +1,11 @@
+Build web page with below features:
+
+1. Shows list of agents/workers/VM instances/Local machines available online, lets call them as worker.
+2. Shows list of jobs that are waiting/failed/executed/passed/executing.
+3. Shows list of jobs executed on each worker.
+4. Shows in graphical/animated way of the process like single queue and they split into available worker and pass out as executed.
+
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking, with suitable icons, easy to operate.
+Use only html, css, javascript and tailwindcss
