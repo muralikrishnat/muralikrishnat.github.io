@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persistent Path Flow Animator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #020617;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Compact Circular Nodes */
+        .node {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #1e293b;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            z-index: 50;
+        }
+
+        .node.active {
+            transform: scale(1.25);
+            border-color: #3b82f6;
+            background: #0f172a;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+        }
+
+        .node.completed {
+            border-color: #10b981;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        /* SVG EDGE ANIMATIONS */
+        .edge-base {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.03);
+            stroke-width: 4;
+            stroke-linecap: round;
+        }
+
+        /* The "Filled" Path after pulse passes */
+        .edge-active {
+            fill: none;
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke: rgba(59, 130, 246, 0.4);
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            transition: stroke-dashoffset 1s ease-out;
+            filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.3));
+        }
+
+        .edge-active.filled {
+            stroke-dashoffset: 0;
+        }
+
+        /* The High-Speed Flow Pulse */
+        .edge-pulse {
+            fill: none;
+            stroke: #60a5fa;
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-dasharray: 30, 150;
+            stroke-dashoffset: 180;
+            opacity: 0;
+            filter: drop-shadow(0 0 8px #3b82f6);
+        }
+
+        .edge-pulse.pulsing {
+            opacity: 1;
+            animation: flowForward 1.2s linear infinite;
+        }
+
+        @keyframes flowForward {
+            from { stroke-dashoffset: 180; }
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* Loop Path Styling */
+        .loop-path {
+            stroke-dasharray: 8, 8;
+            stroke: rgba(239, 68, 68, 0.1);
+        }
+        
+        .loop-active {
+            stroke: #ef4444;
+            opacity: 1;
+            animation: loopDash 0.5s linear infinite;
+        }
+
+        @keyframes loopDash {
+            to { stroke-dashoffset: -16; }
+        }
+
+        .log-terminal {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0, 0, 0, 0.2);
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="max-w-4xl w-full">
+        <div class="text-center mb-8">
+            <h1 class="text-xl font-semibold text-slate-200 tracking-tight">Circuit Flow Logic</h1>
+            <p class="text-slate-500 text-xs">Persistent connection state & dynamic pulse propagation</p>
+        </div>
+
+        <!-- Canvas -->
+        <div class="glass-card p-12 relative mb-6 min-h-[320px] flex items-center">
+            
+            <svg id="svg-canvas" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 10;">
+                <g id="bg-layer"></g>
+                <g id="active-layer"></g>
+                <g id="pulse-layer"></g>
+                
+                <!-- Explicit Loop Path -->
+                <path id="loop-base" class="edge-base loop-path" />
+                <path id="loop-pulse" class="edge-pulse" style="stroke: #ef4444; filter: drop-shadow(0 0 8px #ef4444);" />
+            </svg>
+
+            <div class="flex justify-between w-full relative z-20 px-8">
+                <div class="flex flex-col items-center gap-3">
+                    <div id="node-0" class="node"><i class="fas fa-plug text-blue-400"></i></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">Input</span>
+                </div>
+                <div class="flex flex-col items-center gap-3">
+                    <div id="node-1" class="node"><i class="fas fa-microchip text-slate-400"></i></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">Process</span>
+                </div>
+                <div class="flex flex-col items-center gap-3">
+                    <div id="node-2" class="node"><i class="fas fa-code-branch text-slate-400"></i></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">Branch</span>
+                </div>
+                <div class="flex flex-col items-center gap-3">
+                    <div id="node-3" class="node"><i class="fas fa-shield-halved text-slate-400"></i></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">Verify</span>
+                </div>
+                <div class="flex flex-col items-center gap-3">
+                    <div id="node-4" class="node"><i class="fas fa-paper-plane text-slate-400"></i></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">Export</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="glass-card p-4 flex flex-col justify-between">
+                <button id="main-btn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-900/40">
+                    Initialize System
+                </button>
+                <div class="mt-4">
+                    <div class="flex justify-between text-[10px] text-slate-500 mb-1">
+                        <span>Speed</span>
+                        <span id="speed-display">1.2s</span>
+                    </div>
+                    <input type="range" id="speed-range" min="600" max="2400" value="1200" class="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                </div>
+            </div>
+
+            <div class="md:col-span-3 glass-card p-4 h-36">
+                <div class="flex items-center justify-between border-b border-white/5 pb-2 mb-2">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active Monitoring</span>
+                    <span id="system-status" class="w-2 h-2 rounded-full bg-slate-700"></span>
+                </div>
+                <div id="terminal" class="log-terminal h-20 overflow-y-auto space-y-1 text-slate-400 px-2">
+                    <div class="opacity-40 italic">System ready for deployment...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nodes = [0,1,2,3,4].map(i => document.getElementById(`node-${i}`));
+        const terminal = document.getElementById('terminal');
+        const mainBtn = document.getElementById('main-btn');
+        const speedRange = document.getElementById('speed-range');
+        const statusDot = document.getElementById('system-status');
+
+        let isRunning = false;
+        let currentIndex = 0;
+        let timers = [];
+
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            const color = type === 'error' ? 'text-red-400' : (type === 'success' ? 'text-emerald-400' : 'text-slate-400');
+            div.className = color;
+            div.innerHTML = `<span class="opacity-30 mr-2">></span> ${msg}`;
+            terminal.prepend(div);
+        }
+
+        function buildPaths() {
+            const svg = document.getElementById('svg-canvas');
+            const bgLayer = document.getElementById('bg-layer');
+            const activeLayer = document.getElementById('active-layer');
+            const pulseLayer = document.getElementById('pulse-layer');
+            const rect = svg.getBoundingClientRect();
+
+            bgLayer.innerHTML = ''; activeLayer.innerHTML = ''; pulseLayer.innerHTML = '';
+
+            for (let i = 0; i < 4; i++) {
+                const b1 = nodes[i].getBoundingClientRect();
+                const b2 = nodes[i+1].getBoundingClientRect();
+                const x1 = (b1.left + b1.width / 2) - rect.left;
+                const y1 = (b1.top + b1.height / 2) - rect.top;
+                const x2 = (b2.left + b2.width / 2) - rect.left;
+                const y2 = (b2.top + b2.height / 2) - rect.top;
+
+                const d = `M ${x1} ${y1} L ${x2} ${y2}`;
+
+                const base = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                base.setAttribute("d", d); base.setAttribute("class", "edge-base");
+                bgLayer.appendChild(base);
+
+                const active = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                active.setAttribute("d", d); active.setAttribute("class", "edge-active");
+                active.id = `active-path-${i}`;
+                activeLayer.appendChild(active);
+
+                const pulse = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                pulse.setAttribute("d", d); pulse.setAttribute("class", "edge-pulse");
+                pulse.id = `pulse-path-${i}`;
+                pulseLayer.appendChild(pulse);
+            }
+
+            // Loop Path (3 -> 1)
+            const b3 = nodes[3].getBoundingClientRect();
+            const b1 = nodes[1].getBoundingClientRect();
+            const x3 = (b3.left + b3.width / 2) - rect.left;
+            const y3 = (b3.top + b3.height / 2) - rect.top;
+            const x1l = (b1.left + b1.width / 2) - rect.left;
+            const y1l = (b1.top + b1.height / 2) - rect.top;
+            const loopD = `M ${x3} ${y3} C ${x3} ${y3 - 100}, ${x1l} ${y1l - 100}, ${x1l} ${y1l}`;
+            
+            document.getElementById('loop-base').setAttribute('d', loopD);
+            document.getElementById('loop-pulse').setAttribute('d', loopD);
+        }
+
+        async function play() {
+            if (!isRunning) return;
+
+            // Activate Node
+            nodes.forEach(n => n.classList.remove('active'));
+            nodes[currentIndex].classList.add('active');
+            log(`Processing at Node ${currentIndex + 1}...`);
+
+            const delay = parseInt(speedRange.value);
+            await new Promise(r => timers.push(setTimeout(r, delay * 0.8)));
+
+            let nextIndex = currentIndex + 1;
+            let loopBack = false;
+
+            // Logic: 20% chance to loop back from Node 4 to Node 2
+            if (currentIndex === 3 && Math.random() < 0.2) {
+                loopBack = true;
+                nextIndex = 1;
+            }
+
+            if (currentIndex < 4 && !loopBack) {
+                const pulse = document.getElementById(`pulse-path-${currentIndex}`);
+                const active = document.getElementById(`active-path-${currentIndex}`);
+                
+                pulse.classList.add('pulsing');
+                log(`Transmitting packet...`);
+                
+                await new Promise(r => timers.push(setTimeout(r, 1000)));
+                
+                pulse.classList.remove('pulsing');
+                active.classList.add('filled'); // Keep path energized
+                nodes[currentIndex].classList.add('completed');
+                
+                currentIndex = nextIndex;
+                play();
+            } else if (loopBack) {
+                const loopP = document.getElementById('loop-pulse');
+                loopP.classList.add('pulsing');
+                log(`Checksum error! Re-routing...`, 'error');
+                
+                await new Promise(r => timers.push(setTimeout(r, 1200)));
+                
+                loopP.classList.remove('pulsing');
+                currentIndex = 1;
+                play();
+            } else {
+                nodes[4].classList.add('completed');
+                log(`Full circuit established. Sequence complete.`, 'success');
+                statusDot.className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]";
+                
+                await new Promise(r => timers.push(setTimeout(r, 2000)));
+                if(isRunning) resetFlow();
+            }
+        }
+
+        function resetFlow() {
+            nodes.forEach(n => n.classList.remove('active', 'completed'));
+            document.querySelectorAll('.edge-active').forEach(p => p.classList.remove('filled'));
+            document.querySelectorAll('.edge-pulse').forEach(p => p.classList.remove('pulsing'));
+            statusDot.className = "w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6]";
+            currentIndex = 0;
+            play();
+        }
+
+        mainBtn.addEventListener('click', () => {
+            if (isRunning) {
+                isRunning = false;
+                timers.forEach(clearTimeout);
+                mainBtn.innerText = "Initialize System";
+                mainBtn.classList.replace('bg-red-600', 'bg-blue-600');
+                statusDot.className = "w-2 h-2 rounded-full bg-slate-700";
+                log("System shutdown.");
+            } else {
+                isRunning = true;
+                mainBtn.innerText = "Halt System";
+                mainBtn.classList.replace('bg-blue-600', 'bg-red-600');
+                statusDot.className = "w-2 h-2 rounded-full bg-blue-500";
+                log("System startup initiated.");
+                play();
+            }
+        });
+
+        speedRange.addEventListener('input', (e) => {
+            document.getElementById('speed-display').innerText = (e.target.value / 1000).toFixed(1) + 's';
+        });
+
+        window.addEventListener('resize', buildPaths);
+        window.onload = () => setTimeout(buildPaths, 300);
+    </script>
+</body>
+</html>

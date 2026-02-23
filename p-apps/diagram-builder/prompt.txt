@@ -1,0 +1,10 @@
+Build web page with below features:
+
+Goal: Diagram builder
+
+1. 
+
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking, with suitable font-awesome icons, easy to operate.
+Use only html, css, javascript and tailwindcss
