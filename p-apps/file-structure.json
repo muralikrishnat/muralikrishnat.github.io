@@ -19,6 +19,20 @@
         "type": "file",
         "parentId": "root-ai-project-template-gen",
         "path": "./ai-project-template-gen/index2.html"
+      },
+      {
+        "id": "file-ai-project-template-gen-index3.html",
+        "name": "index3.html",
+        "type": "file",
+        "parentId": "root-ai-project-template-gen",
+        "path": "./ai-project-template-gen/index3.html"
+      },
+      {
+        "id": "file-ai-project-template-gen-index4.html",
+        "name": "index4.html",
+        "type": "file",
+        "parentId": "root-ai-project-template-gen",
+        "path": "./ai-project-template-gen/index4.html"
       }
     ]
   },
@@ -131,6 +145,38 @@
     ]
   },
   {
+    "id": "root-cron-jobs",
+    "name": "cron-jobs",
+    "type": "folder",
+    "parentId": null,
+    "path": "/cron-jobs",
+    "children": [
+      {
+        "id": "file-cron-jobs-index.html",
+        "name": "index.html",
+        "type": "file",
+        "parentId": "root-cron-jobs",
+        "path": "./cron-jobs/index.html"
+      }
+    ]
+  },
+  {
+    "id": "root-diagram-builder",
+    "name": "diagram-builder",
+    "type": "folder",
+    "parentId": null,
+    "path": "/diagram-builder",
+    "children": [
+      {
+        "id": "file-diagram-builder-index.html",
+        "name": "index.html",
+        "type": "file",
+        "parentId": "root-diagram-builder",
+        "path": "./diagram-builder/index.html"
+      }
+    ]
+  },
+  {
     "id": "root-feature-flag",
     "name": "feature-flag",
     "type": "folder",
@@ -175,6 +221,27 @@
         "type": "file",
         "parentId": "root-flow-builder",
         "path": "./flow-builder/index.html"
+      },
+      {
+        "id": "file-flow-builder-index2.html",
+        "name": "index2.html",
+        "type": "file",
+        "parentId": "root-flow-builder",
+        "path": "./flow-builder/index2.html"
+      },
+      {
+        "id": "file-flow-builder-index3.html",
+        "name": "index3.html",
+        "type": "file",
+        "parentId": "root-flow-builder",
+        "path": "./flow-builder/index3.html"
+      },
+      {
+        "id": "file-flow-builder-index4.html",
+        "name": "index4.html",
+        "type": "file",
+        "parentId": "root-flow-builder",
+        "path": "./flow-builder/index4.html"
       }
     ]
   },

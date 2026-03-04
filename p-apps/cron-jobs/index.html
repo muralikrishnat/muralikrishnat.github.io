@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glassmorphic Cron Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Base styling and animated background */
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(-45deg, #4f46e5, #ec4899, #0ea5e9, #8b5cf6);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    @keyframes gradientBG {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    /* Glassmorphism utility classes */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .glass-input {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      transition: all 0.2s;
+    }
+
+    .glass-input:focus {
+      outline: none;
+      background: rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Styling for select options since they don't inherit transparency well */
+    select option {
+      background-color: #2d3748;
+      color: white;
+    }
+
+    .glass-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.2s;
+      color: white;
+    }
+
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .glass-btn-primary {
+      background: rgba(79, 70, 229, 0.6);
+      border: 1px solid rgba(99, 102, 241, 0.5);
+    }
+
+    .glass-btn-primary:hover {
+      background: rgba(79, 70, 229, 0.8);
+    }
+
+    .glass-btn-danger {
+      background: rgba(225, 29, 72, 0.6);
+      border: 1px solid rgba(244, 63, 94, 0.5);
+    }
+
+    .glass-btn-danger:hover {
+      background: rgba(225, 29, 72, 0.8);
+    }
+
+    /* Checkbox styling */
+    .glass-checkbox {
+      appearance: none;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 0.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      display: inline-block;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .glass-checkbox:checked {
+      background: rgba(79, 70, 229, 0.8);
+    }
+
+    .glass-checkbox:checked::after {
+      content: '✓';
+      position: absolute;
+      color: white;
+      font-size: 0.875rem;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Utilities */
+    .hidden {
+      display: none !important;
+    }
+
+    .active-tab {
+      background: rgba(255, 255, 255, 0.3) !important;
+      font-weight: bold;
+    }
+
+    .calendar-day {
+      min-height: 80px;
+      transition: all 0.2s;
+    }
+
+    .calendar-day:hover:not(.empty-day) {
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+    }
+
+    .calendar-day.selected {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .job-dot {
+      height: 6px;
+      width: 6px;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 1px;
+    }
+  </style>
+</head>
+
+<body class="p-4 md:p-8">
+
+  <!-- Main Container -->
+  <div class="max-w-6xl mx-auto glass-panel rounded-2xl p-4 md:p-6 flex flex-col h-[90vh]">
+
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b border-white/20 pb-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-white/20 p-3 rounded-lg backdrop-blur-md">
+          <i class="fa-solid fa-clock text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold tracking-wide">Cron Manager</h1>
+          <p class="text-sm text-white/70">Schedule & manage your tasks</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <div class="flex bg-black/20 p-1 rounded-lg w-full md:w-auto">
+          <button data-action="switch-view" data-view="list" id="tab-list"
+            class="flex-1 md:flex-none px-4 py-2 rounded-md text-sm transition-all active-tab">
+            <i class="fa-solid fa-list mr-2"></i> List
+          </button>
+          <button data-action="switch-view" data-view="calendar" id="tab-calendar"
+            class="flex-1 md:flex-none px-4 py-2 rounded-md text-sm transition-all">
+            <i class="fa-regular fa-calendar mr-2"></i> Calendar
+          </button>
+        </div>
+        <button data-action="open-add-modal"
+          class="glass-btn glass-btn-primary px-4 py-2 rounded-lg font-medium whitespace-nowrap shadow-lg">
+          <i class="fa-solid fa-plus mr-1"></i> New Job
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto pr-2" id="main-content">
+
+      <!-- LIST VIEW -->
+      <div id="view-list" class="space-y-6">
+        <!-- Toolbar -->
+        <div class="flex justify-between items-center">
+          <div class="relative w-full md:w-1/3">
+            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50"></i>
+            <input type="text" id="filter-input" placeholder="Search jobs by title..."
+              class="glass-input w-full pl-10 pr-4 py-2 rounded-lg focus:ring-2 focus:ring-white/30">
+          </div>
+          <div class="text-sm text-white/70" id="job-count">0 jobs found</div>
+        </div>
+
+        <!-- Job Grid -->
+        <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Jobs injected by JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+          <div class="bg-white/10 p-6 rounded-full mb-4">
+            <i class="fa-solid fa-inbox text-4xl text-white/50"></i>
+          </div>
+          <h3 class="text-xl font-medium mb-2">No jobs found</h3>
+          <p class="text-white/60 max-w-sm mb-6">You don't have any cron jobs scheduled yet, or none match your filter.
+          </p>
+          <button data-action="open-add-modal" class="glass-btn px-6 py-2 rounded-lg">Create your first job</button>
+        </div>
+      </div>
+
+      <!-- CALENDAR VIEW -->
+      <div id="view-calendar" class="hidden h-full flex flex-col">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold" id="calendar-title">Month Year</h2>
+          <div class="flex gap-2">
+            <button data-action="prev-month" class="glass-btn px-3 py-1 rounded-lg"><i
+                class="fa-solid fa-chevron-left"></i></button>
+            <button data-action="today-month" class="glass-btn px-4 py-1 rounded-lg text-sm">Today</button>
+            <button data-action="next-month" class="glass-btn px-3 py-1 rounded-lg"><i
+                class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="flex-1 flex flex-col md:flex-row gap-6 h-full">
+          <!-- Calendar Grid -->
+          <div class="flex-1 glass-card rounded-xl p-4 flex flex-col">
+            <div class="grid grid-cols-7 gap-1 text-center font-medium text-sm text-white/70 mb-2">
+              <div>Sun</div>
+              <div>Mon</div>
+              <div>Tue</div>
+              <div>Wed</div>
+              <div>Thu</div>
+              <div>Fri</div>
+              <div>Sat</div>
+            </div>
+            <div id="calendar-grid" class="grid grid-cols-7 gap-1 flex-1">
+              <!-- Days injected by JS -->
+            </div>
+          </div>
+
+          <!-- Selected Day Sidebar -->
+          <div class="w-full md:w-80 glass-card rounded-xl p-5 flex flex-col h-64 md:h-auto overflow-y-auto">
+            <h3 class="text-lg font-bold mb-1 border-b border-white/20 pb-2" id="selected-date-title">Selected Date</h3>
+            <p class="text-sm text-white/60 mb-4">Scheduled Executions</p>
+
+            <div id="selected-date-jobs" class="space-y-3 flex-1">
+              <!-- Day jobs injected by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- Add/Edit Job Modal -->
+  <div id="job-modal"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
+    <div class="glass-panel w-full max-w-md rounded-2xl p-6 m-4 transform scale-95 transition-transform duration-300"
+      id="job-modal-content">
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="text-xl font-bold" id="modal-title">Add New Job</h2>
+        <button data-action="close-modal" class="text-white/60 hover:text-white transition-colors">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <form id="job-form" class="space-y-4">
+        <input type="hidden" id="job-id">
+
+        <div>
+          <label class="block text-sm font-medium text-white/80 mb-1">Job Title</label>
+          <input type="text" id="job-title" required class="glass-input w-full px-4 py-2 rounded-lg"
+            placeholder="e.g., Database Backup">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1">Execution Time</label>
+            <input type="time" id="job-time" required class="glass-input w-full px-4 py-2 rounded-lg">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1">Repeat Mode</label>
+            <select id="job-mode" class="glass-input w-full px-4 py-2 rounded-lg cursor-pointer">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="bi-weekly">Bi-weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Dynamic Repeat Settings Container -->
+        <div id="repeat-settings" class="glass-card rounded-lg p-4 mt-2">
+
+          <!-- Daily Info -->
+          <div id="setting-daily" class="text-sm text-white/70 text-center">
+            <i class="fa-solid fa-rotate-right mb-2 text-xl"></i>
+            <p>This job will run every day at the specified time.</p>
+          </div>
+
+          <!-- Weekly / Bi-Weekly Settings -->
+          <div id="setting-weekly" class="hidden">
+            <label class="block text-sm font-medium text-white/80 mb-2">Repeat On (Days of week)</label>
+            <div class="flex flex-wrap gap-3">
+              <label class="flex items-center gap-1 text-sm"><input type="checkbox" name="days" value="1"
+                  class="glass-checkbox"> Mon</label>
+              <label class="flex items-center gap-1 text-sm"><input type="checkbox" name="days" value="2"
+                  class="glass-checkbox"> Tue</label>
+              <label class="flex items-center gap-1 text-sm"><input type="checkbox" name="days" value="3"
+                  class="glass-checkbox"> Wed</label>
+              <label class="flex items-center gap-1 text-sm"><input type="checkbox" name="days" value="4"
+                  class="glass-checkbox"> Thu</label>
+              <label class="flex items-center gap-1 text-sm"><input type="checkbox" name="days" value="5"
+                  class="glass-checkbox"> Fri</label>
+              <label class="flex items-center gap-1 text-sm"><input type="checkbox" name="days" value="6"
+                  class="glass-checkbox"> Sat</label>
+              <label class="flex items-center gap-1 text-sm"><input type="checkbox" name="days" value="0"
+                  class="glass-checkbox"> Sun</label>
+            </div>
+            <p id="biweekly-note" class="hidden text-xs text-white/50 mt-3"><i class="fa-solid fa-circle-info mr-1"></i>
+              For bi-weekly, the cycle starts from the job creation date.</p>
+          </div>
+
+          <!-- Monthly Settings -->
+          <div id="setting-monthly" class="hidden">
+            <label class="block text-sm font-medium text-white/80 mb-1">Date of Month</label>
+            <div class="flex items-center gap-3">
+              <input type="number" id="job-date" min="1" max="31" value="1"
+                class="glass-input w-20 px-3 py-2 rounded-lg text-center">
+              <span class="text-sm text-white/70">of every month</span>
+            </div>
+            <p class="text-xs text-white/50 mt-2">Note: For months with fewer days, it will run on the last day of the
+              month.</p>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-white/20">
+          <button type="button" data-action="close-modal" class="glass-btn px-4 py-2 rounded-lg text-sm">Cancel</button>
+          <button type="submit" class="glass-btn glass-btn-primary px-4 py-2 rounded-lg text-sm font-medium">Save
+            Job</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="delete-modal"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
+    <div
+      class="glass-panel w-full max-w-sm rounded-2xl p-6 m-4 text-center transform scale-95 transition-transform duration-300"
+      id="delete-modal-content">
+      <div
+        class="bg-red-500/20 text-red-400 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/30">
+        <i class="fa-solid fa-triangle-exclamation text-3xl"></i>
+      </div>
+      <h2 class="text-xl font-bold mb-2">Delete Job?</h2>
+      <p class="text-white/70 text-sm mb-6">Are you sure you want to delete <span id="delete-job-name"
+          class="font-bold text-white"></span>? This action cannot be undone.</p>
+      <div class="flex justify-center gap-3">
+        <button data-action="close-delete-modal" class="glass-btn px-4 py-2 rounded-lg text-sm">Cancel</button>
+        <button data-action="confirm-delete"
+          class="glass-btn glass-btn-danger px-4 py-2 rounded-lg text-sm font-medium">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /** STATE MANAGEMENT **/
+    const state = {
+      jobs: JSON.parse(localStorage.getItem('cron_jobs')) || [],
+      view: 'list', // 'list' or 'calendar'
+      filter: '',
+      calendar: {
+        month: new Date().getMonth(),
+        year: new Date().getFullYear()
+      },
+      selectedDate: new Date(),
+      editingJobId: null,
+      jobToDelete: null,
+      timeUpdater: null
+    };
+
+    // Colors for job badges
+    const modeColors = {
+      'daily': 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+      'weekly': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+      'bi-weekly': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+      'monthly': 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+    };
+    const dotColors = {
+      'daily': '#10b981', 'weekly': '#3b82f6', 'bi-weekly': '#8b5cf6', 'monthly': '#f59e0b'
+    };
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    /** DOM ELEMENTS **/
+    const els = {
+      viewList: document.getElementById('view-list'),
+      viewCalendar: document.getElementById('view-calendar'),
+      tabList: document.getElementById('tab-list'),
+      tabCalendar: document.getElementById('tab-calendar'),
+      jobGrid: document.getElementById('job-grid'),
+      emptyState: document.getElementById('empty-state'),
+      jobCount: document.getElementById('job-count'),
+      filterInput: document.getElementById('filter-input'),
+
+      jobModal: document.getElementById('job-modal'),
+      jobModalContent: document.getElementById('job-modal-content'),
+      jobForm: document.getElementById('job-form'),
+      modalTitle: document.getElementById('modal-title'),
+      jobId: document.getElementById('job-id'),
+      jobTitle: document.getElementById('job-title'),
+      jobTime: document.getElementById('job-time'),
+      jobMode: document.getElementById('job-mode'),
+
+      settingDaily: document.getElementById('setting-daily'),
+      settingWeekly: document.getElementById('setting-weekly'),
+      settingMonthly: document.getElementById('setting-monthly'),
+      biweeklyNote: document.getElementById('biweekly-note'),
+      jobDate: document.getElementById('job-date'),
+      dayCheckboxes: document.querySelectorAll('input[name="days"]'),
+
+      deleteModal: document.getElementById('delete-modal'),
+      deleteModalContent: document.getElementById('delete-modal-content'),
+      deleteJobName: document.getElementById('delete-job-name'),
+
+      calendarTitle: document.getElementById('calendar-title'),
+      calendarGrid: document.getElementById('calendar-grid'),
+      selectedDateTitle: document.getElementById('selected-date-title'),
+      selectedDateJobs: document.getElementById('selected-date-jobs')
+    };
+
+    /** CORE LOGIC: NEXT EXECUTION CALCULATION **/
+
+    // Helper to reset time of a date object
+    const resetTime = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    function calculateNextExecution(job, fromDate = new Date()) {
+      const now = fromDate;
+      let nextDate = new Date(now);
+      const [hours, minutes] = job.time.split(':').map(Number);
+      nextDate.setHours(hours, minutes, 0, 0);
+
+      if (job.mode === 'daily') {
+        if (nextDate <= now) {
+          nextDate.setDate(nextDate.getDate() + 1);
+        }
+        return nextDate;
+      }
+
+      if (job.mode === 'weekly') {
+        if (!job.days || job.days.length === 0) return null;
+        let daysAdded = 0;
+        while (daysAdded <= 7) {
+          if (daysAdded > 0 || nextDate <= now) {
+            nextDate.setDate(nextDate.getDate() + 1);
+          }
+          if (nextDate > now && job.days.includes(nextDate.getDay())) {
+            return nextDate;
+          }
+          daysAdded++;
+        }
+      }
+
+      if (job.mode === 'bi-weekly') {
+        if (!job.days || job.days.length === 0) return null;
+        const created = new Date(job.createdAt);
+        created.setHours(0, 0, 0, 0);
+
+        // Find next valid day of week, then check if it's an active week
+        let testDate = new Date(nextDate);
+        if (testDate <= now) testDate.setDate(testDate.getDate() + 1);
+
+        for (let i = 0; i < 14; i++) {
+          if (job.days.includes(testDate.getDay())) {
+            // Check if it's an even week difference from creation week
+            const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+            // normalize to Monday to calculate week diff correctly
+            const createdMon = new Date(created);
+            createdMon.setDate(createdMon.getDate() - (createdMon.getDay() === 0 ? 6 : createdMon.getDay() - 1));
+
+            const testMon = new Date(testDate);
+            testMon.setDate(testMon.getDate() - (testMon.getDay() === 0 ? 6 : testMon.getDay() - 1));
+
+            const weekDiff = Math.round((testMon - createdMon) / msPerWeek);
+
+            if (weekDiff % 2 === 0 && testDate > now) {
+              return testDate;
+            }
+          }
+          testDate.setDate(testDate.getDate() + 1);
+        }
+        // Fallback safe mechanism
+        testDate.setDate(testDate.getDate() + 7);
+        return testDate;
+      }
+
+      if (job.mode === 'monthly') {
+        nextDate.setDate(1); // avoid overflow when changing month
+        if (now.getDate() > job.dateOfMonth || (now.getDate() === job.dateOfMonth && nextDate <= now)) {
+          nextDate.setMonth(nextDate.getMonth() + 1);
+        }
+
+        // Handle short months
+        const lastDayOfMonth = new Date(nextDate.getFullYear(), nextDate.getMonth() + 1, 0).getDate();
+        const targetDate = Math.min(job.dateOfMonth, lastDayOfMonth);
+        nextDate.setDate(targetDate);
+
+        // recalculate time just in case DST shifted
+        nextDate.setHours(hours, minutes, 0, 0);
+
+        if (nextDate <= now) { // Edge case where capping makes it past due today
+          nextDate.setMonth(nextDate.getMonth() + 1);
+          const nextLast = new Date(nextDate.getFullYear(), nextDate.getMonth() + 1, 0).getDate();
+          nextDate.setDate(Math.min(job.dateOfMonth, nextLast));
+          nextDate.setHours(hours, minutes, 0, 0);
+        }
+        return nextDate;
+      }
+      return null;
+    }
+
+    function formatTimeUntil(nextDate) {
+      if (!nextDate) return 'Invalid configuration';
+      const now = new Date();
+      let diff = nextDate.getTime() - now.getTime();
+
+      if (diff < 0) return 'Executing soon...';
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      diff -= days * (1000 * 60 * 60 * 24);
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      diff -= hours * (1000 * 60 * 60);
+      const mins = Math.floor(diff / (1000 * 60));
+
+      let parts = [];
+      if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
+      if (hours > 0) parts.push(`${hours} hr${hours > 1 ? 's' : ''}`);
+      if (mins > 0) parts.push(`${mins} min${mins > 1 ? 's' : ''}`);
+
+      if (parts.length === 0) return 'in less than a minute';
+      return `in ${parts.join(', ')}`;
+    }
+
+    // Check if a job is scheduled to run on a specific DATE (ignoring time)
+    function doesJobRunOnDate(job, targetDate) {
+      const target = resetTime(targetDate);
+      const created = resetTime(new Date(job.createdAt));
+      if (target < created) return false;
+
+      if (job.mode === 'daily') return true;
+
+      if (job.mode === 'weekly') {
+        return job.days.includes(target.getDay());
+      }
+
+      if (job.mode === 'bi-weekly') {
+        if (!job.days.includes(target.getDay())) return false;
+
+        const createdMon = new Date(created);
+        createdMon.setDate(createdMon.getDate() - (createdMon.getDay() === 0 ? 6 : createdMon.getDay() - 1));
+        const targetMon = new Date(target);
+        targetMon.setDate(targetMon.getDate() - (targetMon.getDay() === 0 ? 6 : targetMon.getDay() - 1));
+
+        const weekDiff = Math.round((targetMon - createdMon) / (7 * 24 * 60 * 60 * 1000));
+        return weekDiff % 2 === 0;
+      }
+
+      if (job.mode === 'monthly') {
+        const lastDayOfMonth = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+        const expectedDate = Math.min(job.dateOfMonth, lastDayOfMonth);
+        return target.getDate() === expectedDate;
+      }
+      return false;
+    }
+
+    function getJobSubtitle(job) {
+      switch (job.mode) {
+        case 'daily': return 'Everyday';
+        case 'weekly': return `Weekly on ${job.days.map(d => dayNames[d]).join(', ')}`;
+        case 'bi-weekly': return `Bi-weekly on ${job.days.map(d => dayNames[d]).join(', ')}`;
+        case 'monthly': return `Monthly on day ${job.dateOfMonth}`;
+        default: return '';
+      }
+    }
+
+    function format12Hour(timeStr) {
+      const [h, m] = timeStr.split(':');
+      let hour = parseInt(h);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12 || 12;
+      return `${hour}:${m} ${ampm}`;
+    }
+
+    /** RENDERING **/
+    function saveState() {
+      localStorage.setItem('cron_jobs', JSON.stringify(state.jobs));
+    }
+
+    function renderList() {
+      const filtered = state.jobs.filter(j => j.title.toLowerCase().includes(state.filter.toLowerCase()));
+
+      els.jobCount.textContent = `${filtered.length} job${filtered.length !== 1 ? 's' : ''} found`;
+
+      if (state.jobs.length === 0) {
+        els.emptyState.classList.remove('hidden');
+        els.jobGrid.classList.add('hidden');
+        els.jobCount.textContent = '0 jobs';
+      } else if (filtered.length === 0) {
+        els.emptyState.classList.remove('hidden');
+        els.emptyState.querySelector('h3').textContent = 'No matches found';
+        els.emptyState.querySelector('p').textContent = 'Try adjusting your search filter.';
+        els.jobGrid.classList.add('hidden');
+      } else {
+        els.emptyState.classList.add('hidden');
+        els.jobGrid.classList.remove('hidden');
+
+        els.jobGrid.innerHTML = filtered.map(job => {
+          const nextDate = calculateNextExecution(job);
+          const timeStr = formatTimeUntil(nextDate);
+          const runTimeStr = format12Hour(job.time);
+
+          return `
+                    <div class="glass-card rounded-xl p-5 flex flex-col h-full relative group">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="font-bold text-lg truncate pr-4" title="${job.title}">${job.title}</h3>
+                            <div class="flex opacity-0 group-hover:opacity-100 transition-opacity gap-2 absolute top-4 right-4 bg-black/40 backdrop-blur-md p-1 rounded-lg">
+                                <button data-action="edit-job" data-id="${job.id}" class="w-8 h-8 rounded-md hover:bg-white/20 transition flex items-center justify-center text-blue-300" title="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button data-action="delete-job" data-id="${job.id}" class="w-8 h-8 rounded-md hover:bg-white/20 transition flex items-center justify-center text-red-400" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="text-xs px-2 py-1 rounded-full border ${modeColors[job.mode]}">
+                                ${job.mode.charAt(0).toUpperCase() + job.mode.slice(1)}
+                            </span>
+                            <span class="text-sm text-white/70 truncate flex-1">${getJobSubtitle(job)}</span>
+                        </div>
+                        
+                        <div class="mt-auto bg-black/20 rounded-lg p-3 border border-white/5">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-white/60"><i class="fa-regular fa-clock mr-1"></i> ${runTimeStr}</span>
+                                <span class="font-medium text-emerald-300 execution-time" data-id="${job.id}">${timeStr}</span>
+                            </div>
+                            <div class="text-xs text-white/40 mt-1 text-right">
+                                Next: ${nextDate ? nextDate.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+                            </div>
+                        </div>
+                    </div>
+                    `;
+        }).join('');
+      }
+    }
+
+    // Live updating execution strings in list view without full re-render
+    function startLiveTimeUpdater() {
+      if (state.timeUpdater) clearInterval(state.timeUpdater);
+      state.timeUpdater = setInterval(() => {
+        if (state.view !== 'list') return;
+        document.querySelectorAll('.execution-time').forEach(el => {
+          const id = el.getAttribute('data-id');
+          const job = state.jobs.find(j => j.id == id);
+          if (job) {
+            const next = calculateNextExecution(job);
+            el.textContent = formatTimeUntil(next);
+          }
+        });
+      }, 60000); // update every minute
+    }
+
+    function renderCalendar() {
+      const { month, year } = state.calendar;
+      els.calendarTitle.textContent = `${monthNames[month]} ${year}`;
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      let html = '';
+
+      // Empty cells before start of month
+      for (let i = 0; i < firstDay; i++) {
+        html += `<div class="calendar-day empty-day bg-white/5 rounded-lg border border-transparent"></div>`;
+      }
+
+      const today = new Date();
+      const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const currentDate = new Date(year, month, day);
+        const isToday = isCurrentMonth && day === today.getDate();
+        const isSelected = state.selectedDate.getDate() === day &&
+          state.selectedDate.getMonth() === month &&
+          state.selectedDate.getFullYear() === year;
+
+        // Find jobs that run on this date
+        const jobsToday = state.jobs.filter(j => doesJobRunOnDate(j, currentDate));
+
+        let dotsHtml = '';
+        if (jobsToday.length > 0) {
+          const maxDots = 5;
+          jobsToday.slice(0, maxDots).forEach(job => {
+            dotsHtml += `<span class="job-dot" style="background-color: ${dotColors[job.mode]}"></span>`;
+          });
+          if (jobsToday.length > maxDots) {
+            dotsHtml += `<span class="text-[10px] text-white/50 ml-1">+${jobsToday.length - maxDots}</span>`;
+          }
+        }
+
+        html += `
+                <div data-action="select-date" data-day="${day}" class="calendar-day bg-white/10 rounded-lg border p-1 md:p-2 flex flex-col 
+                            ${isToday ? 'border-blue-400 bg-blue-500/10' : 'border-white/10'} 
+                            ${isSelected ? 'selected shadow-[0_0_15px_rgba(255,255,255,0.2)]' : ''}">
+                    <span class="text-sm ${isToday ? 'font-bold text-blue-300' : 'text-white/80'}">${day}</span>
+                    <div class="mt-auto flex flex-wrap justify-center md:justify-start pt-1">${dotsHtml}</div>
+                </div>
+                `;
+      }
+
+      els.calendarGrid.innerHTML = html;
+      renderSelectedDateJobs();
+    }
+
+    function renderSelectedDateJobs() {
+      const date = state.selectedDate;
+      const isToday = resetTime(date).getTime() === resetTime(new Date()).getTime();
+
+      els.selectedDateTitle.textContent = isToday ? 'Today, ' + date.toLocaleDateString([], { month: 'long', day: 'numeric' }) :
+        date.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+
+      const jobsToday = state.jobs.filter(j => doesJobRunOnDate(j, date))
+        .sort((a, b) => a.time.localeCompare(b.time)); // sort by time
+
+      if (jobsToday.length === 0) {
+        els.selectedDateJobs.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-white/40 pt-8">
+                        <i class="fa-regular fa-calendar-xmark text-3xl mb-2"></i>
+                        <p class="text-sm">No jobs scheduled</p>
+                    </div>`;
+        return;
+      }
+
+      els.selectedDateJobs.innerHTML = jobsToday.map(job => `
+                <div class="bg-black/20 border border-white/10 rounded-lg p-3 flex items-center justify-between hover:bg-black/30 transition">
+                    <div class="flex flex-col overflow-hidden mr-2">
+                        <span class="font-medium truncate text-sm">${job.title}</span>
+                        <span class="text-xs text-white/50">${getJobSubtitle(job)}</span>
+                    </div>
+                    <div class="bg-white/10 px-2 py-1 rounded text-xs font-mono border border-white/5 whitespace-nowrap">
+                        ${format12Hour(job.time)}
+                    </div>
+                </div>
+            `).join('');
+    }
+
+    function updateView() {
+      if (state.view === 'list') {
+        els.viewList.classList.remove('hidden');
+        els.viewCalendar.classList.add('hidden');
+        els.tabList.classList.add('active-tab');
+        els.tabCalendar.classList.remove('active-tab');
+        renderList();
+      } else {
+        els.viewList.classList.add('hidden');
+        els.viewCalendar.classList.remove('hidden');
+        els.tabList.classList.remove('active-tab');
+        els.tabCalendar.classList.add('active-tab');
+        renderCalendar();
+      }
+    }
+
+    /** FORM LOGIC **/
+    function updateFormUI() {
+      const mode = els.jobMode.value;
+      els.settingDaily.classList.add('hidden');
+      els.settingWeekly.classList.add('hidden');
+      els.settingMonthly.classList.add('hidden');
+      els.biweeklyNote.classList.add('hidden');
+
+      if (mode === 'daily') els.settingDaily.classList.remove('hidden');
+      else if (mode === 'weekly' || mode === 'bi-weekly') {
+        els.settingWeekly.classList.remove('hidden');
+        if (mode === 'bi-weekly') els.biweeklyNote.classList.remove('hidden');
+      }
+      else if (mode === 'monthly') els.settingMonthly.classList.remove('hidden');
+    }
+
+    function openModal(jobId = null) {
+      state.editingJobId = jobId;
+      els.jobForm.reset();
+
+      if (jobId) {
+        const job = state.jobs.find(j => j.id == jobId);
+        if (job) {
+          els.modalTitle.textContent = 'Edit Job';
+          els.jobId.value = job.id;
+          els.jobTitle.value = job.title;
+          els.jobTime.value = job.time;
+          els.jobMode.value = job.mode;
+
+          if (job.mode === 'weekly' || job.mode === 'bi-weekly') {
+            els.dayCheckboxes.forEach(cb => {
+              cb.checked = job.days.includes(parseInt(cb.value));
+            });
+          } else if (job.mode === 'monthly') {
+            els.jobDate.value = job.dateOfMonth;
+          }
+        }
+      } else {
+        els.modalTitle.textContent = 'Add New Job';
+        els.jobId.value = '';
+        els.jobMode.value = 'daily';
+        const now = new Date();
+        els.jobTime.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      }
+
+      updateFormUI();
+
+      els.jobModal.classList.remove('hidden');
+      // Trigger reflow for animation
+      void els.jobModal.offsetWidth;
+      els.jobModal.classList.remove('opacity-0');
+      els.jobModalContent.classList.remove('scale-95');
+    }
+
+    function closeModal() {
+      els.jobModal.classList.add('opacity-0');
+      els.jobModalContent.classList.add('scale-95');
+      setTimeout(() => {
+        els.jobModal.classList.add('hidden');
+      }, 300);
+    }
+
+    function openDeleteModal(jobId) {
+      state.jobToDelete = jobId;
+      const job = state.jobs.find(j => j.id == jobId);
+      if (job) {
+        els.deleteJobName.textContent = `"${job.title}"`;
+        els.deleteModal.classList.remove('hidden');
+        void els.deleteModal.offsetWidth;
+        els.deleteModal.classList.remove('opacity-0');
+        els.deleteModalContent.classList.remove('scale-95');
+      }
+    }
+
+    function closeDeleteModal() {
+      els.deleteModal.classList.add('opacity-0');
+      els.deleteModalContent.classList.add('scale-95');
+      setTimeout(() => {
+        els.deleteModal.classList.add('hidden');
+        state.jobToDelete = null;
+      }, 300);
+    }
+
+    /** EVENT LISTENERS **/
+
+    // Form field reactive changes
+    els.jobMode.addEventListener('change', updateFormUI);
+
+    els.filterInput.addEventListener('input', (e) => {
+      state.filter = e.target.value;
+      renderList();
+    });
+
+    els.jobForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const mode = els.jobMode.value;
+      let days = [];
+      let dateOfMonth = 1;
+
+      if (mode === 'weekly' || mode === 'bi-weekly') {
+        days = Array.from(els.dayCheckboxes)
+          .filter(cb => cb.checked)
+          .map(cb => parseInt(cb.value));
+        if (days.length === 0) {
+          alert('Please select at least one day for weekly/bi-weekly execution.');
+          return;
+        }
+      } else if (mode === 'monthly') {
+        dateOfMonth = parseInt(els.jobDate.value);
+      }
+
+      const jobData = {
+        id: els.jobId.value || Date.now().toString(),
+        title: els.jobTitle.value,
+        time: els.jobTime.value,
+        mode: mode,
+        days: days,
+        dateOfMonth: dateOfMonth,
+        createdAt: state.editingJobId ? state.jobs.find(j => j.id == state.editingJobId).createdAt : new Date().toISOString()
+      };
+
+      if (state.editingJobId) {
+        const index = state.jobs.findIndex(j => j.id == state.editingJobId);
+        if (index !== -1) state.jobs[index] = jobData;
+      } else {
+        state.jobs.push(jobData);
+      }
+
+      saveState();
+      closeModal();
+      updateView();
+    });
+
+    // Global Event Delegation for clicks
+    document.body.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+
+      const action = btn.getAttribute('data-action');
+
+      switch (action) {
+        case 'switch-view':
+          state.view = btn.getAttribute('data-view');
+          updateView();
+          break;
+        case 'open-add-modal':
+          openModal();
+          break;
+        case 'close-modal':
+          closeModal();
+          break;
+        case 'edit-job':
+          openModal(btn.getAttribute('data-id'));
+          break;
+        case 'delete-job':
+          openDeleteModal(btn.getAttribute('data-id'));
+          break;
+        case 'close-delete-modal':
+          closeDeleteModal();
+          break;
+        case 'confirm-delete':
+          if (state.jobToDelete) {
+            state.jobs = state.jobs.filter(j => j.id != state.jobToDelete);
+            saveState();
+            closeDeleteModal();
+            updateView();
+          }
+          break;
+        case 'prev-month':
+          state.calendar.month--;
+          if (state.calendar.month < 0) {
+            state.calendar.month = 11;
+            state.calendar.year--;
+          }
+          renderCalendar();
+          break;
+        case 'next-month':
+          state.calendar.month++;
+          if (state.calendar.month > 11) {
+            state.calendar.month = 0;
+            state.calendar.year++;
+          }
+          renderCalendar();
+          break;
+        case 'today-month':
+          const now = new Date();
+          state.calendar.month = now.getMonth();
+          state.calendar.year = now.getFullYear();
+          state.selectedDate = new Date();
+          renderCalendar();
+          break;
+        case 'select-date':
+          const day = parseInt(btn.getAttribute('data-day'));
+          state.selectedDate = new Date(state.calendar.year, state.calendar.month, day);
+          renderCalendar();
+          break;
+      }
+    });
+
+    // Setup mock data for first-time visitors
+    if (state.jobs.length === 0 && !localStorage.getItem('cron_jobs_initialized')) {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      state.jobs = [
+        {
+          id: "1", title: "Daily Database Backup", mode: "daily", time: "02:00",
+          createdAt: now.toISOString()
+        },
+        {
+          id: "2", title: "Weekly Report Generation", mode: "weekly", time: "08:30",
+          days: [1], // Monday
+          createdAt: now.toISOString()
+        },
+        {
+          id: "3", title: "Bi-weekly Server Maintenance", mode: "bi-weekly", time: "23:00",
+          days: [5, 6], // Fri, Sat
+          createdAt: now.toISOString()
+        },
+        {
+          id: "4", title: "Monthly Billing Cycle", mode: "monthly", time: "12:00",
+          dateOfMonth: 1,
+          createdAt: now.toISOString()
+        }
+      ];
+      localStorage.setItem('cron_jobs_initialized', 'true');
+      saveState();
+    }
+
+    /** INITIALIZATION **/
+    updateView();
+    startLiveTimeUpdater();
+
+  </script>
+</body>
+
+</html>

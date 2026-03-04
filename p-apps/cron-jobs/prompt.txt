@@ -1,0 +1,11 @@
+Build me app to manage the cron jobs.
+
+Ability to add new job with details like title, repeat mode (daily, weekly, bi-weekly, monthly), repeat on (everyday, some day, some date on every month).
+Ability to see list of cron jobs with filter capability.
+Ability to Edit cron job details and Delete cron job (confirm before delete).
+Ability to see when will be the next execution like (in 3 days and 2 hours and 4 minutes).
+Ability to see the jobs in calender view as well.
+
+Using only html, css, javascript and tailwindcss.
+Use Glassmorphic.
+It should be simple and easy to operate.

@@ -1,0 +1,25 @@
+Build app for flow builder with below features:
+
+* Ability to create flow using drag and drop such as Forgerock, n8n.
+* Left section show list of actions that are available.
+* Categorized actions such as Category 1, Category2...etc.
+* Main section show art board, zoom in, zoom out, drag art board.
+* Ability to delete the node/step
+* Ability to edit the node details such as Step name, Step config where dynamically add any no of key+value pair.
+* Ability to add connection between nodes.
+* Allow only one output for nodes. only condition node and diverge node has multiple outputs.
+* Ability to delete connection between nodes.
+* Show the connections as Inputs and Outputs in the edit modal.
+* If/Else Condition node has two outputs, one for true and other for false.
+* Multi Node has multiple outputs, option1, option2, option3...etc.,
+* Each option has individual condition, like switch logic.
+* Ability to see the nodes and connections in JSON format.
+* Ability to import and export the flow using JSON field window.
+
+
+
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking, with suitable font-awesome icons, easy to operate.
+Use suitable animations.
+Use only html, css, javascript and tailwindcss

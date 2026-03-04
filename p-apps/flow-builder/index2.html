@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Journey Builder - Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      overscroll-behavior: none;
+    }
+
+    .canvas-container {
+      position: relative;
+      overflow: hidden;
+      background-color: #f8fafc;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 24px 24px;
+      touch-action: none;
+    }
+
+    .journey-node {
+      position: absolute;
+      width: 240px;
+      user-select: none;
+      touch-action: none;
+      cursor: move;
+      z-index: 10;
+    }
+
+    .journey-node.selected {
+      box-shadow: 0 0 0 2px #3b82f6, 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      z-index: 50;
+    }
+
+    .node-delete-btn,
+    .node-edit-btn {
+      display: none;
+      position: absolute;
+      top: -10px;
+      width: 26px;
+      height: 26px;
+      color: white;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 60;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .node-delete-btn {
+      right: -10px;
+      background-color: #ef4444;
+    }
+
+    .node-edit-btn {
+      left: -10px;
+      background-color: #3b82f6;
+    }
+
+    .journey-node.selected .node-delete-btn,
+    .journey-node.selected .node-edit-btn {
+      display: flex;
+    }
+
+    .port {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background-color: white;
+      border: 2px solid #94a3b8;
+      border-radius: 50%;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: crosshair;
+      z-index: 20;
+    }
+
+    .port-in {
+      left: -12px;
+    }
+
+    .port-out {
+      right: -12px;
+    }
+
+    svg.connections-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .connection-path {
+      fill: none;
+      stroke: #cbd5e1;
+      stroke-width: 5;
+      stroke-linecap: round;
+      pointer-events: stroke;
+      cursor: pointer;
+      transition: stroke 0.2s;
+    }
+
+    .connection-path.selected {
+      stroke: #ef4444;
+      stroke-width: 6;
+    }
+
+    .connection-path:hover {
+      stroke: #94a3b8;
+    }
+
+    .temp-connection {
+      fill: none;
+      stroke: #3b82f6;
+      stroke-width: 3;
+      stroke-dasharray: 6 6;
+      animation: dash 1s linear infinite;
+    }
+
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -12;
+      }
+    }
+
+    .bg-trigger {
+      background-color: #10b981;
+    }
+
+    .bg-action {
+      background-color: #3b82f6;
+    }
+
+    .bg-decision {
+      background-color: #f59e0b;
+    }
+
+    #conn-delete-popover {
+      pointer-events: auto;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.2s;
+    }
+
+    /* Drag and Drop Styling */
+    .draggable-item {
+      cursor: grab;
+    }
+
+    .draggable-item:active {
+      cursor: grabbing;
+    }
+
+    .canvas-drag-over {
+      background-color: #eff6ff;
+      outline: 2px dashed #3b82f6;
+      outline-offset: -4px;
+    }
+  </style>
+</head>
+
+<body class="h-screen w-screen flex flex-col overflow-hidden bg-white text-slate-800 font-sans fixed inset-0">
+
+  <header
+    class="h-14 md:h-16 border-b border-slate-200 bg-white flex items-center justify-between px-4 z-20 shadow-sm relative">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleSidebar()" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-md">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+      <div class="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold">J</div>
+      <h1 class="text-base font-semibold hidden sm:block">Journey Builder</h1>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="clearCanvas()" class="px-3 py-1.5 text-sm text-slate-500 hover:text-red-600">Clear</button>
+      <button onclick="exportJourney()"
+        class="px-4 py-1.5 bg-slate-900 text-white text-sm rounded-md shadow-sm">Export</button>
+    </div>
+  </header>
+
+  <div class="flex-1 flex overflow-hidden relative">
+    <div id="sidebar-overlay"
+      class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden transition-opacity opacity-0"
+      onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar"
+      class="absolute md:relative inset-y-0 left-0 w-72 border-r border-slate-200 bg-slate-50 flex flex-col z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+      <div
+        class="p-4 font-bold text-xs text-slate-400 uppercase tracking-widest border-b border-slate-200 flex justify-between items-center shrink-0">
+        <span>Components</span>
+        <button onclick="toggleSidebar()" class="md:hidden">✕</button>
+      </div>
+      <div class="p-4 text-[10px] text-slate-400 italic">Drag components onto the canvas</div>
+      <div class="p-3 flex-1 overflow-y-auto space-y-2" id="palette"></div>
+    </aside>
+
+    <main class="flex-1 canvas-container w-full h-full" id="canvas-container">
+      <svg class="connections-layer" id="svg-layer"></svg>
+
+      <div id="conn-delete-popover" class="absolute hidden z-[60]">
+        <button id="btn-delete-conn"
+          class="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1 hover:bg-red-600 active:scale-95 transition-all">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          Delete Connection
+        </button>
+      </div>
+
+      <div id="canvas" class="absolute inset-0 origin-top-left"></div>
+    </main>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="edit-modal"
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-all flex flex-col max-h-[90vh]">
+      <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <h2 class="font-bold text-slate-800">Node Configuration</h2>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+      <div class="p-6 space-y-6 overflow-y-auto">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="col-span-2">
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Node Title</label>
+            <input type="text" id="edit-title"
+              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Notes /
+              Description</label>
+            <textarea id="edit-notes" rows="3"
+              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"></textarea>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 grid grid-cols-2 gap-6">
+          <div>
+            <label
+              class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Inputs
+            </label>
+            <div id="modal-inputs" class="space-y-2">
+              <!-- Injected -->
+            </div>
+          </div>
+          <div>
+            <label
+              class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Outputs
+            </label>
+            <div id="modal-outputs" class="space-y-2">
+              <!-- Injected -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+        <button onclick="closeEditModal()"
+          class="px-5 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">Cancel</button>
+        <button onclick="saveNodeDetails()"
+          class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-blue-700 active:scale-95 transition-all">Save
+          Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div id="export-modal"
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+      <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+        <h2 class="font-bold">Export JSON</h2>
+        <button onclick="closeExportModal()">✕</button>
+      </div>
+      <pre class="p-4 bg-slate-900 text-emerald-400 text-xs overflow-auto flex-1 font-mono" id="export-code"></pre>
+      <div class="p-4 bg-slate-50 flex justify-end gap-2">
+        <button onclick="closeExportModal()" class="px-4 py-2 text-sm">Close</button>
+        <button onclick="copyExportToClipboard()"
+          class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-slate-800 text-white text-sm font-medium shadow-2xl transition-all opacity-0 pointer-events-none z-[200]">
+  </div>
+
+  <script>
+    const state = {
+      nodes: [],
+      connections: [],
+      selectedNodeId: null,
+      selectedConnId: null,
+      canvasOffset: { x: 0, y: 0 },
+      isSidebarOpen: false
+    };
+
+    const nodeDefinitions = [
+      { type: 'trigger', category: 'trigger', title: 'Webhook', icon: '🌐', desc: 'Starts on URL call' },
+      { type: 'schedule', category: 'trigger', title: 'Schedule', icon: '⏱️', desc: 'Starts on timer' },
+      { type: 'http', category: 'action', title: 'HTTP Request', icon: '🔌', desc: 'Call external API' },
+      { type: 'email', category: 'action', title: 'Email', icon: '📧', desc: 'Send notification' },
+      { type: 'sms', category: 'action', title: 'SMS', icon: '📱', desc: 'Send text' },
+      { type: 'if', category: 'decision', title: 'If / Else', icon: '🔀', desc: 'Route logic' },
+      { type: 'wait', category: 'decision', title: 'Wait', icon: '⏳', desc: 'Pause flow' }
+    ];
+
+    const DOM = {
+      canvas: document.getElementById('canvas'),
+      canvasContainer: document.getElementById('canvas-container'),
+      svgLayer: document.getElementById('svg-layer'),
+      palette: document.getElementById('palette'),
+      sidebar: document.getElementById('sidebar'),
+      sidebarOverlay: document.getElementById('sidebar-overlay'),
+      connPopover: document.getElementById('conn-delete-popover'),
+      btnDeleteConn: document.getElementById('btn-delete-conn')
+    };
+
+    let dragInfo = { isDragging: false, nodeId: null, offsetX: 0, offsetY: 0 };
+    let connInfo = { isConnecting: false, fromNodeId: null, startX: 0, startY: 0 };
+    let panInfo = { isPanning: false, lastX: 0, lastY: 0 };
+
+    function init() {
+      renderPalette();
+      addNodeCentered('trigger');
+
+      // Interaction events
+      DOM.canvasContainer.addEventListener('mousedown', handleStart);
+      DOM.canvasContainer.addEventListener('touchstart', handleStart, { passive: false });
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('touchmove', handleMove, { passive: false });
+      window.addEventListener('mouseup', handleEnd);
+      window.addEventListener('touchend', handleEnd);
+
+      // Drag and Drop native API
+      DOM.canvasContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        DOM.canvasContainer.classList.add('canvas-drag-over');
+      });
+      DOM.canvasContainer.addEventListener('dragleave', () => {
+        DOM.canvasContainer.classList.remove('canvas-drag-over');
+      });
+      DOM.canvasContainer.addEventListener('drop', handleDrop);
+
+      DOM.btnDeleteConn.addEventListener('click', () => {
+        if (state.selectedConnId) deleteConnection(state.selectedConnId);
+      });
+    }
+
+    function toggleSidebar() {
+      state.isSidebarOpen = !state.isSidebarOpen;
+      DOM.sidebar.classList.toggle('-translate-x-full', !state.isSidebarOpen);
+      DOM.sidebarOverlay.classList.toggle('hidden', !state.isSidebarOpen);
+      setTimeout(() => DOM.sidebarOverlay.classList.toggle('opacity-0', !state.isSidebarOpen), 10);
+    }
+
+    function renderPalette() {
+      nodeDefinitions.forEach(def => {
+        const el = document.createElement('div');
+        el.className = `p-3 bg-white border border-slate-200 rounded-xl shadow-sm cursor-pointer hover:border-blue-300 active:scale-95 transition-all flex items-center gap-3 draggable-item`;
+        el.draggable = true;
+        el.dataset.type = def.type;
+
+        // For desktop drag
+        el.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('nodeType', def.type);
+        });
+
+        // For simple click add
+        el.onclick = () => {
+          if (!dragInfo.isDragging) {
+            addNodeCentered(def.type);
+            if (window.innerWidth < 768) toggleSidebar();
+          }
+        };
+
+        el.innerHTML = `
+                    <div class="w-8 h-8 rounded bg-${def.category} text-white flex items-center justify-center text-sm shadow-sm">${def.icon}</div>
+                    <div class="flex-1 overflow-hidden">
+                        <h3 class="text-xs font-bold text-slate-800 truncate">${def.title}</h3>
+                        <p class="text-[9px] text-slate-400 truncate">${def.desc}</p>
+                    </div>
+                `;
+        DOM.palette.appendChild(el);
+      });
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      DOM.canvasContainer.classList.remove('canvas-drag-over');
+      const type = e.dataTransfer.getData('nodeType');
+      if (!type) return;
+
+      const rect = DOM.canvasContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left - state.canvasOffset.x - 120;
+      const y = e.clientY - rect.top - state.canvasOffset.y - 40;
+
+      addNode(type, x, y);
+    }
+
+    function getCoords(e) {
+      const touch = e.touches?.[0] || e.changedTouches?.[0];
+      return touch ? { x: touch.clientX, y: touch.clientY } : { x: e.clientX, y: e.clientY };
+    }
+
+    function handleStart(e) {
+      const coords = getCoords(e);
+      const containerRect = DOM.canvasContainer.getBoundingClientRect();
+
+      // 1. Connection Path Selection
+      if (e.target.classList.contains('connection-path')) {
+        const connId = e.target.dataset.connId;
+        selectConnection(connId, coords);
+        return;
+      }
+
+      // 2. Clear Selection if clicking canvas
+      if (e.target === DOM.canvasContainer || e.target.id === 'canvas' || e.target.id === 'svg-layer') {
+        selectNode(null);
+        selectConnection(null);
+        panInfo = { isPanning: true, lastX: coords.x, lastY: coords.y };
+        return;
+      }
+
+      // 3. Ports
+      if (e.target.classList.contains('port-out')) {
+        e.preventDefault();
+        const nodeId = e.target.dataset.nodeId;
+        const rect = e.target.getBoundingClientRect();
+        connInfo = {
+          isConnecting: true,
+          fromNodeId: nodeId,
+          startX: rect.left + 12 - containerRect.left,
+          startY: rect.top + 12 - containerRect.top
+        };
+        return;
+      }
+
+      // 4. Nodes
+      const nodeEl = e.target.closest('.journey-node');
+      if (nodeEl) {
+        if (e.target.closest('.node-delete-btn')) return deleteNode(nodeEl.dataset.nodeId);
+        if (e.target.closest('.node-edit-btn')) return openEditModal(nodeEl.dataset.nodeId);
+
+        selectNode(nodeEl.dataset.nodeId);
+        selectConnection(null);
+        const rect = nodeEl.getBoundingClientRect();
+        dragInfo = {
+          isDragging: true,
+          nodeId: nodeEl.dataset.nodeId,
+          offsetX: coords.x - rect.left,
+          offsetY: coords.y - rect.top
+        };
+        return;
+      }
+    }
+
+    function handleMove(e) {
+      const coords = getCoords(e);
+      const containerRect = DOM.canvasContainer.getBoundingClientRect();
+
+      if (dragInfo.isDragging) {
+        const node = state.nodes.find(n => n.id === dragInfo.nodeId);
+        if (node) {
+          node.x = coords.x - containerRect.left - dragInfo.offsetX - state.canvasOffset.x;
+          node.y = coords.y - containerRect.top - dragInfo.offsetY - state.canvasOffset.y;
+          updateNodeDOM(node);
+          renderConnections();
+        }
+      } else if (connInfo.isConnecting) {
+        renderConnections({
+          temp: true,
+          x1: connInfo.startX,
+          y1: connInfo.startY,
+          x2: coords.x - containerRect.left,
+          y2: coords.y - containerRect.top
+        });
+      } else if (panInfo.isPanning) {
+        state.canvasOffset.x += coords.x - panInfo.lastX;
+        state.canvasOffset.y += coords.y - panInfo.lastY;
+        DOM.canvas.style.transform = `translate(${state.canvasOffset.x}px, ${state.canvasOffset.y}px)`;
+        DOM.canvasContainer.style.backgroundPosition = `${state.canvasOffset.x}px ${state.canvasOffset.y}px`;
+        panInfo.lastX = coords.x;
+        panInfo.lastY = coords.y;
+        renderConnections();
+      }
+    }
+
+    function handleEnd(e) {
+      if (connInfo.isConnecting) {
+        const coords = getCoords(e);
+        const target = document.elementFromPoint(coords.x, coords.y);
+        if (target?.classList.contains('port-in')) {
+          const toId = target.dataset.nodeId;
+          if (toId !== connInfo.fromNodeId && !state.connections.some(c => c.from === connInfo.fromNodeId && c.to === toId)) {
+            state.connections.push({ id: 'conn_' + Date.now(), from: connInfo.fromNodeId, to: toId });
+            showToast("Connected!");
+          }
+        }
+      }
+      dragInfo.isDragging = false;
+      connInfo.isConnecting = false;
+      panInfo.isPanning = false;
+      renderConnections();
+    }
+
+    function addNode(typeStr, x, y) {
+      const def = nodeDefinitions.find(d => d.type === typeStr);
+      const id = 'node_' + Math.random().toString(36).substr(2, 5);
+      const node = { id, type: typeStr, def, title: def.title, notes: '', x, y };
+      state.nodes.push(node);
+      createNodeDOM(node);
+      selectNode(id);
+    }
+
+    function createNodeDOM(node) {
+      const el = document.createElement('div');
+      el.className = `journey-node bg-white border border-slate-200 rounded-xl shadow-sm`;
+      el.dataset.nodeId = node.id;
+      el.innerHTML = `
+                <div class="node-delete-btn" title="Delete">✕</div>
+                <div class="node-edit-btn" title="Edit">✎</div>
+                ${node.def.category !== 'trigger' ? `<div class="port port-in" data-node-id="${node.id}"></div>` : ''}
+                <div class="p-3 flex items-center gap-3 border-b border-slate-50">
+                    <div class="w-8 h-8 rounded bg-${node.def.category} text-white flex items-center justify-center shrink-0 shadow-sm">${node.def.icon}</div>
+                    <h3 class="node-title text-sm font-bold text-slate-700 truncate">${node.title}</h3>
+                </div>
+                <div class="px-3 py-1.5 flex justify-between items-center bg-slate-50/30 rounded-b-xl">
+                    <span class="text-[9px] font-bold text-slate-300 uppercase">${node.def.category}</span>
+                </div>
+                <div class="port port-out" data-node-id="${node.id}"></div>
+            `;
+      DOM.canvas.appendChild(el);
+      updateNodeDOM(node);
+    }
+
+    function updateNodeDOM(node) {
+      const el = document.querySelector(`[data-node-id="${node.id}"]`);
+      if (el) { el.style.left = `${node.x}px`; el.style.top = `${node.y}px`; }
+    }
+
+    function selectNode(id) {
+      state.selectedNodeId = id;
+      document.querySelectorAll('.journey-node').forEach(el => el.classList.toggle('selected', el.dataset.nodeId === id));
+    }
+
+    function selectConnection(id, coords = null) {
+      state.selectedConnId = id;
+      if (!id) {
+        DOM.connPopover.classList.add('hidden');
+      } else if (coords) {
+        DOM.connPopover.classList.remove('hidden');
+        DOM.connPopover.style.left = `${coords.x - DOM.canvasContainer.getBoundingClientRect().left}px`;
+        DOM.connPopover.style.top = `${coords.y - DOM.canvasContainer.getBoundingClientRect().top - 40}px`;
+      }
+      renderConnections();
+    }
+
+    function deleteNode(id) {
+      state.nodes = state.nodes.filter(n => n.id !== id);
+      state.connections = state.connections.filter(c => c.from !== id && c.to !== id);
+      document.querySelector(`[data-node-id="${id}"]`)?.remove();
+      renderConnections();
+      showToast("Node deleted");
+    }
+
+    function deleteConnection(id) {
+      state.connections = state.connections.filter(c => c.id !== id);
+      selectConnection(null);
+      showToast("Connection deleted");
+    }
+
+    function renderConnections(temp = null) {
+      let html = '';
+      state.connections.forEach(c => {
+        const f = state.nodes.find(n => n.id === c.from);
+        const t = state.nodes.find(n => n.id === c.to);
+        if (f && t) {
+          const d = createBezier(
+            f.x + 240 + state.canvasOffset.x,
+            f.y + 35 + state.canvasOffset.y,
+            t.x + state.canvasOffset.x,
+            t.y + 35 + state.canvasOffset.y
+          );
+          html += `<path class="connection-path ${state.selectedConnId === c.id ? 'selected' : ''}" d="${d}" data-conn-id="${c.id}"></path>`;
+        }
+      });
+      if (temp) html += `<path class="temp-connection" d="${createBezier(temp.x1, temp.y1, temp.x2, temp.y2)}"></path>`;
+      DOM.svgLayer.innerHTML = html;
+    }
+
+    function createBezier(x1, y1, x2, y2) {
+      const cp = Math.max(Math.abs(x2 - x1) * 0.5, 40);
+      return `M ${x1} ${y1} C ${x1 + cp} ${y1}, ${x2 - cp} ${y2}, ${x2} ${y2}`;
+    }
+
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      t.textContent = m; t.classList.remove('opacity-0');
+      setTimeout(() => t.classList.add('opacity-0'), 2000);
+    }
+
+    function addNodeCentered(t) {
+      const r = DOM.canvasContainer.getBoundingClientRect();
+      addNode(t, (r.width / 2) - state.canvasOffset.x - 120, (r.height / 2) - state.canvasOffset.y - 40);
+    }
+
+    // Modals Logic
+    function openEditModal(id) {
+      const n = state.nodes.find(n => n.id === id);
+      if (!n) return;
+
+      state.editingNodeId = id;
+      document.getElementById('edit-title').value = n.title;
+      document.getElementById('edit-notes').value = n.notes || '';
+
+      // Update Connections Display
+      const inputsDiv = document.getElementById('modal-inputs');
+      const outputsDiv = document.getElementById('modal-outputs');
+
+      const inputs = state.connections.filter(c => c.to === id).map(c => state.nodes.find(node => node.id === c.from));
+      const outputs = state.connections.filter(c => c.from === id).map(c => state.nodes.find(node => node.id === c.to));
+
+      inputsDiv.innerHTML = inputs.length ? inputs.map(node => `
+                <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 flex items-center gap-2">
+                    <span class="opacity-50">${node.def.icon}</span> ${node.title}
+                </div>
+            `).join('') : '<div class="text-[10px] text-slate-400 italic">No incoming connections</div>';
+
+      outputsDiv.innerHTML = outputs.length ? outputs.map(node => `
+                <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 flex items-center gap-2">
+                     <span class="opacity-50">${node.def.icon}</span> ${node.title}
+                </div>
+            `).join('') : '<div class="text-[10px] text-slate-400 italic">No outgoing connections</div>';
+
+      document.getElementById('edit-modal').classList.replace('hidden', 'flex');
+      setTimeout(() => {
+        document.getElementById('edit-modal').firstElementChild.classList.replace('scale-95', 'scale-100');
+      }, 10);
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').firstElementChild.classList.replace('scale-100', 'scale-95');
+      setTimeout(() => {
+        document.getElementById('edit-modal').classList.replace('flex', 'hidden');
+      }, 150);
+    }
+
+    function saveNodeDetails() {
+      const n = state.nodes.find(n => n.id === state.editingNodeId);
+      if (n) {
+        n.title = document.getElementById('edit-title').value;
+        n.notes = document.getElementById('edit-notes').value;
+        document.querySelector(`[data-node-id="${n.id}"] .node-title`).textContent = n.title;
+        showToast("Saved!");
+      }
+      closeEditModal();
+    }
+
+    function exportJourney() {
+      const data = {
+        nodes: state.nodes.map(({ def, ...rest }) => rest),
+        connections: state.connections
+      };
+      document.getElementById('export-code').textContent = JSON.stringify(data, null, 2);
+      document.getElementById('export-modal').classList.replace('hidden', 'flex');
+    }
+
+    function closeExportModal() { document.getElementById('export-modal').classList.replace('flex', 'hidden'); }
+
+    function copyExportToClipboard() {
+      const code = document.getElementById('export-code').textContent;
+      const textArea = document.createElement("textarea");
+      textArea.value = code;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      showToast("Copied to clipboard!");
+    }
+
+    function clearCanvas() {
+      if (confirm("Are you sure you want to clear the entire canvas?")) {
+        state.nodes = [];
+        state.connections = [];
+        DOM.canvas.innerHTML = '';
+        renderConnections();
+      }
+    }
+
+    init();
+  </script>
+</body>
+
+</html>
