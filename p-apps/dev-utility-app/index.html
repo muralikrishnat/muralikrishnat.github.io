@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevNexus - Developer Utility Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide-react/0.263.1/lucide-react.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at top left, #1a1c2c, #0d0e14);
+      color: #e2e8f0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-dark {
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .sidebar-item.active {
+      background: rgba(59, 130, 246, 0.2);
+      border-right: 3px solid #3b82f6;
+    }
+
+    .terminal-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .tab-active {
+      border-bottom: 2px solid #3b82f6;
+      color: #3b82f6;
+    }
+
+    .node-hover:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  </style>
+</head>
+
+<body class="flex flex-col">
+
+  <!-- Status Bar -->
+  <header class="h-10 glass border-b flex items-center justify-between px-4 text-xs font-medium z-50">
+    <div class="flex items-center gap-4">
+      <span class="text-blue-400 font-bold tracking-wider">DEVNEXUS v1.0</span>
+      <div id="pinned-stats" class="flex items-center gap-3 border-l border-white/10 pl-4">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span> CPU: <span
+            id="stat-cpu">12%</span></span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> RAM: <span
+            id="stat-ram">4.2GB</span></span>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <span id="sys-time">00:00:00</span>
+      <span class="opacity-50">OS: Darwin-x64</span>
+    </div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-16 md:w-64 glass border-r flex flex-col">
+      <nav class="flex-1 py-4 flex flex-col gap-1 overflow-y-auto" id="main-nav">
+        <!-- Nav items generated via JS -->
+      </nav>
+      <div class="p-4 border-t border-white/10">
+        <button onclick="app.showPluginManager()"
+          class="flex items-center gap-3 w-full p-2 rounded hover:bg-white/5 text-sm transition-colors">
+          <span id="icon-plus"></span>
+          <span class="hidden md:inline">Add Plugin</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 relative overflow-y-auto p-6" id="app-viewport">
+      <!-- View contents injected here -->
+    </main>
+  </div>
+
+  <!-- Modals Container -->
+  <div id="modal-container" class="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] hidden">
+    <div class="glass w-[500px] p-6 rounded-xl shadow-2xl scale-95 transition-transform" id="modal-content">
+      <!-- Modal content injected here -->
+    </div>
+  </div>
+
+  <script>
+    // --- Core State Management ---
+    const app = {
+      currentView: 'terminal',
+      plugins: [
+        { id: 'copy', name: 'Copy Utility', icon: 'copy' },
+        { id: 'terminal', name: 'Web Terminal', icon: 'terminal' },
+        { id: 'cron', name: 'Cron Jobs', icon: 'clock' },
+        { id: 'watcher', name: 'Watcher', icon: 'eye' },
+        { id: 'json', name: 'JSON Utility', icon: 'file-json' },
+        { id: 'system', name: 'System Info', icon: 'cpu' }
+      ],
+      terminal: {
+        tabs: [{ id: 1, name: 'Default', history: [] }],
+        activeTabId: 1,
+        history: []
+      },
+      cron: [],
+      watchers: [],
+      copyLogs: [],
+      jsonData: {
+        project: "DevNexus",
+        version: "1.0.0",
+        author: "Gemini",
+        settings: {
+          theme: "dark",
+          notifications: true
+        },
+        tags: ["dev", "utils", "web"]
+      }
+    };
+
+    // --- UI Rendering ---
+    function initIcons() {
+      // Simple mapping for Lucide icons (placeholders used here)
+      const icons = {
+        copy: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+        terminal: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>',
+        clock: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+        eye: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+        'file-json': '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M10 13l-2 2 2 2"/><path d="M14 17l2-2-2-2"/></svg>',
+        cpu: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>',
+        plus: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+      };
+      document.getElementById('icon-plus').innerHTML = icons.plus;
+      return icons;
+    }
+
+    const icons = initIcons();
+
+    function renderSidebar() {
+      const nav = document.getElementById('main-nav');
+      nav.innerHTML = app.plugins.map(p => `
+                <button onclick="setView('${p.id}')" class="sidebar-item flex items-center gap-3 px-4 py-3 text-sm transition-all hover:bg-white/5 ${app.currentView === p.id ? 'active' : 'opacity-60'}">
+                    ${icons[p.icon]}
+                    <span class="hidden md:inline font-medium">${p.name}</span>
+                </button>
+            `).join('');
+    }
+
+    function setView(viewId) {
+      app.currentView = viewId;
+      renderSidebar();
+      renderView();
+    }
+
+    function renderView() {
+      const viewport = document.getElementById('app-viewport');
+      viewport.innerHTML = '';
+
+      switch (app.currentView) {
+        case 'copy': renderCopyUtility(viewport); break;
+        case 'terminal': renderTerminal(viewport); break;
+        case 'cron': renderCronJobs(viewport); break;
+        case 'watcher': renderWatcher(viewport); break;
+        case 'json': renderJsonUtility(viewport); break;
+        case 'system': renderSystemInfo(viewport); break;
+      }
+    }
+
+    // --- View Handlers ---
+
+    function renderCopyUtility(container) {
+      container.innerHTML = `
+                <div class="space-y-6 max-w-4xl">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-2xl font-bold">Copy Utility</h1>
+                        <div class="flex gap-2">
+                             <button class="px-4 py-2 glass rounded-lg hover:bg-white/10 transition text-sm">Clear History</button>
+                        </div>
+                    </div>
+
+                    <div class="glass p-6 rounded-xl space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs uppercase tracking-wider opacity-50 mb-2 font-bold">Source Directory</label>
+                                <input type="text" placeholder="/src/assets" class="w-full glass-dark p-3 rounded-lg outline-none focus:ring-1 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs uppercase tracking-wider opacity-50 mb-2 font-bold">Destination Directory</label>
+                                <input type="text" placeholder="/dist/assets" class="w-full glass-dark p-3 rounded-lg outline-none focus:ring-1 focus:ring-blue-500">
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-6 pt-2">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" checked class="w-4 h-4 rounded border-white/10 bg-black/30">
+                                <span class="text-sm">gZip Compression</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" checked class="w-4 h-4 rounded border-white/10 bg-black/30">
+                                <span class="text-sm">Minify Assets</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" class="w-4 h-4 rounded border-white/10 bg-black/30">
+                                <span class="text-sm">Combine into Single File</span>
+                            </label>
+                        </div>
+
+                        <button onclick="executeCopy()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-bold shadow-lg shadow-blue-900/20 transition">Run Copy Operation</button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold opacity-60">RECENT ACTIONS</h3>
+                        <div id="copy-logs" class="space-y-2">
+                            ${app.copyLogs.length ? app.copyLogs.map(log => `
+                                <div class="glass-dark p-3 rounded-lg flex justify-between items-center animate-in fade-in slide-in-from-bottom-2">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                        <div>
+                                            <p class="text-sm font-medium">${log.action}</p>
+                                            <p class="text-xs opacity-40">${log.time}</p>
+                                        </div>
+                                    </div>
+                                    <button class="text-xs text-red-400 hover:underline">Delete</button>
+                                </div>
+                            `).join('') : '<p class="text-sm opacity-30 italic">No operations performed yet.</p>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+    }
+
+    function executeCopy() {
+      app.copyLogs.unshift({
+        action: 'Recursive copy dist -> build (compressed)',
+        time: new Date().toLocaleTimeString()
+      });
+      renderView();
+    }
+
+    function renderTerminal(container) {
+      container.innerHTML = `
+                <div class="flex flex-col h-full space-y-4">
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1" id="terminal-tabs">
+                        ${app.terminal.tabs.map(t => `
+                            <div class="glass flex items-center gap-3 px-4 py-2 rounded-t-lg min-w-[120px] cursor-pointer group ${app.terminal.activeTabId === t.id ? 'tab-active' : 'opacity-50'}">
+                                <span class="text-sm truncate">${t.name}</span>
+                                <button class="opacity-0 group-hover:opacity-100 transition">×</button>
+                            </div>
+                        `).join('')}
+                        <button class="p-2 opacity-50 hover:opacity-100 hover:bg-white/5 rounded" onclick="addTerminalTab()">+</button>
+                    </div>
+
+                    <div class="flex-1 glass p-4 rounded-xl terminal-font text-sm flex flex-col overflow-hidden">
+                        <div class="flex-1 overflow-y-auto space-y-4 mb-4" id="terminal-output">
+                            <div class="text-green-400">Welcome to DevNexus Terminal. Type 'help' for commands.</div>
+                            ${app.terminal.history.map(item => `
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2 opacity-50 text-xs">
+                                        <span>[${item.time}]</span> 
+                                        <span>Status: ${item.status}</span>
+                                        <span>Time: ${item.duration}ms</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="text-blue-400 font-bold">$</span>
+                                        <span>${item.cmd}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="border-t border-white/5 pt-4">
+                            <div class="text-xs opacity-40 mb-2 flex justify-between">
+                                <span>AI SUGGESTIONS:</span>
+                                <span class="text-blue-400">Press Tab to auto-complete</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="px-3 py-1 glass text-xs rounded-full hover:bg-blue-500/20">npm run dev</button>
+                                <button class="px-3 py-1 glass text-xs rounded-full hover:bg-blue-500/20">git status</button>
+                                <button class="px-3 py-1 glass text-xs rounded-full hover:bg-blue-500/20">docker-compose up</button>
+                            </div>
+                            <div class="mt-4 flex gap-2 items-center bg-black/40 p-3 rounded-lg border border-white/10">
+                                <span class="text-blue-400 font-bold">$</span>
+                                <input id="terminal-input" type="text" class="flex-1 bg-transparent outline-none" placeholder="Enter command..." autofocus>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+      const input = document.getElementById('terminal-input');
+      input?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') executeCommand(input.value);
+      });
+    }
+
+    function executeCommand(cmd) {
+      if (!cmd.trim()) return;
+      app.terminal.history.push({
+        cmd,
+        time: new Date().toLocaleTimeString(),
+        status: 'success',
+        duration: Math.floor(Math.random() * 200) + 10
+      });
+      renderView();
+      setTimeout(() => {
+        const output = document.getElementById('terminal-output');
+        if (output) output.scrollTop = output.scrollHeight;
+      }, 50);
+    }
+
+    function addTerminalTab() {
+      const id = Date.now();
+      app.terminal.tabs.push({ id, name: `Session ${app.terminal.tabs.length + 1}`, history: [] });
+      app.terminal.activeTabId = id;
+      renderView();
+    }
+
+    function renderCronJobs(container) {
+      container.innerHTML = `
+                <div class="space-y-6 max-w-4xl">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-2xl font-bold">Cron Jobs</h1>
+                        <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-bold text-sm">Create New Job</button>
+                    </div>
+
+                    <div class="glass-dark overflow-hidden rounded-xl border border-white/10">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-white/5 border-b border-white/10">
+                                <tr>
+                                    <th class="p-4">Job Name</th>
+                                    <th class="p-4">Schedule</th>
+                                    <th class="p-4">Last Run</th>
+                                    <th class="p-4">Next Slot</th>
+                                    <th class="p-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                <tr>
+                                    <td class="p-4 font-medium">Build Production Assets</td>
+                                    <td class="p-4 opacity-70">0 0 * * *</td>
+                                    <td class="p-4 opacity-70">2h ago</td>
+                                    <td class="p-4 opacity-70 text-blue-400">In 22h</td>
+                                    <td class="p-4">
+                                        <div class="flex gap-2 text-xs">
+                                            <button class="text-green-400 hover:underline">Run</button>
+                                            <button class="text-blue-400 hover:underline">Edit</button>
+                                            <button class="text-red-400 hover:underline">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-medium">Clear Log Files</td>
+                                    <td class="p-4 opacity-70">*/30 * * * *</td>
+                                    <td class="p-4 opacity-70">12m ago</td>
+                                    <td class="p-4 opacity-70 text-blue-400">In 18m</td>
+                                    <td class="p-4">
+                                        <div class="flex gap-2 text-xs">
+                                            <button class="text-green-400 hover:underline">Run</button>
+                                            <button class="text-blue-400 hover:underline">Edit</button>
+                                            <button class="text-red-400 hover:underline">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+    }
+
+    function renderWatcher(container) {
+      container.innerHTML = `
+                <div class="space-y-6 max-w-4xl">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-2xl font-bold">Folder Watchers</h1>
+                        <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-bold text-sm">+ Add Watcher</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="glass p-5 rounded-xl border-l-4 border-green-500">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="font-bold">Watch: /src/components</h3>
+                                <span class="bg-green-500/20 text-green-400 text-[10px] px-2 py-1 rounded uppercase font-bold">Active</span>
+                            </div>
+                            <p class="text-xs opacity-50 mb-4 line-clamp-1">Trigger: File Change -> Action: Run Build Cron</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] opacity-30">Updated 5 mins ago</span>
+                                <div class="flex gap-3">
+                                    <button class="text-xs text-blue-400">Pause</button>
+                                    <button class="text-xs text-red-400">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass p-5 rounded-xl border-l-4 border-yellow-500 opacity-60">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="font-bold">Watch: /dist</h3>
+                                <span class="bg-yellow-500/20 text-yellow-400 text-[10px] px-2 py-1 rounded uppercase font-bold">Paused</span>
+                            </div>
+                            <p class="text-xs opacity-50 mb-4 line-clamp-1">Trigger: New File -> Action: Copy Utility</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] opacity-30">Updated Yesterday</span>
+                                <div class="flex gap-3">
+                                    <button class="text-xs text-green-400">Resume</button>
+                                    <button class="text-xs text-red-400">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+    }
+
+    function renderJsonUtility(container) {
+      container.innerHTML = `
+                <div class="flex flex-col h-full space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-2xl font-bold">Visual JSON Editor</h1>
+                        <div class="flex gap-2">
+                            <button class="glass px-4 py-2 rounded text-sm hover:bg-white/5">Import</button>
+                            <button class="bg-blue-600 px-4 py-2 rounded text-sm hover:bg-blue-500">Export JSON</button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden">
+                        <div class="glass p-4 rounded-xl flex flex-col overflow-hidden">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-xs font-bold opacity-50">TREE VIEW (Drag to reorder)</span>
+                                <button onclick="addJsonNode()" class="text-xs text-blue-400">+ Add Root Node</button>
+                            </div>
+                            <div id="json-tree" class="flex-1 overflow-y-auto space-y-2 p-2">
+                                ${renderJsonNodes(app.jsonData)}
+                            </div>
+                        </div>
+                        <div class="glass p-4 rounded-xl flex flex-col overflow-hidden">
+                             <span class="text-xs font-bold opacity-50 mb-4 uppercase">Source Preview</span>
+                             <pre class="flex-1 overflow-y-auto terminal-font text-sm bg-black/20 p-4 rounded-lg text-blue-200">${JSON.stringify(app.jsonData, null, 4)}</pre>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+      new Sortable(document.getElementById('json-tree'), {
+        animation: 150,
+        ghostClass: 'opacity-50'
+      });
+    }
+
+    function renderJsonNodes(obj, depth = 0) {
+      return Object.entries(obj).map(([key, val]) => {
+        const isObject = typeof val === 'object' && val !== null;
+        return `
+                    <div class="node-hover p-2 rounded flex flex-col gap-1 transition-colors" style="margin-left: ${depth * 16}px">
+                        <div class="flex items-center justify-between group">
+                            <div class="flex items-center gap-2">
+                                <span class="opacity-30">⋮⋮</span>
+                                <span class="text-pink-400 font-bold">${key}:</span>
+                                ${!isObject ? `
+                                    <input type="text" value="${val}" class="bg-transparent border-b border-transparent focus:border-blue-500 outline-none px-1 text-white/80" 
+                                    onchange="updateJsonValue('${key}', this.value)">
+                                ` : `<span class="opacity-40 text-xs italic">{ Object }</span>`}
+                            </div>
+                            <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                                <button class="text-[10px] text-blue-400">Edit</button>
+                                <button class="text-[10px] text-red-400">Delete</button>
+                            </div>
+                        </div>
+                        ${isObject ? renderJsonNodes(val, depth + 1) : ''}
+                    </div>
+                `;
+      }).join('');
+    }
+
+    function updateJsonValue(key, val) {
+      // Simple flat update for demo
+      app.jsonData[key] = val;
+      renderView();
+    }
+
+    function renderSystemInfo(container) {
+      container.innerHTML = `
+                <div class="space-y-8 max-w-4xl">
+                    <h1 class="text-2xl font-bold">System Resources</h1>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="glass p-6 rounded-2xl flex flex-col items-center text-center">
+                            <div class="w-16 h-16 rounded-full border-4 border-blue-500 flex items-center justify-center text-blue-500 font-bold mb-4">64%</div>
+                            <h3 class="font-bold">CPU Load</h3>
+                            <p class="text-xs opacity-50">Intel Core i9 10-Core</p>
+                        </div>
+                        <div class="glass p-6 rounded-2xl flex flex-col items-center text-center">
+                            <div class="w-16 h-16 rounded-full border-4 border-green-500 flex items-center justify-center text-green-500 font-bold mb-4">8.2</div>
+                            <h3 class="font-bold">RAM (GB)</h3>
+                            <p class="text-xs opacity-50">16GB Total Available</p>
+                        </div>
+                        <div class="glass p-6 rounded-2xl flex flex-col items-center text-center">
+                            <div class="w-16 h-16 rounded-full border-4 border-purple-500 flex items-center justify-center text-purple-500 font-bold mb-4">2.4</div>
+                            <h3 class="font-bold">Disk (TB)</h3>
+                            <p class="text-xs opacity-50">SSD - 12% Used</p>
+                        </div>
+                    </div>
+
+                    <div class="glass p-6 rounded-2xl">
+                        <h3 class="font-bold mb-4">Kernel Information</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between border-b border-white/5 py-2">
+                                <span class="opacity-50">OS Version</span>
+                                <span class="font-mono">macOS 14.2.1 (23C71)</span>
+                            </div>
+                            <div class="flex justify-between border-b border-white/5 py-2">
+                                <span class="opacity-50">Shell</span>
+                                <span class="font-mono">/bin/zsh</span>
+                            </div>
+                            <div class="flex justify-between border-b border-white/5 py-2">
+                                <span class="opacity-50">Uptime</span>
+                                <span class="font-mono">14 days, 3:24</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+    }
+
+    // --- Utils & Simulation ---
+
+    function updateStatusBar() {
+      const time = new Date().toLocaleTimeString();
+      document.getElementById('sys-time').innerText = time;
+
+      // Simulating fluctuation
+      const cpu = Math.floor(Math.random() * 20) + 10;
+      const ram = (Math.random() * 2 + 4).toFixed(1);
+      document.getElementById('stat-cpu').innerText = `${cpu}%`;
+      document.getElementById('stat-ram').innerText = `${ram}GB`;
+    }
+
+    app.showPluginManager = function () {
+      const container = document.getElementById('modal-container');
+      const content = document.getElementById('modal-content');
+      container.classList.remove('hidden');
+
+      content.innerHTML = `
+                <h2 class="text-xl font-bold mb-4">Plugin Marketplace</h2>
+                <div class="space-y-4">
+                    <div class="p-4 glass-dark rounded-lg flex justify-between items-center">
+                        <div>
+                            <p class="font-bold">Database Explorer</p>
+                            <p class="text-xs opacity-50">SQL/NoSQL visual manager</p>
+                        </div>
+                        <button class="bg-blue-600 px-3 py-1 rounded text-xs">Install</button>
+                    </div>
+                    <div class="p-4 glass-dark rounded-lg flex justify-between items-center opacity-50">
+                        <div>
+                            <p class="font-bold">API Tester</p>
+                            <p class="text-xs opacity-50">Postman-like utility</p>
+                        </div>
+                        <button class="bg-white/10 px-3 py-1 rounded text-xs" disabled>Installed</button>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('modal-container').classList.add('hidden')" class="mt-6 w-full py-2 glass rounded hover:bg-white/10 transition">Close</button>
+            `;
+    };
+
+    // Initialize
+    window.onload = () => {
+      renderSidebar();
+      renderView();
+      setInterval(updateStatusBar, 1000);
+    };
+  </script>
+</body>
+
+</html>

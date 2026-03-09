@@ -161,6 +161,22 @@
     ]
   },
   {
+    "id": "root-dev-utility-app",
+    "name": "dev-utility-app",
+    "type": "folder",
+    "parentId": null,
+    "path": "/dev-utility-app",
+    "children": [
+      {
+        "id": "file-dev-utility-app-index.html",
+        "name": "index.html",
+        "type": "file",
+        "parentId": "root-dev-utility-app",
+        "path": "./dev-utility-app/index.html"
+      }
+    ]
+  },
+  {
     "id": "root-diagram-builder",
     "name": "diagram-builder",
     "type": "folder",

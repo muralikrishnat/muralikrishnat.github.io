@@ -1,0 +1,43 @@
+Build me app to help developers in daily activities.
+
+Copy utility 
+- Ability to copy file/folder recurcive from one folder to another folder.
+- Ability to gZip compression, minification while copying files with both original file and gzip file.
+- Ability to combine files into single file.
+- List of actions performed, edit, delete.
+
+Web terminal
+- Ability to run terminal commands
+- New Tab, list of tabs, delete tab, rename tab.
+- See command history
+- Re-run the command
+- Section for each execution with details like time to execute, when? status? no of times.
+- AI agent suggestions or prompts for next command
+
+Cron jobs
+- Ability to repeat job
+- Job can be command line execution or copy utility...etc.,
+- List of cron jobs with details like when ran, next slot, edit, delete, re-run.
+
+Watcher
+- Ability to create watcher on folder/file and invoke copy, command, cron job.
+- List of watchers, edit/delete/ativate watcher.
+
+
+JSON utility
+- Ability to view the JSON data.
+- Ability to edit JSON in visual like move the item with drag and add/edit/delete element.
+- Easy to move elements inside JSON, set type of JSON values.
+
+System utility
+- Ability to see OS, CPU, RAM information
+- Ability to pin this info on tool status bar
+
+
+come up with simple UI, left side bar for apps and have scope of few more utilities.
+I want this tool as explandable using plugins, like new utility can be added as plugin.
+
+
+Using only html, css, javascript and tailwindcss.
+Use Glassmorphic.
+It should be simple and easy to operate.
