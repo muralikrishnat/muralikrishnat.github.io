@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev Utils Workspace</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Tailwind Config for Custom Colors/Fonts -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            glass: {
+              50: 'rgba(255, 255, 255, 0.05)',
+              100: 'rgba(255, 255, 255, 0.1)',
+              200: 'rgba(255, 255, 255, 0.2)',
+              dark: 'rgba(0, 0, 0, 0.2)',
+              darker: 'rgba(0, 0, 0, 0.4)'
+            }
+          },
+          animation: {
+            'gradient-x': 'gradient-x 15s ease infinite',
+          },
+          keyframes: {
+            'gradient-x': {
+              '0%, 100%': {
+                'background-size': '200% 200%',
+                'background-position': 'left center'
+              },
+              '50%': {
+                'background-size': '200% 200%',
+                'background-position': 'right center'
+              }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(-45deg, #0f172a, #312e81, #1e1b4b, #020617);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      color: #f8fafc;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    @keyframes gradient {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .font-mono {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphism Utilities */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .glass-input {
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .glass-input:focus {
+      outline: none;
+      border-color: rgba(99, 102, 241, 0.6);
+      background: rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(4px);
+      transition: all 0.2s;
+    }
+
+    .glass-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .glass-button-primary {
+      background: rgba(79, 70, 229, 0.6);
+      border: 1px solid rgba(99, 102, 241, 0.5);
+      backdrop-filter: blur(4px);
+      transition: all 0.2s;
+    }
+
+    .glass-button-primary:hover {
+      background: rgba(79, 70, 229, 0.8);
+      border-color: rgba(99, 102, 241, 0.8);
+      box-shadow: 0 0 15px rgba(79, 70, 229, 0.4);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Tooltip */
+    .tooltip .tooltip-text {
+      visibility: hidden;
+      background-color: rgba(15, 23, 42, 0.9);
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 4px 8px;
+      position: absolute;
+      z-index: 50;
+      left: 120%;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(4px);
+    }
+
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .app-view {
+      display: none;
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+
+    .app-view.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Dynamic Background Orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: -1;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+
+<body class="h-screen w-screen flex antialiased selection:bg-indigo-500/30">
+
+  <!-- Decorative Background Elements -->
+  <div class="orb bg-indigo-600 w-96 h-96 top-[-10%] left-[-10%]"></div>
+  <div class="orb bg-purple-600 w-96 h-96 bottom-[-10%] right-[-10%]"></div>
+  <div class="orb bg-blue-500 w-64 h-64 top-[40%] left-[60%]"></div>
+
+  <!-- Sidebar (Activity Bar) -->
+  <aside class="w-16 h-full glass-panel flex flex-col items-center py-4 z-10 shrink-0">
+    <!-- Home / Dashboard -->
+    <div class="tooltip relative mb-6">
+      <button onclick="navigate('dashboard')" id="nav-dashboard"
+        class="w-12 h-12 rounded-xl flex items-center justify-center text-xl text-indigo-300 bg-white/10 hover:bg-white/20 transition-all border-l-2 border-indigo-400">
+        <i class="fa-solid fa-table-cells-large"></i>
+      </button>
+      <span class="tooltip-text">Dashboard</span>
+    </div>
+
+    <div class="w-8 h-px bg-white/10 mb-6"></div>
+
+    <!-- Dynamic App Icons will go here -->
+    <nav id="sidebar-apps" class="flex flex-col gap-4 w-full items-center flex-1 overflow-y-auto">
+      <!-- Populated by JS -->
+    </nav>
+
+    <!-- Settings / Bottom -->
+    <div class="mt-auto pt-4 flex flex-col gap-4">
+      <div class="tooltip relative">
+        <button
+          class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+        <span class="tooltip-text">Settings</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 h-full overflow-hidden relative flex flex-col">
+
+    <!-- Topbar -->
+    <header class="h-14 glass-panel border-b-0 border-l-0 flex items-center px-6 justify-between z-10 shrink-0">
+      <div class="flex items-center gap-3">
+        <span id="current-app-icon" class="text-indigo-400"><i class="fa-solid fa-table-cells-large"></i></span>
+        <h1 id="current-app-title" class="font-semibold text-lg tracking-wide">Dashboard</h1>
+      </div>
+      <div class="text-xs text-gray-400 font-mono" id="clock">
+        00:00:00
+      </div>
+    </header>
+
+    <!-- View Container -->
+    <div class="flex-1 overflow-y-auto p-6 relative z-0" id="view-container">
+
+      <!-- Dashboard View -->
+      <div id="view-dashboard" class="app-view active flex-col h-full">
+        <div class="mb-8">
+          <h2 class="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 to-white">
+            Developer Utilities</h2>
+          <p class="text-gray-300">Select a tool to open in the current workspace or a new tab.</p>
+        </div>
+
+        <div id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-12">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- App 1: JSON Formatter -->
+      <div id="view-json" class="app-view flex-col h-full gap-4">
+        <div class="flex justify-between items-center shrink-0">
+          <div class="flex gap-2">
+            <button onclick="formatJSON()" class="glass-button-primary px-4 py-2 rounded-lg text-sm font-medium"><i
+                class="fa-solid fa-wand-magic-sparkles mr-2"></i>Format</button>
+            <button onclick="minifyJSON()" class="glass-button px-4 py-2 rounded-lg text-sm font-medium"><i
+                class="fa-solid fa-compress mr-2"></i>Minify</button>
+            <button onclick="clearJSON()"
+              class="glass-button px-4 py-2 rounded-lg text-sm text-red-300 hover:text-red-200"><i
+                class="fa-solid fa-trash mr-2"></i>Clear</button>
+          </div>
+          <button onclick="copyJSON()" class="glass-button px-4 py-2 rounded-lg text-sm"><i
+              class="fa-regular fa-copy mr-2"></i>Copy Output</button>
+        </div>
+        <div class="flex flex-col md:flex-row gap-4 flex-1 h-full min-h-[400px]">
+          <div class="flex-1 flex flex-col gap-2">
+            <label class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Input</label>
+            <textarea id="json-input" class="glass-input flex-1 rounded-xl p-4 font-mono text-sm resize-none"
+              placeholder='Paste your JSON here...' spellcheck="false"></textarea>
+          </div>
+          <div class="flex-1 flex flex-col gap-2">
+            <label class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Output <span id="json-status"
+                class="ml-2 text-green-400"></span></label>
+            <textarea id="json-output"
+              class="glass-input flex-1 rounded-xl p-4 font-mono text-sm resize-none bg-black/40" readonly
+              placeholder='Result will appear here...' spellcheck="false"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- App 2: Base64 Encoder/Decoder -->
+      <div id="view-base64" class="app-view flex-col h-full gap-4">
+        <div class="flex flex-col lg:flex-row gap-6 flex-1 h-full min-h-[400px]">
+          <div class="flex-1 flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+              <label class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Plain Text</label>
+              <button onclick="copyBase64('plain')" class="text-gray-400 hover:text-white text-sm"><i
+                  class="fa-regular fa-copy"></i></button>
+            </div>
+            <textarea id="b64-plain" class="glass-input flex-1 rounded-xl p-4 font-mono text-sm resize-none"
+              placeholder='Enter plain text here...' spellcheck="false"></textarea>
+          </div>
+
+          <div class="flex lg:flex-col justify-center items-center gap-4 shrink-0 py-4 lg:py-0">
+            <button onclick="encodeBase64()"
+              class="glass-button-primary w-full px-6 py-3 rounded-xl font-medium flex items-center justify-center gap-2 group">
+              Encode <i
+                class="fa-solid fa-arrow-right lg:rotate-0 rotate-90 group-hover:translate-x-1 lg:group-hover:translate-x-1 transition-transform"></i>
+            </button>
+            <button onclick="decodeBase64()"
+              class="glass-button w-full px-6 py-3 rounded-xl font-medium flex items-center justify-center gap-2 group">
+              <i
+                class="fa-solid fa-arrow-left lg:rotate-0 rotate-90 group-hover:-translate-x-1 lg:group-hover:-translate-x-1 transition-transform"></i>
+              Decode
+            </button>
+          </div>
+
+          <div class="flex-1 flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+              <label class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Base64 Encoded</label>
+              <button onclick="copyBase64('encoded')" class="text-gray-400 hover:text-white text-sm"><i
+                  class="fa-regular fa-copy"></i></button>
+            </div>
+            <textarea id="b64-encoded" class="glass-input flex-1 rounded-xl p-4 font-mono text-sm resize-none"
+              placeholder='Enter Base64 here...' spellcheck="false"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- App 3: Regex Tester -->
+      <div id="view-regex" class="app-view flex-col h-full gap-4 max-w-5xl mx-auto w-full">
+        <div class="glass-card p-4 rounded-xl flex flex-col md:flex-row gap-4">
+          <div class="flex-1 flex flex-col gap-1 relative">
+            <label class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Regular Expression</label>
+            <div class="flex items-center">
+              <span class="absolute left-3 text-gray-500 font-mono text-lg">/</span>
+              <input type="text" id="regex-pattern"
+                class="glass-input w-full rounded-lg py-2 pl-6 pr-4 font-mono text-sm" placeholder="pattern"
+                value="[a-zA-Z]+">
+              <span class="absolute right-3 text-gray-500 font-mono text-lg">/</span>
+            </div>
+          </div>
+          <div class="w-32 flex flex-col gap-1">
+            <label class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Flags</label>
+            <input type="text" id="regex-flags" class="glass-input w-full rounded-lg py-2 px-3 font-mono text-sm"
+              placeholder="gmi" value="g">
+          </div>
+        </div>
+
+        <div class="flex-1 flex flex-col gap-2 relative">
+          <label class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Test String</label>
+          <div class="relative flex-1">
+            <textarea id="regex-test-string"
+              class="glass-input absolute inset-0 w-full h-full rounded-xl p-4 font-mono text-sm resize-none text-transparent caret-white z-10 bg-transparent"
+              spellcheck="false">Hello World 123!</textarea>
+            <!-- Highlight overlay -->
+            <div id="regex-highlight"
+              class="absolute inset-0 w-full h-full rounded-xl p-4 font-mono text-sm overflow-hidden whitespace-pre-wrap break-words bg-black/20 text-gray-300 pointer-events-none z-0">
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-xl p-4 h-48 overflow-y-auto">
+          <label class="text-xs text-gray-400 uppercase tracking-wider font-semibold block mb-2">Match Results <span
+              id="regex-match-count" class="ml-2 text-indigo-300"></span></label>
+          <div id="regex-results" class="font-mono text-sm text-gray-300 space-y-1">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- App 4: Color Converter -->
+      <div id="view-color" class="app-view flex-col items-center justify-center h-full gap-8 max-w-3xl mx-auto w-full">
+
+        <div class="w-full flex justify-center mb-4">
+          <div id="color-preview"
+            class="w-32 h-32 rounded-2xl shadow-2xl border-4 border-white/20 transition-colors duration-300"
+            style="background-color: #4f46e5;"></div>
+        </div>
+
+        <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- HEX -->
+          <div class="glass-card p-5 rounded-xl flex flex-col gap-2 relative group">
+            <label class="text-xs text-gray-400 uppercase font-semibold">HEX</label>
+            <input type="text" id="color-hex"
+              class="glass-input w-full rounded-lg py-2 px-3 font-mono text-center text-lg" value="#4f46e5">
+            <button onclick="copyText(document.getElementById('color-hex').value)"
+              class="absolute top-4 right-4 text-gray-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"><i
+                class="fa-regular fa-copy"></i></button>
+          </div>
+
+          <!-- RGB -->
+          <div class="glass-card p-5 rounded-xl flex flex-col gap-2 relative group">
+            <label class="text-xs text-gray-400 uppercase font-semibold">RGB</label>
+            <input type="text" id="color-rgb"
+              class="glass-input w-full rounded-lg py-2 px-3 font-mono text-center text-lg" value="rgb(79, 70, 229)">
+            <button onclick="copyText(document.getElementById('color-rgb').value)"
+              class="absolute top-4 right-4 text-gray-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"><i
+                class="fa-regular fa-copy"></i></button>
+          </div>
+
+          <!-- HSL -->
+          <div class="glass-card p-5 rounded-xl flex flex-col gap-2 relative group">
+            <label class="text-xs text-gray-400 uppercase font-semibold">HSL</label>
+            <input type="text" id="color-hsl"
+              class="glass-input w-full rounded-lg py-2 px-3 font-mono text-center text-lg" value="hsl(243, 75%, 59%)">
+            <button onclick="copyText(document.getElementById('color-hsl').value)"
+              class="absolute top-4 right-4 text-gray-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"><i
+                class="fa-regular fa-copy"></i></button>
+          </div>
+        </div>
+        <p class="text-sm text-gray-400 mt-4 text-center">Edit any value to convert. Try color names too (e.g.
+          'tomato').</p>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-3 z-50"></div>
+
+  <script>
+    // --- App Configuration & State ---
+    const apps = [
+      { id: 'json', icon: 'fa-solid fa-code', name: 'JSON Formatter', desc: 'Format, validate, and minify JSON data instantly.', color: 'from-blue-500 to-cyan-400' },
+      { id: 'base64', icon: 'fa-solid fa-lock', name: 'Base64 Tool', desc: 'Encode to or decode from Base64 strings.', color: 'from-purple-500 to-pink-500' },
+      { id: 'regex', icon: 'fa-solid fa-magnifying-glass', name: 'Regex Tester', desc: 'Test regular expressions with real-time highlighting.', color: 'from-green-400 to-emerald-600' },
+      { id: 'color', icon: 'fa-solid fa-palette', name: 'Color Converter', desc: 'Convert between HEX, RGB, and HSL formats.', color: 'from-orange-400 to-red-500' }
+    ];
+
+    let currentAppId = 'dashboard';
+
+    // --- Initialization ---
+    function init() {
+      renderDashboard();
+      renderSidebar();
+
+      // Check URL parameters for initial app state
+      const urlParams = new URLSearchParams(window.location.search);
+      const requestedApp = urlParams.get('app');
+
+      if (requestedApp && apps.find(a => a.id === requestedApp)) {
+        navigate(requestedApp);
+      } else {
+        navigate('dashboard');
+      }
+
+      // Start clock
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      // Init specific tool listeners
+      initRegexTester();
+      initColorConverter();
+    }
+
+    // --- UI Rendering ---
+    function renderDashboard() {
+      const grid = document.getElementById('dashboard-grid');
+      grid.innerHTML = '';
+
+      apps.forEach(app => {
+        const card = document.createElement('div');
+        card.className = 'glass-card rounded-2xl p-6 flex flex-col h-full group relative overflow-hidden';
+
+        // Background decoration
+        card.innerHTML = `
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br ${app.color} rounded-full opacity-20 group-hover:opacity-40 transition-opacity blur-xl"></div>
+                    
+                    <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-2xl mb-4 text-white shadow-inner border border-white/5">
+                        <i class="${app.icon}"></i>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold mb-2 text-white">${app.name}</h3>
+                    <p class="text-sm text-gray-400 mb-6 flex-1">${app.desc}</p>
+                    
+                    <div class="flex gap-3 mt-auto">
+                        <button onclick="navigate('${app.id}')" class="flex-1 glass-button-primary py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all">
+                            Open
+                        </button>
+                        <a href="?app=${app.id}" target="_blank" class="glass-button w-10 h-10 flex items-center justify-center rounded-lg text-gray-300 hover:text-white" title="Open in New Tab">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
+                    </div>
+                `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderSidebar() {
+      const sidebar = document.getElementById('sidebar-apps');
+      sidebar.innerHTML = '';
+
+      apps.forEach(app => {
+        const btnWrapper = document.createElement('div');
+        btnWrapper.className = 'tooltip relative w-full flex justify-center';
+
+        const btn = document.createElement('button');
+        btn.id = `nav-${app.id}`;
+        btn.onclick = () => navigate(app.id);
+        btn.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-lg text-gray-400 hover:text-white hover:bg-white/10 transition-all border-l-2 border-transparent';
+        btn.innerHTML = `<i class="${app.icon}"></i>`;
+
+        const tooltip = document.createElement('span');
+        tooltip.className = 'tooltip-text';
+        tooltip.innerText = app.name;
+
+        btnWrapper.appendChild(btn);
+        btnWrapper.appendChild(tooltip);
+        sidebar.appendChild(btnWrapper);
+      });
+    }
+
+    // --- Navigation Logic ---
+    function navigate(appId) {
+      currentAppId = appId;
+
+      // Hide all views
+      document.querySelectorAll('.app-view').forEach(el => el.classList.remove('active'));
+
+      // Reset Sidebar Nav states
+      document.querySelectorAll('aside button').forEach(btn => {
+        btn.classList.remove('text-indigo-300', 'bg-white/10', 'border-indigo-400');
+        btn.classList.add('text-gray-400', 'border-transparent');
+
+        // Specific fix for dashboard icon
+        if (btn.id === 'nav-dashboard') {
+          btn.className = 'w-12 h-12 rounded-xl flex items-center justify-center text-xl text-gray-400 hover:bg-white/10 hover:text-white transition-all border-l-2 border-transparent';
+        } else if (btn.id.startsWith('nav-')) {
+          btn.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-lg text-gray-400 hover:text-white hover:bg-white/10 transition-all border-l-2 border-transparent';
+        }
+      });
+
+      // Show selected view
+      const targetView = document.getElementById(`view-${appId}`);
+      if (targetView) targetView.classList.add('active');
+
+      // Update Header & Sidebar active state
+      const headerIcon = document.getElementById('current-app-icon');
+      const headerTitle = document.getElementById('current-app-title');
+      const navBtn = document.getElementById(`nav-${appId}`);
+
+      if (appId === 'dashboard') {
+        headerIcon.innerHTML = '<i class="fa-solid fa-table-cells-large"></i>';
+        headerTitle.innerText = 'Dashboard';
+        navBtn.classList.remove('text-gray-400', 'border-transparent');
+        navBtn.classList.add('text-indigo-300', 'bg-white/10', 'border-indigo-400');
+      } else {
+        const appInfo = apps.find(a => a.id === appId);
+        if (appInfo) {
+          headerIcon.innerHTML = `<i class="${appInfo.icon}"></i>`;
+          headerTitle.innerText = appInfo.name;
+          navBtn.classList.remove('text-gray-400', 'border-transparent');
+          navBtn.classList.add('text-indigo-300', 'bg-white/10', 'border-indigo-400');
+        }
+      }
+
+      // Update URL without reloading (so new tab works if link copied)
+      const url = new URL(window.location);
+      if (appId === 'dashboard') {
+        url.searchParams.delete('app');
+      } else {
+        url.searchParams.set('app', appId);
+      }
+      window.history.pushState({}, '', url);
+    }
+
+    // --- Utils ---
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      const colors = type === 'error' ? 'border-red-500/50 bg-red-500/20 text-red-100' : 'border-green-500/50 bg-green-500/20 text-green-100';
+      const icon = type === 'error' ? 'fa-circle-xmark' : 'fa-circle-check';
+
+      toast.className = `glass-panel ${colors} px-4 py-3 rounded-lg flex items-center gap-3 shadow-lg transform transition-all duration-300 translate-y-10 opacity-0`;
+      toast.innerHTML = `<i class="fa-solid ${icon}"></i><span class="text-sm font-medium">${message}</span>`;
+
+      container.appendChild(toast);
+
+      // Animate in
+      setTimeout(() => {
+        toast.classList.remove('translate-y-10', 'opacity-0');
+      }, 10);
+
+      // Remove after 3s
+      setTimeout(() => {
+        toast.classList.add('translate-y-10', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function copyText(text) {
+      if (!text) return;
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast('Copied to clipboard!');
+      } catch (err) {
+        showToast('Failed to copy', 'error');
+      }
+      document.body.removeChild(textarea);
+    }
+
+    // ==========================================
+    // App 1: JSON Formatter Logic
+    // ==========================================
+    function formatJSON() {
+      const input = document.getElementById('json-input').value;
+      const output = document.getElementById('json-output');
+      const status = document.getElementById('json-status');
+
+      if (!input.trim()) {
+        output.value = '';
+        status.innerText = '';
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(input);
+        output.value = JSON.stringify(parsed, null, 4);
+        status.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Valid';
+        status.className = 'ml-2 text-green-400 text-xs';
+      } catch (e) {
+        output.value = e.toString();
+        status.innerHTML = '<i class="fa-solid fa-xmark mr-1"></i> Invalid';
+        status.className = 'ml-2 text-red-400 text-xs';
+      }
+    }
+
+    function minifyJSON() {
+      const input = document.getElementById('json-input').value;
+      const output = document.getElementById('json-output');
+      const status = document.getElementById('json-status');
+
+      if (!input.trim()) return;
+
+      try {
+        const parsed = JSON.parse(input);
+        output.value = JSON.stringify(parsed);
+        status.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Valid (Minified)';
+        status.className = 'ml-2 text-green-400 text-xs';
+      } catch (e) {
+        output.value = e.toString();
+        status.innerHTML = '<i class="fa-solid fa-xmark mr-1"></i> Invalid';
+        status.className = 'ml-2 text-red-400 text-xs';
+      }
+    }
+
+    function clearJSON() {
+      document.getElementById('json-input').value = '';
+      document.getElementById('json-output').value = '';
+      document.getElementById('json-status').innerText = '';
+    }
+
+    function copyJSON() {
+      copyText(document.getElementById('json-output').value);
+    }
+
+
+    // ==========================================
+    // App 2: Base64 Logic
+    // ==========================================
+    function encodeBase64() {
+      const plain = document.getElementById('b64-plain').value;
+      try {
+        // Handle utf-8 string to base64
+        const encoded = btoa(unescape(encodeURIComponent(plain)));
+        document.getElementById('b64-encoded').value = encoded;
+      } catch (e) {
+        showToast('Failed to encode', 'error');
+      }
+    }
+
+    function decodeBase64() {
+      const encoded = document.getElementById('b64-encoded').value;
+      try {
+        const plain = decodeURIComponent(escape(atob(encoded)));
+        document.getElementById('b64-plain').value = plain;
+      } catch (e) {
+        showToast('Invalid Base64 string', 'error');
+      }
+    }
+
+    function copyBase64(type) {
+      const val = document.getElementById(type === 'plain' ? 'b64-plain' : 'b64-encoded').value;
+      copyText(val);
+    }
+
+
+    // ==========================================
+    // App 3: Regex Tester Logic
+    // ==========================================
+    function initRegexTester() {
+      const inputPattern = document.getElementById('regex-pattern');
+      const inputFlags = document.getElementById('regex-flags');
+      const testString = document.getElementById('regex-test-string');
+
+      const triggerUpdate = () => updateRegex();
+
+      inputPattern.addEventListener('input', triggerUpdate);
+      inputFlags.addEventListener('input', triggerUpdate);
+      testString.addEventListener('input', triggerUpdate);
+      testString.addEventListener('scroll', syncRegexScroll);
+
+      // Initial run
+      setTimeout(triggerUpdate, 100);
+    }
+
+    function syncRegexScroll() {
+      const textarea = document.getElementById('regex-test-string');
+      const highlight = document.getElementById('regex-highlight');
+      highlight.scrollTop = textarea.scrollTop;
+      highlight.scrollLeft = textarea.scrollLeft;
+    }
+
+    function updateRegex() {
+      const patternStr = document.getElementById('regex-pattern').value;
+      const flagsStr = document.getElementById('regex-flags').value;
+      const textStr = document.getElementById('regex-test-string').value;
+
+      const highlightDiv = document.getElementById('regex-highlight');
+      const resultsDiv = document.getElementById('regex-results');
+      const countSpan = document.getElementById('regex-match-count');
+
+      if (!patternStr) {
+        highlightDiv.textContent = textStr;
+        resultsDiv.innerHTML = '<span class="text-gray-500 italic">No pattern provided.</span>';
+        countSpan.innerText = '';
+        return;
+      }
+
+      try {
+        const regex = new RegExp(patternStr, flagsStr);
+
+        // Deal with highlight overlay
+        // Escape HTML from textStr to prevent injection in highlight div
+        let htmlStr = textStr.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        let matchCount = 0;
+        let resultsHtml = '';
+
+        // If global flag is missing, we only find the first match
+        const isGlobal = flagsStr.includes('g');
+
+        // For highlighting
+        let lastIndex = 0;
+        let highlightedHtml = '';
+
+        let match;
+        const safeRegex = new RegExp(patternStr, flagsStr); // clone for loop
+
+        // Ensure no infinite loop on zero-length matches if global
+        if (safeRegex.test("")) {
+          throw new Error("Zero-length match looping guard.");
+        }
+
+        while ((match = safeRegex.exec(textStr)) !== null) {
+          matchCount++;
+
+          // Results list
+          resultsHtml += `<div class="bg-white/5 p-2 rounded border border-white/5"><span class="text-indigo-300">Match ${matchCount}:</span> <span class="text-white">${match[0].replace(/</g, "&lt;")}</span> <span class="text-gray-500 text-xs ml-2">Index: ${match.index}</span></div>`;
+
+          if (match.length > 1) {
+            for (let i = 1; i < match.length; i++) {
+              if (match[i] !== undefined) {
+                resultsHtml += `<div class="pl-4 text-xs text-gray-400">Group ${i}: ${match[i].replace(/</g, "&lt;")}</div>`;
+              }
+            }
+          }
+
+          // Highlight overlay mapping
+          const matchStart = match.index;
+          const matchEnd = matchStart + match[0].length;
+
+          const beforeMatch = textStr.substring(lastIndex, matchStart).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          const matchText = textStr.substring(matchStart, matchEnd).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+          highlightedHtml += beforeMatch + `<mark class="bg-indigo-500/50 text-transparent rounded px-0.5">${matchText}</mark>`;
+
+          lastIndex = matchEnd;
+
+          if (!isGlobal) break;
+        }
+
+        highlightedHtml += textStr.substring(lastIndex).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        highlightDiv.innerHTML = highlightedHtml;
+
+        countSpan.innerText = `(${matchCount} match${matchCount !== 1 ? 'es' : ''})`;
+        resultsDiv.innerHTML = matchCount > 0 ? resultsHtml : '<span class="text-gray-500 italic">No matches found.</span>';
+
+        document.getElementById('regex-pattern').classList.remove('border-red-500');
+
+      } catch (e) {
+        highlightDiv.textContent = textStr;
+        resultsDiv.innerHTML = `<span class="text-red-400"><i class="fa-solid fa-triangle-exclamation mr-2"></i>${e.message}</span>`;
+        countSpan.innerText = '';
+        document.getElementById('regex-pattern').classList.add('border-red-500');
+      }
+    }
+
+
+    // ==========================================
+    // App 4: Color Converter Logic
+    // ==========================================
+    function initColorConverter() {
+      const hexIn = document.getElementById('color-hex');
+      const rgbIn = document.getElementById('color-rgb');
+      const hslIn = document.getElementById('color-hsl');
+
+      // Creating a dummy element to parse colors via browser engine
+      const dummy = document.createElement('div');
+
+      const updateFromStr = (str, source) => {
+        dummy.style.color = '';
+        dummy.style.color = str;
+        if (!dummy.style.color) return; // Invalid
+
+        document.body.appendChild(dummy);
+        const computed = window.getComputedStyle(dummy).color; // rgb(...) or rgba(...)
+        document.body.removeChild(dummy);
+
+        const rgba = computed.match(/\d+/g).map(Number);
+        const r = rgba[0], g = rgba[1], b = rgba[2];
+        const a = rgba[3] !== undefined ? rgba[3] : 1;
+
+        // Set preview
+        document.getElementById('color-preview').style.backgroundColor = computed;
+
+        // Calculate formats
+        const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+
+        // Calculate HSL
+        let r1 = r / 255, g1 = g / 255, b1 = b / 255;
+        let cmin = Math.min(r1, g1, b1), cmax = Math.max(r1, g1, b1), delta = cmax - cmin;
+        let h = 0, s = 0, l = 0;
+
+        if (delta == 0) h = 0;
+        else if (cmax == r1) h = ((g1 - b1) / delta) % 6;
+        else if (cmax == g1) h = (b1 - r1) / delta + 2;
+        else h = (r1 - g1) / delta + 4;
+
+        h = Math.round(h * 60);
+        if (h < 0) h += 360;
+
+        l = (cmax + cmin) / 2;
+        s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+        s = +(s * 100).toFixed(1);
+        l = +(l * 100).toFixed(1);
+
+        // Update UI conditionally
+        if (source !== 'hex') hexIn.value = hex;
+        if (source !== 'rgb') rgbIn.value = a < 1 ? `rgba(${r}, ${g}, ${b}, ${a})` : `rgb(${r}, ${g}, ${b})`;
+        if (source !== 'hsl') hslIn.value = a < 1 ? `hsla(${h}, ${s}%, ${l}%, ${a})` : `hsl(${h}, ${s}%, ${l}%)`;
+      };
+
+      hexIn.addEventListener('input', (e) => updateFromStr(e.target.value, 'hex'));
+      rgbIn.addEventListener('input', (e) => updateFromStr(e.target.value, 'rgb'));
+      hslIn.addEventListener('input', (e) => updateFromStr(e.target.value, 'hsl'));
+    }
+
+    // Start App
+    window.addEventListener('DOMContentLoaded', init);
+    window.addEventListener('popstate', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const requestedApp = urlParams.get('app');
+      if (requestedApp && apps.find(a => a.id === requestedApp)) {
+        navigate(requestedApp);
+      } else {
+        navigate('dashboard');
+      }
+    });
+
+  </script>
+</body>
+
+</html>

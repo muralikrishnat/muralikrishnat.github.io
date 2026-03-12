@@ -173,6 +173,13 @@
         "type": "file",
         "parentId": "root-dev-utility-app",
         "path": "./dev-utility-app/index.html"
+      },
+      {
+        "id": "file-dev-utility-app-index2.html",
+        "name": "index2.html",
+        "type": "file",
+        "parentId": "root-dev-utility-app",
+        "path": "./dev-utility-app/index2.html"
       }
     ]
   },
@@ -654,6 +661,20 @@
         "type": "file",
         "parentId": "root-web-terminal",
         "path": "./web-terminal/index3.html"
+      },
+      {
+        "id": "file-web-terminal-index4.html",
+        "name": "index4.html",
+        "type": "file",
+        "parentId": "root-web-terminal",
+        "path": "./web-terminal/index4.html"
+      },
+      {
+        "id": "file-web-terminal-index5.html",
+        "name": "index5.html",
+        "type": "file",
+        "parentId": "root-web-terminal",
+        "path": "./web-terminal/index5.html"
       }
     ]
   }

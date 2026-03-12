@@ -1,0 +1,28 @@
+Build an web page that helps to developer with different utillities.
+
+The layout of the app:
+- top ribbon similar to mac status bar.
+- left ribbon like VS code Activity side bar.
+* top left has app list icon, and on click of it, it will show list of apps available.
+* On select of app, it will add icon to left ribbon and open the app in main section.
+* Ability to pin the app in the left activity bar.
+- Main section
+
+
+Using only html, css, javascript and tailwindcss.
+Use Glassmorphic.
+Use font-awesome icons.
+It should be simple and easy to operate.
+
+
+
+
+Build an web page that helps to developer with different utillities.
+First page displays list of apps available in the system, like dashboard for apps with icons.
+Developer can open the app in new tab or same window.
+Same window will just open the app in main section and show icon similar to VS code activity side bar.
+
+Using only html, css, javascript and tailwindcss.
+Use Glassmorphic.
+Use font-awesome icons.
+It should be simple and easy to operate.
