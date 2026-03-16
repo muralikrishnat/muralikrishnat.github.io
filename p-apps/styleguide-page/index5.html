@@ -1,0 +1,3572 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Glass UI Styleguide</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --g: #7DF9C2;
+      --p: #A78BFA;
+      --pk: #F472B6;
+      --bl: #60A5FA;
+      --or: #FB923C;
+      --bg: #060612;
+      --tm: rgba(255, 255, 255, 0.07);
+      --tb: rgba(255, 255, 255, 0.13);
+      --mu: rgba(255, 255, 255, 0.45)
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: rgba(255, 255, 255, 0.9);
+      overflow-x: hidden
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 15% 10%, rgba(124, 58, 237, .22) 0%, transparent 60%), radial-gradient(ellipse 55% 45% at 85% 85%, rgba(16, 185, 129, .16) 0%, transparent 60%), radial-gradient(ellipse 45% 40% at 55% 30%, rgba(244, 63, 94, .1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0
+    }
+
+    #app {
+      position: relative;
+      z-index: 1
+    }
+
+    /* Glass */
+    .glass {
+      background: var(--tm);
+      border: 1px solid var(--tb);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .35)
+    }
+
+    .glass-dark {
+      background: rgba(0, 0, 0, .28);
+      border: 1px solid rgba(255, 255, 255, .07);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px)
+    }
+
+    /* Topbar */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 52px;
+      background: rgba(6, 6, 18, .88);
+      border-bottom: 1px solid rgba(255, 255, 255, .08);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      padding: 0 1.25rem;
+      gap: .875rem;
+      z-index: 100
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 52px;
+      left: 0;
+      bottom: 0;
+      width: 220px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, .08) transparent;
+      z-index: 90
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 3px
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, .08);
+      border-radius: 2px
+    }
+
+    .sl {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .45rem .875rem;
+      font-size: .8rem;
+      font-weight: 500;
+      color: var(--mu);
+      cursor: pointer;
+      border-radius: 6px;
+      margin: 1px .4rem;
+      transition: all .15s;
+      text-decoration: none;
+      border-left: 2px solid transparent
+    }
+
+    .sl:hover {
+      background: rgba(255, 255, 255, .06);
+      color: rgba(255, 255, 255, .9)
+    }
+
+    .sl.active {
+      background: rgba(125, 249, 194, .09);
+      color: var(--g);
+      border-left-color: var(--g);
+      margin-left: .25rem
+    }
+
+    .sg {
+      font-family: 'Syne', sans-serif;
+      font-size: .625rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, .2);
+      padding: 1rem 1.25rem .375rem
+    }
+
+    /* Main */
+    .main {
+      margin-left: 220px;
+      padding-top: 52px
+    }
+
+    .sec {
+      padding: 2.5rem 2.5rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .04);
+      scroll-margin-top: 70px
+    }
+
+    .sec:last-child {
+      border-bottom: none;
+      padding-bottom: 3rem
+    }
+
+    .stitle {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, .5));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: .375rem
+    }
+
+    .sdesc {
+      font-size: .8375rem;
+      color: var(--mu);
+      margin-bottom: 1.75rem;
+      font-weight: 300
+    }
+
+    .sub {
+      font-family: 'Syne', sans-serif;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--g);
+      margin: 1.75rem 0 .875rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem
+    }
+
+    .sub::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, rgba(125, 249, 194, .25), transparent)
+    }
+
+    /* Preview */
+    .pv {
+      background: rgba(255, 255, 255, .025);
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1rem
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .5rem 1.2rem;
+      border-radius: 7px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+      font-family: 'DM Sans', sans-serif;
+      white-space: nowrap
+    }
+
+    .btn-p {
+      background: linear-gradient(135deg, #7DF9C2, #4ade80);
+      color: #060612;
+      font-weight: 700;
+      box-shadow: 0 0 18px rgba(125, 249, 194, .28)
+    }
+
+    .btn-p:hover {
+      box-shadow: 0 0 28px rgba(125, 249, 194, .45);
+      transform: translateY(-1px)
+    }
+
+    .btn-s {
+      background: rgba(255, 255, 255, .08);
+      color: rgba(255, 255, 255, .9);
+      border: 1px solid rgba(255, 255, 255, .12)
+    }
+
+    .btn-s:hover {
+      background: rgba(255, 255, 255, .13)
+    }
+
+    .btn-g {
+      background: transparent;
+      color: var(--mu);
+      border: 1px solid rgba(255, 255, 255, .07)
+    }
+
+    .btn-g:hover {
+      background: rgba(255, 255, 255, .05);
+      color: rgba(255, 255, 255, .9)
+    }
+
+    .btn-d {
+      background: rgba(244, 63, 94, .13);
+      color: #f472b6;
+      border: 1px solid rgba(244, 63, 94, .22)
+    }
+
+    .btn-d:hover {
+      background: rgba(244, 63, 94, .22)
+    }
+
+    .btn-sm {
+      padding: .35rem .8rem;
+      font-size: .78rem
+    }
+
+    .btn-lg {
+      padding: .7rem 1.6rem;
+      font-size: .95rem
+    }
+
+    .btn-ico {
+      padding: .45rem;
+      width: 34px;
+      height: 34px;
+      justify-content: center
+    }
+
+    /* Input */
+    .inp {
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 7px;
+      padding: .575rem .8rem;
+      color: rgba(255, 255, 255, .9);
+      font-size: .85rem;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      width: 100%;
+      transition: all .2s
+    }
+
+    .inp::placeholder {
+      color: rgba(255, 255, 255, .22)
+    }
+
+    .inp:focus {
+      border-color: rgba(125, 249, 194, .4);
+      background: rgba(255, 255, 255, .08);
+      box-shadow: 0 0 0 3px rgba(125, 249, 194, .08)
+    }
+
+    .inp.err {
+      border-color: rgba(244, 63, 94, .45)
+    }
+
+    .sel {
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 7px;
+      padding: .575rem 2.25rem .575rem .8rem;
+      color: rgba(255, 255, 255, .9);
+      font-size: .85rem;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      width: 100%;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='rgba(255,255,255,0.35)' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right .75rem center;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .sel:focus {
+      border-color: rgba(125, 249, 194, .4);
+      box-shadow: 0 0 0 3px rgba(125, 249, 194, .08)
+    }
+
+    .ta {
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 7px;
+      padding: .7rem .8rem;
+      color: rgba(255, 255, 255, .9);
+      font-size: .85rem;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      width: 100%;
+      resize: vertical;
+      min-height: 90px;
+      transition: all .2s
+    }
+
+    .ta::placeholder {
+      color: rgba(255, 255, 255, .22)
+    }
+
+    .ta:focus {
+      border-color: rgba(125, 249, 194, .4);
+      box-shadow: 0 0 0 3px rgba(125, 249, 194, .08)
+    }
+
+    .lbl {
+      font-size: .78rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, .55);
+      margin-bottom: .3rem;
+      display: block
+    }
+
+    .hint {
+      font-size: .72rem;
+      color: var(--mu);
+      margin-top: .25rem
+    }
+
+    .ferr {
+      font-size: .72rem;
+      color: #f472b6;
+      margin-top: .25rem
+    }
+
+    /* Checkbox/Radio */
+    .chk {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1.5px solid rgba(255, 255, 255, .2);
+      background: rgba(255, 255, 255, .04);
+      appearance: none;
+      cursor: pointer;
+      position: relative;
+      transition: all .15s;
+      flex-shrink: 0
+    }
+
+    .chk:checked {
+      background: var(--g);
+      border-color: var(--g)
+    }
+
+    .chk:checked::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 5px;
+      height: 8px;
+      border: 2px solid #060612;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg)
+    }
+
+    .rad {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, .2);
+      background: rgba(255, 255, 255, .04);
+      appearance: none;
+      cursor: pointer;
+      position: relative;
+      transition: all .15s;
+      flex-shrink: 0
+    }
+
+    .rad:checked {
+      border-color: var(--g);
+      background: rgba(125, 249, 194, .1)
+    }
+
+    .rad:checked::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      background: var(--g)
+    }
+
+    /* Toggle */
+    .tog {
+      width: 38px;
+      height: 21px;
+      border-radius: 11px;
+      background: rgba(255, 255, 255, .1);
+      border: 1px solid rgba(255, 255, 255, .1);
+      position: relative;
+      cursor: pointer;
+      transition: all .25s;
+      flex-shrink: 0
+    }
+
+    .tog.on {
+      background: rgba(125, 249, 194, .22);
+      border-color: rgba(125, 249, 194, .35)
+    }
+
+    .tog-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .45);
+      transition: all .25s
+    }
+
+    .tog.on .tog-thumb {
+      transform: translateX(17px);
+      background: var(--g);
+      box-shadow: 0 0 7px rgba(125, 249, 194, .55)
+    }
+
+    /* Range */
+    .rng {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, .1);
+      outline: none;
+      cursor: pointer
+    }
+
+    .rng::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--g);
+      box-shadow: 0 0 7px rgba(125, 249, 194, .45);
+      cursor: pointer
+    }
+
+    /* Badges */
+    .bdg {
+      display: inline-flex;
+      align-items: center;
+      gap: .25rem;
+      padding: .2rem .55rem;
+      border-radius: 99px;
+      font-size: .66rem;
+      font-weight: 600;
+      letter-spacing: .03em
+    }
+
+    .bg-g {
+      background: rgba(125, 249, 194, .13);
+      color: var(--g);
+      border: 1px solid rgba(125, 249, 194, .2)
+    }
+
+    .bg-p {
+      background: rgba(167, 139, 250, .13);
+      color: var(--p);
+      border: 1px solid rgba(167, 139, 250, .2)
+    }
+
+    .bg-pk {
+      background: rgba(244, 114, 182, .13);
+      color: var(--pk);
+      border: 1px solid rgba(244, 114, 182, .2)
+    }
+
+    .bg-b {
+      background: rgba(96, 165, 250, .13);
+      color: var(--bl);
+      border: 1px solid rgba(96, 165, 250, .2)
+    }
+
+    .bg-o {
+      background: rgba(251, 146, 60, .13);
+      color: var(--or);
+      border: 1px solid rgba(251, 146, 60, .2)
+    }
+
+    .bg-n {
+      background: rgba(255, 255, 255, .07);
+      color: var(--mu);
+      border: 1px solid rgba(255, 255, 255, .1)
+    }
+
+    /* Status dot */
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .dot-on {
+      background: var(--g);
+      box-shadow: 0 0 5px rgba(125, 249, 194, .55)
+    }
+
+    .dot-bz {
+      background: var(--pk);
+      box-shadow: 0 0 5px rgba(244, 114, 182, .55)
+    }
+
+    .dot-aw {
+      background: #fbbf24;
+      box-shadow: 0 0 5px rgba(251, 191, 36, .45)
+    }
+
+    .dot-off {
+      background: rgba(255, 255, 255, .2)
+    }
+
+    /* Accordion */
+    .acc-item {
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: .4rem
+    }
+
+    .acc-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .875rem 1.1rem;
+      background: rgba(255, 255, 255, .04);
+      cursor: pointer;
+      color: rgba(255, 255, 255, .9);
+      font-size: .875rem;
+      font-weight: 500;
+      border: none;
+      text-align: left;
+      transition: background .2s
+    }
+
+    .acc-btn:hover {
+      background: rgba(255, 255, 255, .07)
+    }
+
+    .acc-btn.open {
+      background: rgba(125, 249, 194, .06);
+      color: var(--g)
+    }
+
+    .acc-chv {
+      transition: transform .25s
+    }
+
+    .acc-btn.open .acc-chv {
+      transform: rotate(180deg)
+    }
+
+    .acc-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .3s ease;
+      background: rgba(255, 255, 255, .02)
+    }
+
+    .acc-body.open {
+      max-height: 300px
+    }
+
+    .acc-inner {
+      padding: .9rem 1.1rem;
+      font-size: .84rem;
+      color: var(--mu);
+      line-height: 1.6
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: .2rem;
+      padding: .2rem;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .07);
+      border-radius: 9px
+    }
+
+    .tab {
+      padding: .45rem .9rem;
+      border-radius: 6px;
+      font-size: .84rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--mu);
+      border: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      white-space: nowrap;
+      transition: all .2s
+    }
+
+    .tab:hover {
+      color: rgba(255, 255, 255, .9);
+      background: rgba(255, 255, 255, .05)
+    }
+
+    .tab.active {
+      background: rgba(125, 249, 194, .11);
+      color: var(--g);
+      font-weight: 600;
+      box-shadow: 0 0 0 1px rgba(125, 249, 194, .18)
+    }
+
+    .tp {
+      display: none
+    }
+
+    .tp.active {
+      display: block
+    }
+
+    /* Underline tabs */
+    .utabs {
+      display: flex;
+      gap: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, .08)
+    }
+
+    .utab {
+      padding: .65rem 0;
+      font-size: .84rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--mu);
+      border: none;
+      background: transparent;
+      position: relative;
+      transition: color .2s;
+      font-family: 'DM Sans', sans-serif
+    }
+
+    .utab::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--g);
+      transform: scaleX(0);
+      transition: transform .2s;
+      border-radius: 1px
+    }
+
+    .utab.active {
+      color: rgba(255, 255, 255, .9)
+    }
+
+    .utab.active::after {
+      transform: scaleX(1)
+    }
+
+    /* Vertical tabs */
+    .vtabs {
+      display: flex;
+      gap: 0
+    }
+
+    .vlist {
+      display: flex;
+      flex-direction: column;
+      gap: .2rem;
+      padding: .4rem;
+      min-width: 145px;
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid rgba(255, 255, 255, .07);
+      border-radius: 9px 0 0 9px
+    }
+
+    .vtab {
+      padding: .55rem .9rem;
+      border-radius: 5px;
+      font-size: .8rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--mu);
+      border: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      text-align: left;
+      transition: all .2s
+    }
+
+    .vtab:hover {
+      color: rgba(255, 255, 255, .9);
+      background: rgba(255, 255, 255, .05)
+    }
+
+    .vtab.active {
+      background: rgba(125, 249, 194, .09);
+      color: var(--g);
+      border-left: 2px solid var(--g);
+      padding-left: calc(.9rem - 2px)
+    }
+
+    .vcontent {
+      flex: 1;
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid rgba(255, 255, 255, .07);
+      border-left: none;
+      border-radius: 0 9px 9px 0;
+      padding: 1.1rem;
+      font-size: .84rem;
+      color: var(--mu);
+      line-height: 1.6
+    }
+
+    /* Table */
+    .tbl {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: .84rem
+    }
+
+    .tbl thead tr {
+      background: rgba(255, 255, 255, .04)
+    }
+
+    .tbl th {
+      padding: .65rem .9rem;
+      text-align: left;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, .3);
+      font-family: 'Syne', sans-serif;
+      border-bottom: 1px solid rgba(255, 255, 255, .06);
+      user-select: none
+    }
+
+    .tbl th.sort {
+      cursor: pointer
+    }
+
+    .tbl th.sort:hover {
+      color: rgba(255, 255, 255, .65)
+    }
+
+    .tbl td {
+      padding: .8rem .9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, .04);
+      vertical-align: middle
+    }
+
+    .tbl tbody tr {
+      transition: background .15s
+    }
+
+    .tbl tbody tr:hover {
+      background: rgba(255, 255, 255, .03)
+    }
+
+    .tbl tbody tr:last-child td {
+      border-bottom: none
+    }
+
+    .twrap {
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 11px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, .02)
+    }
+
+    /* Pagination */
+    .pag {
+      display: flex;
+      align-items: center;
+      gap: .2rem
+    }
+
+    .pg {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .78rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, .08);
+      background: rgba(255, 255, 255, .04);
+      color: var(--mu);
+      transition: all .15s
+    }
+
+    .pg:hover {
+      background: rgba(255, 255, 255, .08);
+      color: rgba(255, 255, 255, .9)
+    }
+
+    .pg.active {
+      background: rgba(125, 249, 194, .13);
+      border-color: rgba(125, 249, 194, .28);
+      color: var(--g);
+      font-weight: 700
+    }
+
+    .pg.dis {
+      opacity: .3;
+      pointer-events: none
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .1);
+      backdrop-filter: blur(14px);
+      border-radius: 13px;
+      overflow: hidden;
+      transition: all .25s
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, .17);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, .38)
+    }
+
+    .card-img {
+      width: 100%;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.25rem;
+      background: linear-gradient(135deg, rgba(125, 249, 194, .12), rgba(167, 139, 250, .12))
+    }
+
+    .card-body {
+      padding: 1.1rem
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: .95rem;
+      font-weight: 700;
+      margin-bottom: .4rem
+    }
+
+    .card-text {
+      font-size: .78rem;
+      color: var(--mu);
+      line-height: 1.5
+    }
+
+    .card-foot {
+      padding: .75rem 1.1rem;
+      border-top: 1px solid rgba(255, 255, 255, .06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center
+    }
+
+    /* Stat card */
+    .stat {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 11px;
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden
+    }
+
+    .stat::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px
+    }
+
+    .stat.sg::before {
+      background: linear-gradient(to right, var(--g), transparent)
+    }
+
+    .stat.sp::before {
+      background: linear-gradient(to right, var(--p), transparent)
+    }
+
+    .stat.spk::before {
+      background: linear-gradient(to right, var(--pk), transparent)
+    }
+
+    .stat.sb::before {
+      background: linear-gradient(to right, var(--bl), transparent)
+    }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 800
+    }
+
+    .stat-lbl {
+      font-size: .68rem;
+      color: var(--mu);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 600;
+      margin-top: .2rem
+    }
+
+    .stat-ch {
+      font-size: .7rem;
+      margin-top: .4rem
+    }
+
+    /* Filter chips */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      padding: .32rem .75rem;
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(255, 255, 255, .09);
+      border-radius: 99px;
+      font-size: .78rem;
+      color: var(--mu);
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .chip:hover {
+      background: rgba(255, 255, 255, .1);
+      color: rgba(255, 255, 255, .9)
+    }
+
+    .chip.active {
+      background: rgba(125, 249, 194, .11);
+      border-color: rgba(125, 249, 194, .28);
+      color: var(--g)
+    }
+
+    /* Sort btn */
+    .srt {
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      padding: .32rem .7rem;
+      font-size: .78rem;
+      font-weight: 500;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 6px;
+      color: var(--mu);
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .srt:hover {
+      background: rgba(255, 255, 255, .08);
+      color: rgba(255, 255, 255, .9)
+    }
+
+    .srt.active {
+      background: rgba(125, 249, 194, .08);
+      border-color: rgba(125, 249, 194, .22);
+      color: var(--g)
+    }
+
+    /* Alerts */
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: .8rem;
+      padding: .9rem 1.1rem;
+      border-radius: 9px;
+      font-size: .84rem
+    }
+
+    .al-s {
+      background: rgba(125, 249, 194, .07);
+      border: 1px solid rgba(125, 249, 194, .18)
+    }
+
+    .al-e {
+      background: rgba(244, 63, 94, .07);
+      border: 1px solid rgba(244, 63, 94, .18)
+    }
+
+    .al-w {
+      background: rgba(251, 191, 36, .07);
+      border: 1px solid rgba(251, 191, 36, .18)
+    }
+
+    .al-i {
+      background: rgba(96, 165, 250, .07);
+      border: 1px solid rgba(96, 165, 250, .18)
+    }
+
+    .al-title {
+      font-weight: 600;
+      margin-bottom: .1rem
+    }
+
+    .al-body {
+      font-size: .78rem;
+      color: var(--mu)
+    }
+
+    /* Progress */
+    .pbar {
+      height: 5px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, .07);
+      overflow: hidden
+    }
+
+    .pfill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .4s ease
+    }
+
+    .pfill.pg {
+      background: linear-gradient(to right, #4ade80, var(--g))
+    }
+
+    .pfill.pp {
+      background: linear-gradient(to right, #8b5cf6, var(--p))
+    }
+
+    .pfill.pb {
+      background: linear-gradient(to right, #3b82f6, var(--bl))
+    }
+
+    /* Avatar */
+    .av {
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      flex-shrink: 0;
+      border: 1.5px solid rgba(255, 255, 255, .1)
+    }
+
+    .av-sm {
+      width: 28px;
+      height: 28px;
+      font-size: .7rem
+    }
+
+    .av-md {
+      width: 38px;
+      height: 38px;
+      font-size: .85rem
+    }
+
+    .av-lg {
+      width: 52px;
+      height: 52px;
+      font-size: 1rem
+    }
+
+    /* Stepper */
+    .stpr {
+      display: flex;
+      align-items: center
+    }
+
+    .step-i {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative
+    }
+
+    .step-i:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      right: -50%;
+      height: 1.5px;
+      background: rgba(255, 255, 255, .08)
+    }
+
+    .step-i.done:not(:last-child)::after {
+      background: var(--g)
+    }
+
+    .step-c {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .72rem;
+      font-weight: 700;
+      z-index: 1;
+      border: 1.5px solid rgba(255, 255, 255, .15);
+      background: rgba(255, 255, 255, .05);
+      color: var(--mu);
+      transition: all .3s
+    }
+
+    .step-i.done .step-c {
+      background: var(--g);
+      border-color: var(--g);
+      color: #060612
+    }
+
+    .step-i.active .step-c {
+      border-color: var(--g);
+      color: var(--g);
+      background: rgba(125, 249, 194, .09)
+    }
+
+    .step-lbl {
+      font-size: .65rem;
+      color: var(--mu);
+      margin-top: .3rem;
+      text-align: center
+    }
+
+    .step-i.active .step-lbl,
+    .step-i.done .step-lbl {
+      color: rgba(255, 255, 255, .85)
+    }
+
+    /* Skeleton */
+    .skel {
+      background: linear-gradient(90deg, rgba(255, 255, 255, .04) 25%, rgba(255, 255, 255, .08) 50%, rgba(255, 255, 255, .04) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0
+      }
+
+      100% {
+        background-position: -200% 0
+      }
+    }
+
+    /* Spinner */
+    .spin {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, .1);
+      border-top-color: var(--g);
+      animation: rot .75s linear infinite
+    }
+
+    @keyframes rot {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* Tooltip */
+    .ttp {
+      position: relative;
+      display: inline-flex
+    }
+
+    .ttp-box {
+      position: absolute;
+      bottom: calc(100% + 7px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 15, 28, .97);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 6px;
+      padding: .4rem .65rem;
+      font-size: .72rem;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .15s;
+      z-index: 50;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .4)
+    }
+
+    .ttp:hover .ttp-box {
+      opacity: 1
+    }
+
+    /* Dropdown */
+    .dd {
+      position: relative;
+      display: inline-block
+    }
+
+    .dd-menu {
+      position: absolute;
+      top: calc(100% + 5px);
+      left: 0;
+      min-width: 180px;
+      z-index: 50;
+      background: rgba(12, 12, 22, .97);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 9px;
+      padding: .3rem;
+      box-shadow: 0 10px 36px rgba(0, 0, 0, .55);
+      backdrop-filter: blur(18px);
+      display: none
+    }
+
+    .dd-menu.open {
+      display: block;
+      animation: ddin .15s ease
+    }
+
+    @keyframes ddin {
+      from {
+        opacity: 0;
+        transform: translateY(-4px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .dd-item {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      padding: .45rem .7rem;
+      border-radius: 5px;
+      font-size: .84rem;
+      color: var(--mu);
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .dd-item:hover {
+      background: rgba(255, 255, 255, .06);
+      color: rgba(255, 255, 255, .9)
+    }
+
+    .dd-item.red:hover {
+      background: rgba(244, 63, 94, .09);
+      color: var(--pk)
+    }
+
+    .dd-div {
+      height: 1px;
+      background: rgba(255, 255, 255, .06);
+      margin: .3rem 0
+    }
+
+    /* Modal */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .68);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 1.25rem
+    }
+
+    .overlay.open {
+      display: flex
+    }
+
+    .mbox {
+      background: rgba(12, 12, 24, .96);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 15px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, .65);
+      backdrop-filter: blur(20px);
+      animation: min .22s ease
+    }
+
+    @keyframes min {
+      from {
+        opacity: 0;
+        transform: scale(.95) translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0)
+      }
+    }
+
+    .mhead {
+      padding: 1.4rem 1.4rem 0
+    }
+
+    .mtitle {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700
+    }
+
+    .mbody {
+      padding: 1.1rem 1.4rem;
+      font-size: .84rem;
+      color: var(--mu);
+      line-height: 1.6
+    }
+
+    .mfoot {
+      padding: 1.1rem 1.4rem;
+      border-top: 1px solid rgba(255, 255, 255, .06);
+      display: flex;
+      justify-content: flex-end;
+      gap: .65rem
+    }
+
+    /* Toast */
+    .toast {
+      display: flex;
+      align-items: flex-start;
+      gap: .65rem;
+      padding: .8rem 1.1rem;
+      background: rgba(15, 15, 28, .97);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 9px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, .5);
+      min-width: 260px;
+      font-size: .84rem
+    }
+
+    .toast.ts {
+      border-left: 3px solid var(--g)
+    }
+
+    .toast.te {
+      border-left: 3px solid var(--pk)
+    }
+
+    .toast.tw {
+      border-left: 3px solid #fbbf24
+    }
+
+    /* Query builder */
+    .qrule {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      flex-wrap: wrap;
+      padding: .65rem .9rem;
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid rgba(255, 255, 255, .07);
+      border-radius: 7px;
+      margin-bottom: .4rem
+    }
+
+    .qcon {
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .2rem .6rem;
+      background: rgba(167, 139, 250, .13);
+      border: 1px solid rgba(167, 139, 250, .22);
+      border-radius: 4px;
+      color: var(--p);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      cursor: pointer
+    }
+
+    /* Kbd */
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: .1rem .35rem;
+      border-radius: 4px;
+      font-size: .7rem;
+      font-family: monospace;
+      font-weight: 600;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-bottom: 2px solid rgba(255, 255, 255, .12);
+      color: rgba(255, 255, 255, .9)
+    }
+
+    /* Code */
+    .code {
+      background: rgba(0, 0, 0, .28);
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 7px;
+      padding: .9rem 1.1rem;
+      font-family: monospace;
+      font-size: .78rem;
+      color: var(--g);
+      overflow-x: auto;
+      line-height: 1.6
+    }
+
+    /* Empty state */
+    .empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1.5rem;
+      text-align: center
+    }
+
+    .empty-ico {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      margin-bottom: 1rem
+    }
+
+    /* View toggle */
+    .vtog {
+      display: flex;
+      gap: .2rem;
+      padding: .2rem;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .07);
+      border-radius: 7px
+    }
+
+    .vbtn {
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--mu);
+      font-size: .7rem;
+      transition: all .15s
+    }
+
+    .vbtn:hover {
+      color: rgba(255, 255, 255, .9);
+      background: rgba(255, 255, 255, .05)
+    }
+
+    .vbtn.active {
+      background: rgba(125, 249, 194, .11);
+      color: var(--g)
+    }
+
+    /* Tile */
+    .tile {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 9px;
+      padding: 1.1rem;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      flex-direction: column;
+      gap: .4rem
+    }
+
+    .tile:hover {
+      background: rgba(255, 255, 255, .07);
+      border-color: rgba(255, 255, 255, .14);
+      transform: translateY(-2px)
+    }
+
+    /* Breadcrumb */
+    .brd {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .8rem
+    }
+
+    .brd-i {
+      color: var(--mu);
+      cursor: pointer;
+      transition: color .15s
+    }
+
+    .brd-i:hover {
+      color: rgba(255, 255, 255, .9)
+    }
+
+    .brd-i.cur {
+      color: rgba(255, 255, 255, .9);
+      font-weight: 500;
+      cursor: default
+    }
+
+    .brd-sep {
+      color: rgba(255, 255, 255, .2);
+      font-size: .7rem
+    }
+
+    /* File drop */
+    .fdrop {
+      border: 1.5px dashed rgba(255, 255, 255, .13);
+      border-radius: 9px;
+      padding: 1.75rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: rgba(255, 255, 255, .02)
+    }
+
+    .fdrop:hover {
+      border-color: rgba(125, 249, 194, .28);
+      background: rgba(125, 249, 194, .03)
+    }
+
+    /* Tag pill */
+    .tpill {
+      display: flex;
+      align-items: center;
+      gap: .2rem;
+      padding: .1rem .45rem;
+      border-radius: 4px;
+      font-size: .72rem;
+      font-weight: 500;
+      background: rgba(125, 249, 194, .1);
+      color: var(--g);
+      border: 1px solid rgba(125, 249, 194, .18)
+    }
+
+    /* Tag input wrap */
+    .tig {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .3rem;
+      align-items: center;
+      padding: .45rem .7rem;
+      min-height: 42px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 7px;
+      cursor: text;
+      transition: border-color .2s
+    }
+
+    .tig:focus-within {
+      border-color: rgba(125, 249, 194, .38);
+      box-shadow: 0 0 0 3px rgba(125, 249, 194, .07)
+    }
+
+    /* Context menu */
+    .ctx {
+      background: rgba(12, 12, 22, .97);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 9px;
+      padding: .3rem;
+      min-width: 170px;
+      box-shadow: 0 10px 36px rgba(0, 0, 0, .55)
+    }
+
+    .ctx-i {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      padding: .45rem .7rem;
+      border-radius: 5px;
+      font-size: .8rem;
+      color: var(--mu);
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .ctx-i:hover {
+      background: rgba(255, 255, 255, .06);
+      color: rgba(255, 255, 255, .9)
+    }
+
+    .ctx-i.red:hover {
+      background: rgba(244, 63, 94, .09);
+      color: var(--pk)
+    }
+
+    /* Swatch */
+    .sw {
+      width: 44px;
+      height: 44px;
+      border-radius: 7px;
+      border: 1px solid rgba(255, 255, 255, .1);
+      flex-shrink: 0
+    }
+
+    /* Notif badge */
+    .nbdg {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      min-width: 15px;
+      height: 15px;
+      border-radius: 99px;
+      background: var(--pk);
+      border: 1.5px solid var(--bg);
+      font-size: .58rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 .2rem
+    }
+
+    /* Number input */
+    .num-btn {
+      padding: 0 .75rem;
+      background: rgba(255, 255, 255, .04);
+      border: none;
+      color: var(--mu);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background .15s
+    }
+
+    .num-btn:hover {
+      background: rgba(255, 255, 255, .09);
+      color: rgba(255, 255, 255, .9)
+    }
+
+    /* helpers */
+    .g {
+      display: grid
+    }
+
+    .g2 {
+      grid-template-columns: repeat(2, 1fr)
+    }
+
+    .g3 {
+      grid-template-columns: repeat(3, 1fr)
+    }
+
+    .g4 {
+      grid-template-columns: repeat(4, 1fr)
+    }
+
+    .flex {
+      display: flex
+    }
+
+    .flex-wrap {
+      flex-wrap: wrap
+    }
+
+    .items-c {
+      align-items: center
+    }
+
+    .gap2 {
+      gap: .5rem
+    }
+
+    .gap3 {
+      gap: .75rem
+    }
+
+    .gap4 {
+      gap: 1rem
+    }
+
+    .gap5 {
+      gap: 1.25rem
+    }
+
+    .mb1 {
+      margin-bottom: .5rem
+    }
+
+    .mb2 {
+      margin-bottom: .75rem
+    }
+
+    .mb3 {
+      margin-bottom: 1rem
+    }
+
+    .mb4 {
+      margin-bottom: 1.25rem
+    }
+
+    .mt1 {
+      margin-top: .5rem
+    }
+
+    .mt2 {
+      margin-top: .75rem
+    }
+
+    .mt3 {
+      margin-top: 1rem
+    }
+
+    .fg {
+      color: var(--g)
+    }
+
+    .fp {
+      color: var(--p)
+    }
+
+    .fpk {
+      color: var(--pk)
+    }
+
+    .fb {
+      color: var(--bl)
+    }
+
+    .fw7 {
+      font-weight: 700
+    }
+
+    .fw8 {
+      font-weight: 800
+    }
+
+    .ff {
+      font-family: 'Syne', sans-serif
+    }
+
+    .mu {
+      color: var(--mu)
+    }
+
+    .fs9 {
+      font-size: .9rem
+    }
+
+    .fs85 {
+      font-size: .85rem
+    }
+
+    .fs8 {
+      font-size: .8rem
+    }
+
+    .fs75 {
+      font-size: .75rem
+    }
+
+    .fs7 {
+      font-size: .7rem
+    }
+
+    .p3 {
+      padding: .75rem
+    }
+
+    .p4 {
+      padding: 1rem
+    }
+
+    .p5 {
+      padding: 1.25rem
+    }
+
+    .r8 {
+      border-radius: 8px
+    }
+
+    .r10 {
+      border-radius: 10px
+    }
+
+    .r12 {
+      border-radius: 12px
+    }
+
+    .w100 {
+      width: 100%
+    }
+
+    .ta-c {
+      text-align: center
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: .3;
+        transform: scale(.8)
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    @keyframes slidein {
+      from {
+        transform: translateX(100%);
+        opacity: 0
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="btn btn-g btn-ico" onclick="toggleSidebar()" style="flex-shrink:0;">
+        <svg width="15" height="15" fill="none" viewBox="0 0 15 15">
+          <path d="M2 3.5h11M2 7.5h11M2 11.5h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+        </svg>
+      </button>
+      <div class="flex items-c gap2">
+        <div
+          style="width:22px;height:22px;border-radius:5px;background:linear-gradient(135deg,#7DF9C2,#A78BFA);flex-shrink:0">
+        </div>
+        <span class="ff fw8 fs85" style="letter-spacing:.03em">GlassUI</span>
+        <span class="bdg bg-g" style="font-size:.58rem">v1.0</span>
+      </div>
+      <div style="flex:1;max-width:220px;">
+        <div style="position:relative">
+          <svg style="position:absolute;left:9px;top:50%;transform:translateY(-50%);opacity:.35" width="13" height="13"
+            fill="none" viewBox="0 0 13 13">
+            <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.4" />
+            <path d="M9 9l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+          </svg>
+          <input class="inp" style="padding-left:1.75rem;height:32px;font-size:.78rem" placeholder="Search…" />
+        </div>
+      </div>
+      <div class="flex items-c gap2" style="margin-left:auto">
+        <div style="position:relative">
+          <button class="btn btn-g btn-ico">
+            <svg width="15" height="15" fill="none" viewBox="0 0 15 15">
+              <path
+                d="M7.5 1a5 5 0 015 5c0 2.4.5 3.8 1.4 4.8H1.1C2 10.8 2.5 9.4 2.5 6a5 5 0 015-5zM5.5 12.5a2 2 0 004 0"
+                stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </button>
+          <div class="nbdg">3</div>
+        </div>
+        <div class="av av-sm" style="background:linear-gradient(135deg,rgba(125,249,194,.28),rgba(167,139,250,.28))">MK
+        </div>
+      </div>
+    </header>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass-dark" id="sidebar">
+      <div style="padding:.75rem 0 2rem">
+        <div class="sg">Layout</div>
+        <a class="sl active" href="#layout">▣ Layout & Grid</a>
+        <a class="sl" href="#typography">T Typography</a>
+        <a class="sl" href="#colors">◉ Colors & Tokens</a>
+        <div class="sg">Components</div>
+        <a class="sl" href="#buttons">⬡ Buttons</a>
+        <a class="sl" href="#forms">⊟ Form Fields</a>
+        <a class="sl" href="#badges">◈ Badges & Tags</a>
+        <a class="sl" href="#cards">⬜ Cards & Tiles</a>
+        <a class="sl" href="#accordion">⊞ Accordion</a>
+        <a class="sl" href="#tabs">⊡ Tabs</a>
+        <a class="sl" href="#table">⊟ Table</a>
+        <div class="sg">Data</div>
+        <a class="sl" href="#filter">⊿ Filter & Sort</a>
+        <a class="sl" href="#pagination">… Pagination</a>
+        <a class="sl" href="#views">⊞ Views</a>
+        <a class="sl" href="#advanced-filter">⊞ Advanced Filter</a>
+        <div class="sg">Feedback</div>
+        <a class="sl" href="#alerts">⚠ Alerts</a>
+        <a class="sl" href="#modals">▣ Modals</a>
+        <a class="sl" href="#toast">◎ Toast & Tooltips</a>
+        <div class="sg">Navigation</div>
+        <a class="sl" href="#breadcrumb">› Breadcrumb & Stepper</a>
+        <a class="sl" href="#misc">⋯ Misc & Utilities</a>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- HERO -->
+      <div style="padding:2.5rem 2.5rem 0">
+        <div class="glass r12"
+          style="padding:2.25rem;background:linear-gradient(135deg,rgba(125,249,194,.04),rgba(167,139,250,.04))">
+          <span class="bdg bg-g mb3" style="display:inline-flex;margin-bottom:1rem">DESIGN SYSTEM</span>
+          <h1 class="ff fw8"
+            style="font-size:clamp(1.75rem,3.5vw,3rem);line-height:1.1;background:linear-gradient(135deg,#fff,rgba(255,255,255,.45));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.625rem">
+            Glass UI<br>Styleguide</h1>
+          <p class="mu fs85" style="max-width:420px;line-height:1.6;font-weight:300">Complete glassmorphic component
+            library — every component, pattern, and utility documented and interactive.</p>
+          <div class="flex flex-wrap gap2 mt3" style="margin-top:1.25rem">
+            <span class="bdg bg-g">HTML</span><span class="bdg bg-p">CSS</span><span
+              class="bdg bg-b">JavaScript</span><span class="bdg bg-pk">Tailwind</span><span
+              class="bdg bg-o">Glassmorphism</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== LAYOUT ====== -->
+      <section class="sec" id="layout">
+        <h2 class="stitle">Layout</h2>
+        <p class="sdesc">Core layout primitives — topbar, sidebar, containers, and grid systems.</p>
+
+        <div class="sub">Top Bar (live above)</div>
+        <div class="pv">
+          <div class="glass r10" style="height:48px;display:flex;align-items:center;padding:0 1.1rem;gap:.75rem">
+            <div style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,#7DF9C2,#A78BFA)">
+            </div>
+            <span class="ff fw7 fs85">App Name</span>
+            <input class="inp"
+              style="height:30px;font-size:.78rem;max-width:200px;flex:1;margin-left:auto;padding-left:1.65rem"
+              placeholder="Search…" />
+            <div class="av av-sm"
+              style="background:linear-gradient(135deg,rgba(125,249,194,.28),rgba(167,139,250,.28));margin-left:auto">JD
+            </div>
+          </div>
+        </div>
+
+        <div class="sub">Grid Systems</div>
+        <div class="pv">
+          <div class="g g2 gap4 mb3" style="gap:.75rem;margin-bottom:.75rem">
+            <div class="glass r8 p3 ta-c fs7 mu">col 1</div>
+            <div class="glass r8 p3 ta-c fs7 mu">col 2</div>
+          </div>
+          <div class="g g3 gap4 mb3" style="gap:.75rem;margin-bottom:.75rem">
+            <div class="glass r8 p3 ta-c fs7 mu">col 1</div>
+            <div class="glass r8 p3 ta-c fs7 mu">col 2</div>
+            <div class="glass r8 p3 ta-c fs7 mu">col 3</div>
+          </div>
+          <div class="g g4" style="gap:.75rem">
+            <div class="glass r8 p3 ta-c fs7 mu">1</div>
+            <div class="glass r8 p3 ta-c fs7 mu">2</div>
+            <div class="glass r8 p3 ta-c fs7 mu">3</div>
+            <div class="glass r8 p3 ta-c fs7 mu">4</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== TYPOGRAPHY ====== -->
+      <section class="sec" id="typography">
+        <h2 class="stitle">Typography</h2>
+        <p class="sdesc">Type scale, weights, and text styles.</p>
+        <div class="pv">
+          <div class="ff fw8"
+            style="font-size:2.5rem;line-height:1.1;background:linear-gradient(135deg,#fff,rgba(255,255,255,.45));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.375rem">
+            Display 3xl / 800</div>
+          <div class="ff fw7" style="font-size:1.9rem;margin-bottom:.3rem">Heading 2xl / 700</div>
+          <div class="ff fw7" style="font-size:1.5rem;margin-bottom:.3rem">Heading xl / 700</div>
+          <div class="ff" style="font-size:1.2rem;font-weight:600;margin-bottom:.3rem">Heading lg / 600</div>
+          <div style="height:1px;background:rgba(255,255,255,.07);margin:.875rem 0"></div>
+          <p style="font-size:1.05rem;font-weight:300;line-height:1.6;color:rgba(255,255,255,.8);margin-bottom:.625rem">
+            Body Large — The quick brown fox jumps over the lazy dog. Light weight.</p>
+          <p class="fs85" style="line-height:1.6;color:rgba(255,255,255,.8);margin-bottom:.625rem">Body Default — The
+            quick brown fox jumps over the lazy dog. Regular weight.</p>
+          <p class="fs8 mu" style="line-height:1.6;margin-bottom:.625rem">Body Small — Secondary information, captions,
+            and helper text at small size.</p>
+          <p class="fs7" style="color:rgba(255,255,255,.28)">Caption — Smallest text, metadata, timestamps, tertiary
+            labels.</p>
+        </div>
+        <div class="g g2 gap4" style="gap:1rem">
+          <div class="pv">
+            <div class="sub" style="margin-top:0">Weights</div>
+            <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.84rem">
+              <span style="font-weight:300">Light 300</span>
+              <span style="font-weight:400">Regular 400</span>
+              <span style="font-weight:500">Medium 500</span>
+              <span style="font-weight:600">Semibold 600</span>
+              <span style="font-weight:700">Bold 700</span>
+              <span class="ff fw8">Extra Bold 800 (Syne)</span>
+            </div>
+          </div>
+          <div class="pv">
+            <div class="sub" style="margin-top:0">Styles</div>
+            <div style="display:flex;flex-direction:column;gap:.55rem;font-size:.84rem">
+              <span style="font-style:italic;color:var(--mu)">Italic body text</span>
+              <span
+                style="text-transform:uppercase;letter-spacing:.1em;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35)">UPPERCASE
+                LABEL</span>
+              <span style="text-decoration:underline;text-underline-offset:3px">Underlined link</span>
+              <span class="fg">Accent green text</span>
+              <span class="fp">Accent purple text</span>
+              <span class="fpk">Accent pink text</span>
+              <code
+                style="background:rgba(125,249,194,.07);padding:.1rem .4rem;border-radius:4px;color:var(--g);font-size:.78rem">inline code</code>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== COLORS ====== -->
+      <section class="sec" id="colors">
+        <h2 class="stitle">Colors & Tokens</h2>
+        <p class="sdesc">Design tokens, brand palette, and glass surface levels.</p>
+        <div class="sub">Brand Palette</div>
+        <div class="pv">
+          <div class="flex flex-wrap gap3" style="gap:.875rem">
+            <div style="display:flex;flex-direction:column;gap:.375rem;align-items:center">
+              <div class="sw" style="background:#7DF9C2"></div><span class="fs7 mu">#7DF9C2</span><span
+                class="fs7 fw7">Accent</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.375rem;align-items:center">
+              <div class="sw" style="background:#A78BFA"></div><span class="fs7 mu">#A78BFA</span><span
+                class="fs7 fw7">Violet</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.375rem;align-items:center">
+              <div class="sw" style="background:#F472B6"></div><span class="fs7 mu">#F472B6</span><span
+                class="fs7 fw7">Pink</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.375rem;align-items:center">
+              <div class="sw" style="background:#60A5FA"></div><span class="fs7 mu">#60A5FA</span><span
+                class="fs7 fw7">Blue</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.375rem;align-items:center">
+              <div class="sw" style="background:#FB923C"></div><span class="fs7 mu">#FB923C</span><span
+                class="fs7 fw7">Orange</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.375rem;align-items:center">
+              <div class="sw" style="background:#FBBF24"></div><span class="fs7 mu">#FBBF24</span><span
+                class="fs7 fw7">Yellow</span>
+            </div>
+          </div>
+        </div>
+        <div class="sub">Glass Surfaces</div>
+        <div class="pv" style="display:flex;flex-direction:column;gap:.625rem">
+          <div
+            style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:7px;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center">
+            <span class="fs85">Surface 1 — Darkest</span><code class="fs7 mu">rgba(255,255,255, 0.03)</code></div>
+          <div
+            style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center">
+            <span class="fs85">Surface 2 — Default</span><code class="fs7 mu">rgba(255,255,255, 0.06)</code></div>
+          <div class="glass"
+            style="border-radius:7px;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center">
+            <span class="fs85">Surface 3 — Glass</span><code class="fs7 mu">blur(16px) + 0.07 bg</code></div>
+          <div
+            style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(24px);border-radius:7px;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center">
+            <span class="fs85">Surface 4 — Strong</span><code class="fs7 mu">blur(24px) + 0.12 bg</code></div>
+        </div>
+      </section>
+
+      <!-- ====== BUTTONS ====== -->
+      <section class="sec" id="buttons">
+        <h2 class="stitle">Buttons</h2>
+        <p class="sdesc">All variants, sizes, icon combos, groups, and states.</p>
+        <div class="sub">Variants</div>
+        <div class="pv flex flex-wrap gap3" style="gap:.75rem">
+          <button class="btn btn-p">Primary</button>
+          <button class="btn btn-s">Secondary</button>
+          <button class="btn btn-g">Ghost</button>
+          <button class="btn btn-d">Danger</button>
+          <button class="btn"
+            style="background:rgba(167,139,250,.13);color:var(--p);border:1px solid rgba(167,139,250,.22)">Purple</button>
+          <button class="btn"
+            style="background:rgba(96,165,250,.11);color:var(--bl);border:1px solid rgba(96,165,250,.2)">Blue</button>
+        </div>
+        <div class="sub">Sizes</div>
+        <div class="pv flex flex-wrap items-c gap3" style="gap:.75rem">
+          <button class="btn btn-p btn-sm">Small</button>
+          <button class="btn btn-p">Default</button>
+          <button class="btn btn-p btn-lg">Large</button>
+        </div>
+        <div class="sub">With Icons</div>
+        <div class="pv flex flex-wrap items-c gap3" style="gap:.75rem">
+          <button class="btn btn-p"><svg width="13" height="13" fill="none" viewBox="0 0 13 13">
+              <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>Add Item</button>
+          <button class="btn btn-s"><svg width="13" height="13" fill="none" viewBox="0 0 13 13">
+              <path d="M2 6.5l3.5 3.5 5.5-5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>Confirm</button>
+          <button class="btn btn-g">Download<svg width="13" height="13" fill="none" viewBox="0 0 13 13">
+              <path d="M6.5 1v8M3 7l3.5 3.5L10 7M1 12h11" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round" />
+            </svg></button>
+          <button class="btn btn-s btn-ico"><svg width="13" height="13" fill="none" viewBox="0 0 13 13">
+              <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg></button>
+          <button class="btn btn-g btn-ico"><svg width="13" height="13" fill="none" viewBox="0 0 13 13">
+              <path d="M9.5 1.5l2 2M1 12l1-4L9.5 1.5l2 2-7.5 7.5L1 12z" stroke="currentColor" stroke-width="1.4"
+                stroke-linecap="round" stroke-linejoin="round" />
+            </svg></button>
+          <button class="btn btn-d btn-ico"><svg width="13" height="13" fill="none" viewBox="0 0 13 13">
+              <path d="M2 3.5h9M4.5 3.5V2h4v1.5M10 3.5l-.75 7.5H3.75L3 3.5" stroke="currentColor" stroke-width="1.4"
+                stroke-linecap="round" stroke-linejoin="round" />
+            </svg></button>
+        </div>
+        <div class="sub">States & Groups</div>
+        <div class="pv flex flex-wrap items-c gap3" style="gap:.75rem">
+          <button class="btn btn-p" disabled style="opacity:.4;cursor:not-allowed">Disabled</button>
+          <button class="btn btn-s" style="pointer-events:none">
+            <div class="spin" style="width:13px;height:13px;border-width:1.5px"></div>Loading
+          </button>
+          <button class="btn btn-p"
+            style="background:linear-gradient(135deg,#4ade80,#7DF9C2);box-shadow:0 0 25px rgba(125,249,194,.45)"><svg
+              width="13" height="13" fill="none" viewBox="0 0 13 13">
+              <path d="M2 6.5l3.5 3.5 5.5-5.5" stroke="#060612" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>Success</button>
+          <div style="display:flex;border:1px solid rgba(255,255,255,.1);border-radius:7px;overflow:hidden">
+            <button
+              style="padding:.5rem .9rem;background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);border:none;font-size:.84rem;font-weight:500;cursor:pointer;border-right:1px solid rgba(255,255,255,.08)">Day</button>
+            <button
+              style="padding:.5rem .9rem;background:rgba(125,249,194,.11);color:var(--g);border:none;font-size:.84rem;font-weight:600;cursor:pointer;border-right:1px solid rgba(255,255,255,.08)">Week</button>
+            <button
+              style="padding:.5rem .9rem;background:rgba(255,255,255,.04);color:var(--mu);border:none;font-size:.84rem;cursor:pointer">Month</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== FORMS ====== -->
+      <section class="sec" id="forms">
+        <h2 class="stitle">Form Fields</h2>
+        <p class="sdesc">Text, select, checkbox, radio, toggle, range, textarea, file, tag input and more.</p>
+
+        <div class="sub">Text Inputs</div>
+        <div class="pv g g2" style="gap:1rem">
+          <div><label class="lbl">Default</label><input class="inp" placeholder="Enter value…" /><span
+              class="hint">Helper text here</span></div>
+          <div><label class="lbl">With Icon</label>
+            <div style="position:relative"><svg
+                style="position:absolute;left:9px;top:50%;transform:translateY(-50%);opacity:.35" width="13" height="13"
+                fill="none" viewBox="0 0 13 13">
+                <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.4" />
+                <path d="M9 9l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+              </svg><input class="inp" style="padding-left:1.75rem" placeholder="Search…" /></div>
+          </div>
+          <div><label class="lbl">Error State</label><input class="inp err" type="email" value="invalid@" /><span
+              class="ferr">⚠ Invalid email address</span></div>
+          <div><label class="lbl">Disabled</label><input class="inp" value="Disabled value" disabled
+              style="opacity:.4;cursor:not-allowed" /></div>
+          <div><label class="lbl">Prefix</label>
+            <div style="display:flex;border:1px solid rgba(255,255,255,.1);border-radius:7px;overflow:hidden"><span
+                style="padding:0 .75rem;display:flex;align-items:center;background:rgba(255,255,255,.04);border-right:1px solid rgba(255,255,255,.08);font-size:.84rem;color:var(--mu);white-space:nowrap">https://</span><input
+                style="flex:1;background:rgba(255,255,255,.04);border:none;padding:.575rem .8rem;color:rgba(255,255,255,.9);font-size:.84rem;outline:none"
+                placeholder="yoursite.com" /></div>
+          </div>
+          <div><label class="lbl">Suffix Button</label>
+            <div style="display:flex;border:1px solid rgba(255,255,255,.1);border-radius:7px;overflow:hidden"><input
+                style="flex:1;background:rgba(255,255,255,.04);border:none;padding:.575rem .8rem;color:rgba(255,255,255,.9);font-size:.84rem;outline:none"
+                placeholder="API token…" /><button
+                style="padding:0 .9rem;background:rgba(125,249,194,.11);color:var(--g);border:none;font-size:.78rem;font-weight:600;cursor:pointer;border-left:1px solid rgba(255,255,255,.08)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sub">Select</div>
+        <div class="pv g g2" style="gap:1rem">
+          <div><label class="lbl">Native Select</label><select class="sel">
+              <option value="">Choose…</option>
+              <option>Design System</option>
+              <option>Frontend</option>
+              <option>Backend</option>
+            </select></div>
+          <div><label class="lbl">Number Input</label>
+            <div style="display:flex;border:1px solid rgba(255,255,255,.1);border-radius:7px;overflow:hidden"><button
+                class="num-btn"
+                onclick="let e=document.getElementById('ni');e.value=Math.max(0,+e.value-1)">−</button><input id="ni"
+                type="number" class="inp" style="flex:1;border:none;text-align:center;border-radius:0"
+                value="5" /><button class="num-btn"
+                onclick="let e=document.getElementById('ni');e.value=+e.value+1">+</button></div>
+          </div>
+        </div>
+
+        <div class="sub">Checkbox & Radio</div>
+        <div class="pv g g2" style="gap:1rem">
+          <div style="display:flex;flex-direction:column;gap:.875rem">
+            <label style="display:flex;align-items:center;gap:.65rem;cursor:pointer;font-size:.84rem"><input
+                type="checkbox" class="chk" checked />Checked state</label>
+            <label style="display:flex;align-items:center;gap:.65rem;cursor:pointer;font-size:.84rem"><input
+                type="checkbox" class="chk" />Unchecked state</label>
+            <label style="display:flex;align-items:center;gap:.65rem;cursor:pointer;font-size:.84rem;opacity:.4"><input
+                type="checkbox" class="chk" disabled />Disabled</label>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.875rem">
+            <label style="display:flex;align-items:center;gap:.65rem;cursor:pointer;font-size:.84rem"><input
+                type="radio" class="rad" name="r1" checked />Option Alpha</label>
+            <label style="display:flex;align-items:center;gap:.65rem;cursor:pointer;font-size:.84rem"><input
+                type="radio" class="rad" name="r1" />Option Beta</label>
+            <label style="display:flex;align-items:center;gap:.65rem;cursor:pointer;font-size:.84rem"><input
+                type="radio" class="rad" name="r1" />Option Gamma</label>
+          </div>
+        </div>
+
+        <div class="sub">Toggle & Range</div>
+        <div class="pv g g2" style="gap:1rem">
+          <div style="display:flex;flex-direction:column;gap:1rem">
+            <label style="display:flex;align-items:center;gap:.875rem;cursor:pointer">
+              <div class="tog on" onclick="this.classList.toggle('on')">
+                <div class="tog-thumb"></div>
+              </div>
+              <div>
+                <div class="fs85 fw7">Notifications</div>
+                <div class="fs8 mu">Push enabled</div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:center;gap:.875rem;cursor:pointer">
+              <div class="tog" onclick="this.classList.toggle('on')">
+                <div class="tog-thumb"></div>
+              </div>
+              <div>
+                <div class="fs85 fw7">Dark mode</div>
+                <div class="fs8 mu">Toggle theme</div>
+              </div>
+            </label>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:1.25rem">
+            <div>
+              <div class="flex items-c" style="justify-content:space-between;margin-bottom:.5rem"><span
+                  class="fs8 mu">Volume</span><span class="fg fw7 ff fs85">72%</span></div><input type="range"
+                class="rng" value="72" />
+            </div>
+            <div>
+              <div class="flex items-c" style="justify-content:space-between;margin-bottom:.5rem"><span
+                  class="fs8 mu">Opacity</span><span class="fp fw7 ff fs85">40%</span></div><input type="range"
+                class="rng" style="--tc:var(--p)" value="40" />
+            </div>
+          </div>
+        </div>
+
+        <div class="sub">Textarea & File</div>
+        <div class="pv g g2" style="gap:1rem">
+          <div><label class="lbl">Textarea</label><textarea class="ta" placeholder="Write your message…"
+              rows="4"></textarea>
+            <div class="flex" style="justify-content:space-between"><span class="hint">Supports Markdown</span><span
+                class="fs7 mu">0 / 500</span></div>
+          </div>
+          <div><label class="lbl">File Upload</label>
+            <div class="fdrop" onclick="document.getElementById('fi').click()">
+              <div style="font-size:1.75rem;margin-bottom:.5rem">☁️</div>
+              <div class="fs85 fw7 mb1">Drop or <span class="fg">browse</span></div>
+              <div class="fs8 mu">PNG, JPG, PDF up to 10MB</div><input type="file" id="fi" style="display:none"
+                multiple />
+            </div>
+          </div>
+        </div>
+
+        <div class="sub">Tag Input</div>
+        <div class="pv">
+          <label class="lbl">Tags</label>
+          <div class="tig" id="tig" onclick="document.getElementById('tinp').focus()">
+            <div class="tpill">React <span style="cursor:pointer;opacity:.6;margin-left:.1rem"
+                onclick="this.parentElement.remove()">✕</span></div>
+            <div class="tpill">TypeScript <span style="cursor:pointer;opacity:.6;margin-left:.1rem"
+                onclick="this.parentElement.remove()">✕</span></div>
+            <div class="tpill">Node.js <span style="cursor:pointer;opacity:.6;margin-left:.1rem"
+                onclick="this.parentElement.remove()">✕</span></div>
+            <input id="tinp"
+              style="flex:1;background:transparent;border:none;outline:none;color:rgba(255,255,255,.9);font-size:.84rem;min-width:70px"
+              placeholder="Add tag…"
+              onkeydown="if(event.key==='Enter'&&this.value.trim()){let t=document.createElement('div');t.className='tpill';t.innerHTML=this.value.trim()+' <span style=cursor:pointer;opacity:.6;margin-left:.1rem onclick=this.parentElement.remove()>✕</span>';this.parentElement.insertBefore(t,this);this.value='';event.preventDefault()}" />
+          </div>
+          <span class="hint">Press Enter to add a tag</span>
+        </div>
+
+        <div class="sub">Date & Time</div>
+        <div class="pv g g2" style="gap:1rem">
+          <div><label class="lbl">Date</label><input type="date" class="inp" style="color-scheme:dark" /></div>
+          <div><label class="lbl">Time</label><input type="time" class="inp" style="color-scheme:dark" /></div>
+        </div>
+
+        <div class="sub">Complete Form Example</div>
+        <div class="pv">
+          <div class="glass"
+            style="border-radius:13px;padding:1.75rem;max-width:520px;background:rgba(255,255,255,.08)">
+            <div class="ff fw7 fs9 mb3" style="margin-bottom:1.25rem">Create Account</div>
+            <div class="g g2 mb3" style="gap:.875rem;margin-bottom:.875rem">
+              <div><label class="lbl">First Name</label><input class="inp" placeholder="John" /></div>
+              <div><label class="lbl">Last Name</label><input class="inp" placeholder="Doe" /></div>
+            </div>
+            <div class="mb3" style="margin-bottom:.875rem"><label class="lbl">Email</label><input class="inp"
+                type="email" placeholder="john@example.com" /></div>
+            <div class="mb3" style="margin-bottom:.875rem"><label class="lbl">Role</label><select class="sel">
+                <option>Select role…</option>
+                <option>Designer</option>
+                <option>Developer</option>
+                <option>Manager</option>
+              </select></div>
+            <div class="mb3" style="margin-bottom:.875rem"><label class="lbl">Bio</label><textarea class="ta"
+                placeholder="Tell us about yourself…" rows="3"></textarea></div>
+            <label style="display:flex;align-items:flex-start;gap:.65rem;cursor:pointer;margin-bottom:1.25rem"><input
+                type="checkbox" class="chk" style="margin-top:1px" /><span class="fs8 mu">I agree to the <span
+                  class="fg">Terms of Service</span> and <span class="fg">Privacy Policy</span></span></label>
+            <button class="btn btn-p" style="width:100%;justify-content:center">Create Account</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== BADGES ====== -->
+      <section class="sec" id="badges">
+        <h2 class="stitle">Badges & Tags</h2>
+        <p class="sdesc">Status indicators, category labels, and chip variants.</p>
+        <div class="sub">Color Variants</div>
+        <div class="pv flex flex-wrap gap3" style="gap:.5rem">
+          <span class="bdg bg-g">Active</span><span class="bdg bg-p">Featured</span><span
+            class="bdg bg-pk">Beta</span><span class="bdg bg-b">Info</span><span class="bdg bg-o">Pending</span><span
+            class="bdg bg-n">Archived</span>
+        </div>
+        <div class="sub">With Status Dot</div>
+        <div class="pv flex flex-wrap gap3" style="gap:.5rem">
+          <span class="bdg bg-g"><span class="dot dot-on"></span>Online</span>
+          <span class="bdg bg-pk"><span class="dot dot-bz"></span>Busy</span>
+          <span class="bdg bg-o"><span class="dot dot-aw"></span>Away</span>
+          <span class="bdg bg-n"><span class="dot dot-off"></span>Offline</span>
+        </div>
+        <div class="sub">Keyboard Keys</div>
+        <div class="pv flex flex-wrap items-c gap2" style="gap:.375rem">
+          <kbd>⌘</kbd><kbd>K</kbd>
+          <span class="mu fs85" style="margin:0 .25rem">—</span>
+          <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>P</kbd>
+          <span class="mu fs85" style="margin:0 .25rem">—</span>
+          <kbd>Enter</kbd><kbd>Esc</kbd><kbd>Tab</kbd><kbd>↑</kbd><kbd>↓</kbd>
+        </div>
+        <div class="sub">Status Dots</div>
+        <div class="pv flex flex-wrap gap4" style="gap:1.5rem">
+          <div class="flex items-c gap2">
+            <div class="dot dot-on"></div><span class="fs85">Online</span>
+          </div>
+          <div class="flex items-c gap2">
+            <div class="dot dot-bz"></div><span class="fs85">Busy</span>
+          </div>
+          <div class="flex items-c gap2">
+            <div class="dot dot-aw"></div><span class="fs85">Away</span>
+          </div>
+          <div class="flex items-c gap2">
+            <div class="dot dot-off"></div><span class="fs85">Offline</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== CARDS ====== -->
+      <section class="sec" id="cards">
+        <h2 class="stitle">Cards & Tiles</h2>
+        <p class="sdesc">Content cards, stat cards, feature tiles, and list cards.</p>
+        <div class="sub">Content Cards</div>
+        <div class="pv g g3" style="gap:1rem">
+          <div class="card">
+            <div class="card-img">🎨</div>
+            <div class="card-body">
+              <div class="card-title">Design Systems</div>
+              <p class="card-text">Building consistent, scalable UI component libraries.</p>
+            </div>
+            <div class="card-foot"><span class="bdg bg-p">Design</span><button class="btn btn-g btn-sm">Read →</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-img"
+              style="background:linear-gradient(135deg,rgba(167,139,250,.18),rgba(244,114,182,.13))">⚡</div>
+            <div class="card-body">
+              <div class="card-title">Performance</div>
+              <p class="card-text">Optimizing web vitals and runtime performance.</p>
+            </div>
+            <div class="card-foot"><span class="bdg bg-g">Frontend</span><button class="btn btn-g btn-sm">Read
+                →</button></div>
+          </div>
+          <div class="card">
+            <div class="card-img" style="background:linear-gradient(135deg,rgba(244,114,182,.18),rgba(251,146,60,.13))">
+              🔒</div>
+            <div class="card-body">
+              <div class="card-title">Security</div>
+              <p class="card-text">Authentication patterns and secure API design.</p>
+            </div>
+            <div class="card-foot"><span class="bdg bg-pk">Backend</span><button class="btn btn-g btn-sm">Read
+                →</button></div>
+          </div>
+        </div>
+        <div class="sub">Stat Cards</div>
+        <div class="pv g g4" style="gap:.875rem">
+          <div class="stat sg">
+            <div class="stat-num fg">$48.2K</div>
+            <div class="stat-lbl">Revenue</div>
+            <div class="stat-ch fg">↑ 12.5%</div>
+          </div>
+          <div class="stat sp">
+            <div class="stat-num fp">2,847</div>
+            <div class="stat-lbl">Users</div>
+            <div class="stat-ch fp">↑ 8.2%</div>
+          </div>
+          <div class="stat spk">
+            <div class="stat-num fpk">94.3%</div>
+            <div class="stat-lbl">Uptime</div>
+            <div class="stat-ch mu">→ Stable</div>
+          </div>
+          <div class="stat sb">
+            <div class="stat-num fb">1.2s</div>
+            <div class="stat-lbl">Load Time</div>
+            <div class="stat-ch fg">↓ 0.3s</div>
+          </div>
+        </div>
+        <div class="sub">Tiles</div>
+        <div class="pv g g4" style="gap:.875rem">
+          <div class="tile">
+            <div style="font-size:1.4rem">📁</div>
+            <div class="fs85 fw7">Documents</div>
+            <div class="fs8 mu">142 files</div>
+          </div>
+          <div class="tile" style="border-color:rgba(125,249,194,.18);background:rgba(125,249,194,.04)">
+            <div style="font-size:1.4rem">💎</div>
+            <div class="fs85 fw7 fg">Premium</div>
+            <div class="fs8 mu">Active plan</div>
+          </div>
+          <div class="tile">
+            <div style="font-size:1.4rem">📊</div>
+            <div class="fs85 fw7">Analytics</div>
+            <div class="fs8 mu">3 dashboards</div>
+          </div>
+          <div class="tile">
+            <div style="font-size:1.4rem">🔗</div>
+            <div class="fs85 fw7">Integrations</div>
+            <div class="fs8 mu">7 connected</div>
+          </div>
+        </div>
+        <div class="sub">List Card</div>
+        <div class="pv">
+          <div class="twrap">
+            <div
+              style="display:flex;align-items:center;gap:.875rem;padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;cursor:pointer"
+              onmouseenter="this.style.background='rgba(255,255,255,.03)'" onmouseleave="this.style.background=''">
+              <div class="av av-md"
+                style="background:linear-gradient(135deg,rgba(125,249,194,.28),rgba(167,139,250,.28))">AB</div>
+              <div style="flex:1">
+                <div class="fs85 fw7">Alice Bennett</div>
+                <div class="fs8 mu">Frontend Engineer · 2h ago</div>
+              </div>
+              <div class="dot dot-on"></div><span class="bdg bg-g">Active</span><button
+                class="btn btn-g btn-sm">View</button>
+            </div>
+            <div
+              style="display:flex;align-items:center;gap:.875rem;padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer"
+              onmouseenter="this.style.background='rgba(255,255,255,.03)'" onmouseleave="this.style.background=''">
+              <div class="av av-md"
+                style="background:linear-gradient(135deg,rgba(167,139,250,.28),rgba(244,114,182,.28))">CK</div>
+              <div style="flex:1">
+                <div class="fs85 fw7">Chris Kim</div>
+                <div class="fs8 mu">Product Designer · 1d ago</div>
+              </div>
+              <div class="dot dot-aw"></div><span class="bdg bg-o">Away</span><button
+                class="btn btn-g btn-sm">View</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:.875rem;padding:.8rem 1rem;cursor:pointer"
+              onmouseenter="this.style.background='rgba(255,255,255,.03)'" onmouseleave="this.style.background=''">
+              <div class="av av-md"
+                style="background:linear-gradient(135deg,rgba(244,114,182,.28),rgba(251,146,60,.28))">MR</div>
+              <div style="flex:1">
+                <div class="fs85 fw7">Morgan Reid</div>
+                <div class="fs8 mu">Backend Engineer · 3d ago</div>
+              </div>
+              <div class="dot dot-off"></div><span class="bdg bg-n">Offline</span><button
+                class="btn btn-g btn-sm">View</button>
+            </div>
+          </div>
+        </div>
+        <div class="sub">Progress Cards & Avatars</div>
+        <div class="pv g g2" style="gap:1rem">
+          <div style="display:flex;flex-direction:column;gap:.875rem">
+            <div class="glass r10 p4">
+              <div class="flex items-c mb2" style="justify-content:space-between;margin-bottom:.625rem"><span
+                  class="fs85 fw7">Design</span><span class="fg fw7 ff fs85">85%</span></div>
+              <div class="pbar">
+                <div class="pfill pg" style="width:85%"></div>
+              </div>
+            </div>
+            <div class="glass r10 p4">
+              <div class="flex items-c mb2" style="justify-content:space-between;margin-bottom:.625rem"><span
+                  class="fs85 fw7">Development</span><span class="fp fw7 ff fs85">60%</span></div>
+              <div class="pbar">
+                <div class="pfill pp" style="width:60%"></div>
+              </div>
+            </div>
+            <div class="glass r10 p4">
+              <div class="flex items-c mb2" style="justify-content:space-between;margin-bottom:.625rem"><span
+                  class="fs85 fw7">Testing</span><span class="fb fw7 ff fs85">30%</span></div>
+              <div class="pbar">
+                <div class="pfill pb" style="width:30%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="pv" style="margin:0">
+            <div class="flex flex-wrap items-c gap3" style="gap:1rem;align-items:flex-end">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:.375rem">
+                <div class="av"
+                  style="width:64px;height:64px;font-size:1.1rem;background:linear-gradient(135deg,rgba(125,249,194,.28),rgba(167,139,250,.28))">
+                  MK</div><span class="fs7 mu">64px</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:.375rem">
+                <div class="av av-lg"
+                  style="background:linear-gradient(135deg,rgba(167,139,250,.28),rgba(244,114,182,.28))">AB</div><span
+                  class="fs7 mu">52px</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:.375rem">
+                <div class="av av-md"
+                  style="background:linear-gradient(135deg,rgba(244,114,182,.28),rgba(251,146,60,.28))">CK</div><span
+                  class="fs7 mu">38px</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:.375rem">
+                <div class="av av-sm"
+                  style="background:linear-gradient(135deg,rgba(96,165,250,.28),rgba(125,249,194,.28))">JD</div><span
+                  class="fs7 mu">28px</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:.375rem">
+                <div style="display:flex">
+                  <div class="av av-md"
+                    style="background:linear-gradient(135deg,rgba(125,249,194,.28),rgba(167,139,250,.28));margin-right:-8px;z-index:3">
+                    MK</div>
+                  <div class="av av-md"
+                    style="background:linear-gradient(135deg,rgba(167,139,250,.28),rgba(244,114,182,.28));margin-right:-8px;z-index:2">
+                    AB</div>
+                  <div class="av av-md"
+                    style="background:linear-gradient(135deg,rgba(244,114,182,.28),rgba(251,146,60,.28));z-index:1">CK
+                  </div>
+                  <div class="av av-md fs8 mu" style="background:rgba(255,255,255,.08);margin-left:-8px;z-index:0">+5
+                  </div>
+                </div>
+                <span class="fs7 mu">Group</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== ACCORDION ====== -->
+      <section class="sec" id="accordion">
+        <h2 class="stitle">Accordion</h2>
+        <p class="sdesc">Collapsible content panels.</p>
+        <div class="pv">
+          <div class="acc-item"><button class="acc-btn open" onclick="acc(this)"><span>What is glassmorphism?</span><svg
+                class="acc-chv" width="15" height="15" fill="none" viewBox="0 0 15 15">
+                <path d="M3.5 5.5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg></button>
+            <div class="acc-body open">
+              <div class="acc-inner">Glassmorphism is a UI design trend using translucent, frosted glass-like
+                backgrounds with blur effects. It creates depth and layering, popular in modern dark-themed interfaces.
+              </div>
+            </div>
+          </div>
+          <div class="acc-item"><button class="acc-btn" onclick="acc(this)"><span>How do I implement
+                backdrop-filter?</span><svg class="acc-chv" width="15" height="15" fill="none" viewBox="0 0 15 15">
+                <path d="M3.5 5.5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg></button>
+            <div class="acc-body">
+              <div class="acc-inner">Use <code
+                  style="background:rgba(125,249,194,.1);padding:.1rem .35rem;border-radius:4px;color:var(--g);font-size:.78rem">backdrop-filter: blur(16px)</code>
+                with a semi-transparent background. Include the <code
+                  style="background:rgba(125,249,194,.1);padding:.1rem .35rem;border-radius:4px;color:var(--g);font-size:.78rem">-webkit-</code>
+                prefix for Safari support.</div>
+            </div>
+          </div>
+          <div class="acc-item"><button class="acc-btn" onclick="acc(this)"><span>Browser compatibility notes</span><svg
+                class="acc-chv" width="15" height="15" fill="none" viewBox="0 0 15 15">
+                <path d="M3.5 5.5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg></button>
+            <div class="acc-body">
+              <div class="acc-inner">Supported in Chrome 76+, Firefox 103+, Safari 14+ (with -webkit- prefix). Test
+                performance on lower-end devices as blur effects can be GPU intensive.</div>
+            </div>
+          </div>
+          <div class="acc-item"><button class="acc-btn" onclick="acc(this)"><span>Performance best practices</span><svg
+                class="acc-chv" width="15" height="15" fill="none" viewBox="0 0 15 15">
+                <path d="M3.5 5.5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg></button>
+            <div class="acc-body">
+              <div class="acc-inner">Limit glass elements on screen simultaneously. Use <code
+                  style="background:rgba(125,249,194,.1);padding:.1rem .35rem;border-radius:4px;color:var(--g);font-size:.78rem">will-change: transform</code>
+                for promotion to compositor layer. Avoid animating blur values.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== TABS ====== -->
+      <section class="sec" id="tabs">
+        <h2 class="stitle">Tabs</h2>
+        <p class="sdesc">Pill tabs, underline tabs, and vertical tabs.</p>
+        <div class="sub">Pill Tabs</div>
+        <div class="pv">
+          <div class="tabs mb3" id="pt" style="margin-bottom:.875rem">
+            <button class="tab active" onclick="stab('pt','tp1',this)">Overview</button>
+            <button class="tab" onclick="stab('pt','tp2',this)">Analytics</button>
+            <button class="tab" onclick="stab('pt','tp3',this)">Reports</button>
+            <button class="tab" onclick="stab('pt','tp4',this)">Settings</button>
+          </div>
+          <div class="glass r10 p4 fs85 mu tp active" id="tp1">Overview — Dashboard metrics, summary stats, and quick
+            actions appear here.</div>
+          <div class="glass r10 p4 fs85 mu tp" id="tp2">Analytics — Charts, graphs, and data visualizations for deeper
+            insights.</div>
+          <div class="glass r10 p4 fs85 mu tp" id="tp3">Reports — Generated documents, export options, and scheduled
+            reports.</div>
+          <div class="glass r10 p4 fs85 mu tp" id="tp4">Settings — Configuration, preferences, and account management.
+          </div>
+        </div>
+        <div class="sub">Underline Tabs</div>
+        <div class="pv">
+          <div class="utabs mb3" id="ut" style="margin-bottom:.875rem">
+            <button class="utab active" onclick="sutab('ut','u1',this)">All Items</button>
+            <button class="utab" onclick="sutab('ut','u2',this)">Active</button>
+            <button class="utab" onclick="sutab('ut','u3',this)">Archived</button>
+            <button class="utab" onclick="sutab('ut','u4',this)">Drafts</button>
+          </div>
+          <div class="fs85 mu tp active" id="u1">Showing all 142 items</div>
+          <div class="fs85 mu tp" id="u2">Showing 89 active items</div>
+          <div class="fs85 mu tp" id="u3">Showing 38 archived items</div>
+          <div class="fs85 mu tp" id="u4">Showing 15 drafts</div>
+        </div>
+        <div class="sub">Vertical Tabs</div>
+        <div class="pv">
+          <div class="vtabs" id="vt">
+            <div class="vlist">
+              <button class="vtab active" onclick="svtab('vt','vt1',this)">Profile</button>
+              <button class="vtab" onclick="svtab('vt','vt2',this)">Security</button>
+              <button class="vtab" onclick="svtab('vt','vt3',this)">Billing</button>
+              <button class="vtab" onclick="svtab('vt','vt4',this)">Notifications</button>
+              <button class="vtab" onclick="svtab('vt','vt5',this)">API Keys</button>
+            </div>
+            <div class="vcontent">
+              <div class="tp active" id="vt1">
+                <div class="ff fw7 mb1">Profile Settings</div>
+                <p>Manage your public profile information, avatar, and account details.</p>
+              </div>
+              <div class="tp" id="vt2">
+                <div class="ff fw7 mb1">Security</div>
+                <p>Two-factor auth, active sessions, and password management.</p>
+              </div>
+              <div class="tp" id="vt3">
+                <div class="ff fw7 mb1">Billing</div>
+                <p>Subscription plan, payment methods, and invoice history.</p>
+              </div>
+              <div class="tp" id="vt4">
+                <div class="ff fw7 mb1">Notifications</div>
+                <p>Configure email, push, and in-app notification preferences.</p>
+              </div>
+              <div class="tp" id="vt5">
+                <div class="ff fw7 mb1">API Keys</div>
+                <p>Generate and manage access tokens for integrations.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== TABLE ====== -->
+      <section class="sec" id="table">
+        <h2 class="stitle">Table</h2>
+        <p class="sdesc">Data tables with sorting, selection, and inline actions.</p>
+        <div class="pv" style="overflow-x:auto">
+          <div class="twrap">
+            <div
+              style="display:flex;justify-content:space-between;align-items:center;padding:.875rem 1rem;border-bottom:1px solid rgba(255,255,255,.06)">
+              <div class="ff fw7 fs9">Team Members</div>
+              <div class="flex gap3" style="gap:.5rem"><button class="btn btn-g btn-sm">Export</button><button
+                  class="btn btn-p btn-sm">+ Add</button></div>
+            </div>
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th style="width:36px"><input type="checkbox" class="chk" /></th>
+                  <th class="sort">Name ↕</th>
+                  <th class="sort">Role ↕</th>
+                  <th class="sort">Status ↕</th>
+                  <th class="sort">Joined ↕</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="checkbox" class="chk" checked /></td>
+                  <td>
+                    <div class="flex items-c gap2" style="gap:.65rem">
+                      <div class="av av-sm"
+                        style="background:linear-gradient(135deg,rgba(125,249,194,.28),rgba(167,139,250,.28))">AB</div>
+                      <div>
+                        <div class="fs85 fw7">Alice Bennett</div>
+                        <div class="fs8 mu">alice@example.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="fs85">Frontend Engineer</td>
+                  <td><span class="bdg bg-g"><span class="dot dot-on"></span>Active</span></td>
+                  <td class="fs8 mu">Jan 12, 2024</td>
+                  <td>
+                    <div class="flex gap2" style="gap:.25rem"><button class="btn btn-g btn-ico btn-sm"
+                        style="font-size:.75rem">✏️</button><button class="btn btn-g btn-ico btn-sm"
+                        style="font-size:.75rem">🗑</button></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="chk" /></td>
+                  <td>
+                    <div class="flex items-c gap2" style="gap:.65rem">
+                      <div class="av av-sm"
+                        style="background:linear-gradient(135deg,rgba(167,139,250,.28),rgba(244,114,182,.28))">CK</div>
+                      <div>
+                        <div class="fs85 fw7">Chris Kim</div>
+                        <div class="fs8 mu">chris@example.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="fs85">Product Designer</td>
+                  <td><span class="bdg bg-o"><span class="dot dot-aw"></span>Away</span></td>
+                  <td class="fs8 mu">Mar 5, 2024</td>
+                  <td>
+                    <div class="flex gap2" style="gap:.25rem"><button class="btn btn-g btn-ico btn-sm"
+                        style="font-size:.75rem">✏️</button><button class="btn btn-g btn-ico btn-sm"
+                        style="font-size:.75rem">🗑</button></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="chk" /></td>
+                  <td>
+                    <div class="flex items-c gap2" style="gap:.65rem">
+                      <div class="av av-sm"
+                        style="background:linear-gradient(135deg,rgba(244,114,182,.28),rgba(251,146,60,.28))">MR</div>
+                      <div>
+                        <div class="fs85 fw7">Morgan Reid</div>
+                        <div class="fs8 mu">morgan@example.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="fs85">Backend Engineer</td>
+                  <td><span class="bdg bg-n"><span class="dot dot-off"></span>Offline</span></td>
+                  <td class="fs8 mu">Nov 20, 2023</td>
+                  <td>
+                    <div class="flex gap2" style="gap:.25rem"><button class="btn btn-g btn-ico btn-sm"
+                        style="font-size:.75rem">✏️</button><button class="btn btn-g btn-ico btn-sm"
+                        style="font-size:.75rem">🗑</button></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="chk" /></td>
+                  <td>
+                    <div class="flex items-c gap2" style="gap:.65rem">
+                      <div class="av av-sm"
+                        style="background:linear-gradient(135deg,rgba(96,165,250,.28),rgba(125,249,194,.28))">JD</div>
+                      <div>
+                        <div class="fs85 fw7">Jordan Davis</div>
+                        <div class="fs8 mu">jordan@example.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="fs85">DevOps Engineer</td>
+                  <td><span class="bdg bg-pk"><span class="dot dot-bz"></span>Busy</span></td>
+                  <td class="fs8 mu">Jul 8, 2024</td>
+                  <td>
+                    <div class="flex gap2" style="gap:.25rem"><button class="btn btn-g btn-ico btn-sm"
+                        style="font-size:.75rem">✏️</button><button class="btn btn-g btn-ico btn-sm"
+                        style="font-size:.75rem">🗑</button></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div
+              style="display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;border-top:1px solid rgba(255,255,255,.06)">
+              <span class="fs8 mu">4 total results</span>
+              <div class="pag">
+                <div class="pg dis">‹</div>
+                <div class="pg active">1</div>
+                <div class="pg">2</div>
+                <div class="pg">3</div>
+                <div class="pg">›</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== FILTER & SORT ====== -->
+      <section class="sec" id="filter">
+        <h2 class="stitle">Filter & Sort</h2>
+        <p class="sdesc">Filter chips, active tags, sort controls, and combined toolbars.</p>
+        <div class="sub">Filter Chips</div>
+        <div class="pv flex flex-wrap gap2" style="gap:.4rem;align-items:center">
+          <span class="fs8 mu fw7">Filter:</span>
+          <div class="chip active" onclick="this.classList.toggle('active')">All</div>
+          <div class="chip" onclick="this.classList.toggle('active')">Frontend</div>
+          <div class="chip" onclick="this.classList.toggle('active')">Backend</div>
+          <div class="chip" onclick="this.classList.toggle('active')">Design</div>
+          <div class="chip" onclick="this.classList.toggle('active')">DevOps</div>
+        </div>
+        <div class="sub">Active Filters (removable)</div>
+        <div class="pv flex flex-wrap gap2" style="gap:.4rem;align-items:center">
+          <span class="fs8 mu fw7">Active:</span>
+          <div class="chip active">Status: Active <span style="margin-left:.25rem;opacity:.7;cursor:pointer">✕</span>
+          </div>
+          <div class="chip active"
+            style="background:rgba(167,139,250,.11);border-color:rgba(167,139,250,.28);color:var(--p)">Role: Engineer
+            <span style="margin-left:.25rem;opacity:.7;cursor:pointer">✕</span></div>
+          <button class="btn btn-g btn-sm">Clear all</button>
+        </div>
+        <div class="sub">Sort Bar</div>
+        <div class="pv flex flex-wrap gap2 items-c" style="gap:.5rem">
+          <span class="fs8 mu">Sort by:</span>
+          <div class="srt active" onclick="sa(this)">Name ↑</div>
+          <div class="srt" onclick="sa(this)">Date</div>
+          <div class="srt" onclick="sa(this)">Status</div>
+          <div class="srt" onclick="sa(this)">Role</div>
+          <div style="margin-left:auto;display:flex;gap:.375rem;align-items:center">
+            <span class="fs8 mu">Order:</span>
+            <div class="srt active">Asc ↑</div>
+            <div class="srt">Desc ↓</div>
+          </div>
+        </div>
+        <div class="sub">Combined Toolbar</div>
+        <div class="pv flex flex-wrap gap2 items-c" style="gap:.625rem">
+          <div style="position:relative;flex:1;min-width:180px"><svg
+              style="position:absolute;left:9px;top:50%;transform:translateY(-50%);opacity:.35" width="13" height="13"
+              fill="none" viewBox="0 0 13 13">
+              <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.4" />
+              <path d="M9 9l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg><input class="inp" style="padding-left:1.75rem" placeholder="Search…" /></div>
+          <button class="btn btn-s btn-sm">⊿ Filters <span class="bdg bg-g"
+              style="font-size:.55rem;padding:.1rem .35rem;margin-left:.2rem">3</span></button>
+          <select class="sel" style="width:auto;padding:.5rem 2rem .5rem .75rem;font-size:.8rem">
+            <option>Sort: Name</option>
+            <option>Sort: Date</option>
+            <option>Sort: Status</option>
+          </select>
+          <div class="vtog">
+            <div class="vbtn active"
+              onclick="this.parentElement.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('active'));this.classList.add('active')"
+              title="Grid">⊞</div>
+            <div class="vbtn"
+              onclick="this.parentElement.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('active'));this.classList.add('active')"
+              title="List">☰</div>
+            <div class="vbtn"
+              onclick="this.parentElement.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('active'));this.classList.add('active')"
+              title="Table">⊟</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== PAGINATION ====== -->
+      <section class="sec" id="pagination">
+        <h2 class="stitle">Pagination</h2>
+        <p class="sdesc">Numbered, compact, and load-more patterns.</p>
+        <div class="sub">Numbered</div>
+        <div class="pv">
+          <div class="pag">
+            <div class="pg dis">‹‹</div>
+            <div class="pg dis">‹</div>
+            <div class="pg">1</div>
+            <div class="pg">2</div>
+            <div class="pg active">3</div>
+            <div class="pg">4</div>
+            <div class="pg">5</div>
+            <div class="pg" style="pointer-events:none;color:var(--mu)">…</div>
+            <div class="pg">12</div>
+            <div class="pg">›</div>
+            <div class="pg">››</div>
+          </div>
+        </div>
+        <div class="sub">With Info & Per-page</div>
+        <div class="pv flex flex-wrap items-c gap3" style="justify-content:space-between;gap:1rem">
+          <div class="flex items-c gap2"><span class="fs8 mu">Rows per page:</span><select class="sel"
+              style="width:65px;padding:.35rem .5rem;font-size:.78rem;background-image:none">
+              <option>10</option>
+              <option selected>25</option>
+              <option>50</option>
+            </select></div>
+          <span class="fs8 mu">51–75 of 312</span>
+          <div class="pag">
+            <div class="pg">‹</div>
+            <div class="pg">2</div>
+            <div class="pg active">3</div>
+            <div class="pg">4</div>
+            <div class="pg">›</div>
+          </div>
+        </div>
+        <div class="sub">Load More</div>
+        <div class="pv ta-c">
+          <p class="fs8 mu mb3">Showing 24 of 128 results</p>
+          <div class="pbar" style="max-width:180px;margin:0 auto .875rem">
+            <div class="pfill pg" style="width:18.75%"></div>
+          </div>
+          <button class="btn btn-s">Load 24 more</button>
+        </div>
+      </section>
+
+      <!-- ====== VIEWS ====== -->
+      <section class="sec" id="views">
+        <h2 class="stitle">Views: Grid / List / Table</h2>
+        <p class="sdesc">Switchable display modes for any dataset.</p>
+        <div class="pv flex gap2 items-c" style="gap:.75rem">
+          <div class="vtog" id="mainVT">
+            <div class="vbtn active" onclick="setV('grid')" title="Grid">⊞</div>
+            <div class="vbtn" onclick="setV('list')" title="List">☰</div>
+            <div class="vbtn" onclick="setV('table')" title="Table">⊟</div>
+          </div>
+          <span class="fs8 mu" id="vlbl">Grid view</span>
+        </div>
+        <div id="vgrid">
+          <div class="pv">
+            <div class="g g3" style="gap:.875rem">
+              <div class="card">
+                <div class="card-img">📦</div>
+                <div class="card-body">
+                  <div class="card-title">Project Alpha</div>
+                  <p class="card-text">Frontend redesign with glassmorphic components.</p>
+                </div>
+                <div class="card-foot"><span class="bdg bg-g">Active</span></div>
+              </div>
+              <div class="card">
+                <div class="card-img"
+                  style="background:linear-gradient(135deg,rgba(167,139,250,.18),rgba(244,114,182,.13))">🚀</div>
+                <div class="card-body">
+                  <div class="card-title">Project Beta</div>
+                  <p class="card-text">API backend with Node.js and MongoDB.</p>
+                </div>
+                <div class="card-foot"><span class="bdg bg-p">Review</span></div>
+              </div>
+              <div class="card">
+                <div class="card-img"
+                  style="background:linear-gradient(135deg,rgba(244,114,182,.18),rgba(251,146,60,.13))">⚙️</div>
+                <div class="card-body">
+                  <div class="card-title">Project Gamma</div>
+                  <p class="card-text">DevOps pipeline and CI/CD setup.</p>
+                </div>
+                <div class="card-foot"><span class="bdg bg-o">Pending</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="vlist" style="display:none">
+          <div class="pv">
+            <div class="twrap">
+              <div
+                style="display:flex;align-items:center;gap:.875rem;padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer"
+                onmouseenter="this.style.background='rgba(255,255,255,.03)'" onmouseleave="this.style.background=''">
+                <span style="font-size:1.25rem">📦</span>
+                <div style="flex:1">
+                  <div class="fs85 fw7">Project Alpha</div>
+                  <div class="fs8 mu">Frontend · 3 members</div>
+                </div><span class="bdg bg-g">Active</span>
+              </div>
+              <div
+                style="display:flex;align-items:center;gap:.875rem;padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer"
+                onmouseenter="this.style.background='rgba(255,255,255,.03)'" onmouseleave="this.style.background=''">
+                <span style="font-size:1.25rem">🚀</span>
+                <div style="flex:1">
+                  <div class="fs85 fw7">Project Beta</div>
+                  <div class="fs8 mu">API · 5 members</div>
+                </div><span class="bdg bg-p">Review</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.875rem;padding:.75rem 1rem;cursor:pointer"
+                onmouseenter="this.style.background='rgba(255,255,255,.03)'" onmouseleave="this.style.background=''">
+                <span style="font-size:1.25rem">⚙️</span>
+                <div style="flex:1">
+                  <div class="fs85 fw7">Project Gamma</div>
+                  <div class="fs8 mu">DevOps · 2 members</div>
+                </div><span class="bdg bg-o">Pending</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="vtable" style="display:none">
+          <div class="pv" style="overflow-x:auto">
+            <div class="twrap">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Status</th>
+                    <th>Members</th>
+                    <th>Updated</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="fs85 fw7">📦 Alpha</td>
+                    <td><span class="bdg bg-g">Active</span></td>
+                    <td class="fs85">3</td>
+                    <td class="fs8 mu">2h ago</td>
+                  </tr>
+                  <tr>
+                    <td class="fs85 fw7">🚀 Beta</td>
+                    <td><span class="bdg bg-p">Review</span></td>
+                    <td class="fs85">5</td>
+                    <td class="fs8 mu">1d ago</td>
+                  </tr>
+                  <tr>
+                    <td class="fs85 fw7">⚙️ Gamma</td>
+                    <td><span class="bdg bg-o">Pending</span></td>
+                    <td class="fs85">2</td>
+                    <td class="fs8 mu">3d ago</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== ADVANCED FILTER ====== -->
+      <section class="sec" id="advanced-filter">
+        <h2 class="stitle">Advanced Filter & Query Builder</h2>
+        <p class="sdesc">Filter panels, rule engines, and saved filter patterns.</p>
+        <div class="sub">Filter Panel</div>
+        <div class="pv">
+          <div class="glass-dark r12 p5">
+            <div class="flex items-c mb3" style="justify-content:space-between;margin-bottom:1.1rem">
+              <div class="ff fw7 fs85">Filters</div><button class="btn btn-g btn-sm">Clear all</button>
+            </div>
+            <div class="g g2 mb3" style="gap:.875rem;margin-bottom:.875rem">
+              <div><label class="lbl">Status</label><select class="sel">
+                  <option>All statuses</option>
+                  <option selected>Active</option>
+                  <option>Inactive</option>
+                </select></div>
+              <div><label class="lbl">Role</label><select class="sel">
+                  <option>All roles</option>
+                  <option>Engineer</option>
+                  <option selected>Designer</option>
+                </select></div>
+              <div><label class="lbl">Joined After</label><input type="date" class="inp" style="color-scheme:dark"
+                  value="2024-01-01" /></div>
+              <div><label class="lbl">Team Size</label>
+                <div class="flex items-c gap2"><input class="inp" style="width:65px" type="number" value="2" /><span
+                    class="mu fs85">–</span><input class="inp" style="width:65px" type="number" value="10" /></div>
+              </div>
+            </div>
+            <div class="flex gap2" style="justify-content:flex-end;gap:.625rem"><button
+                class="btn btn-g">Reset</button><button class="btn btn-p">Apply Filters</button></div>
+          </div>
+        </div>
+        <div class="sub">Query Builder (Rule Engine)</div>
+        <div class="pv">
+          <div class="glass-dark r12 p5">
+            <div class="flex items-c gap2 mb3" style="margin-bottom:1rem">
+              <span class="fs8 mu fw7">Match</span>
+              <select class="sel" style="width:85px;padding:.4rem 1.75rem .4rem .65rem;font-size:.78rem">
+                <option selected>ALL</option>
+                <option>ANY</option>
+                <option>NONE</option>
+              </select>
+              <span class="fs8 mu fw7">of the following rules:</span>
+            </div>
+            <div class="qrule"><select class="sel"
+                style="width:120px;padding:.4rem 1.75rem .4rem .65rem;font-size:.78rem">
+                <option selected>Status</option>
+                <option>Role</option>
+                <option>Name</option>
+                <option>Created</option>
+              </select><select class="sel" style="width:110px;padding:.4rem 1.75rem .4rem .65rem;font-size:.78rem">
+                <option selected>is</option>
+                <option>is not</option>
+                <option>contains</option>
+              </select><input class="inp" style="flex:1;min-width:90px" value="Active" /><button
+                class="btn btn-d btn-ico btn-sm" style="font-size:.7rem">✕</button></div>
+            <div class="flex items-c gap2" style="padding:.2rem .4rem;margin-bottom:.2rem">
+              <div style="flex:1;height:1px;background:rgba(255,255,255,.06)"></div>
+              <div class="qcon">AND</div>
+              <div style="flex:1;height:1px;background:rgba(255,255,255,.06)"></div>
+            </div>
+            <div class="qrule"><select class="sel"
+                style="width:120px;padding:.4rem 1.75rem .4rem .65rem;font-size:.78rem">
+                <option>Status</option>
+                <option selected>Role</option>
+                <option>Name</option>
+              </select><select class="sel" style="width:110px;padding:.4rem 1.75rem .4rem .65rem;font-size:.78rem">
+                <option>is</option>
+                <option selected>contains</option>
+                <option>starts with</option>
+              </select><input class="inp" style="flex:1;min-width:90px" value="Engineer" /><button
+                class="btn btn-d btn-ico btn-sm" style="font-size:.7rem">✕</button></div>
+            <div class="flex items-c gap2" style="padding:.2rem .4rem;margin-bottom:.2rem">
+              <div style="flex:1;height:1px;background:rgba(255,255,255,.06)"></div>
+              <div class="qcon">AND</div>
+              <div style="flex:1;height:1px;background:rgba(255,255,255,.06)"></div>
+            </div>
+            <div class="qrule"><select class="sel"
+                style="width:120px;padding:.4rem 1.75rem .4rem .65rem;font-size:.78rem">
+                <option>Status</option>
+                <option>Role</option>
+                <option selected>Created</option>
+              </select><select class="sel" style="width:110px;padding:.4rem 1.75rem .4rem .65rem;font-size:.78rem">
+                <option>is</option>
+                <option selected>is after</option>
+                <option>is before</option>
+              </select><input type="date" class="inp" style="flex:1;min-width:90px;color-scheme:dark"
+                value="2024-01-01" /><button class="btn btn-d btn-ico btn-sm" style="font-size:.7rem">✕</button></div>
+            <div class="flex items-c gap2" style="justify-content:space-between;margin-top:.875rem">
+              <button class="btn btn-g btn-sm">+ Add Rule</button>
+              <div class="flex gap2" style="gap:.5rem"><button class="btn btn-g btn-sm">Save Filter</button><button
+                  class="btn btn-p btn-sm">Apply</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="sub">Saved Filters</div>
+        <div class="pv flex flex-wrap gap2" style="gap:.4rem">
+          <div class="chip active">⭐ Active Engineers</div>
+          <div class="chip">📅 Joined This Month</div>
+          <div class="chip">🔍 Remote Designers</div>
+          <button class="btn btn-g btn-sm">+ Save current</button>
+        </div>
+      </section>
+
+      <!-- ====== ALERTS ====== -->
+      <section class="sec" id="alerts">
+        <h2 class="stitle">Alerts & Notices</h2>
+        <p class="sdesc">Success, error, warning, and info system feedback banners.</p>
+        <div class="pv" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="alert al-s"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"
+              style="flex-shrink:0;margin-top:1px">
+              <circle cx="8" cy="8" r="7" stroke="#7DF9C2" stroke-width="1.4" />
+              <path d="M4.5 8l2.5 2.5L11 5" stroke="#7DF9C2" stroke-width="1.4" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+            <div>
+              <div class="al-title fg">Deploy successful</div>
+              <div class="al-body">Build #4821 completed in 2m 14s and deployed to production.</div>
+            </div>
+          </div>
+          <div class="alert al-e"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"
+              style="flex-shrink:0;margin-top:1px">
+              <circle cx="8" cy="8" r="7" stroke="#f472b6" stroke-width="1.4" />
+              <path d="M8 5v4M8 10.5v.5" stroke="#f472b6" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+            <div>
+              <div class="al-title fpk">Build failed</div>
+              <div class="al-body">ESLint errors found in 3 files. Fix issues and push again to retry.</div>
+            </div>
+          </div>
+          <div class="alert al-w"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"
+              style="flex-shrink:0;margin-top:1px">
+              <path d="M8 2L1 14h14L8 2z" stroke="#fbbf24" stroke-width="1.4" stroke-linejoin="round" />
+              <path d="M8 7v3M8 11.5v.5" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+            <div>
+              <div class="al-title" style="color:#fbbf24">Usage limit approaching</div>
+              <div class="al-body">You've used 84% of your monthly API quota. Consider upgrading.</div>
+            </div>
+          </div>
+          <div class="alert al-i"><svg width="16" height="16" fill="none" viewBox="0 0 16 16"
+              style="flex-shrink:0;margin-top:1px">
+              <circle cx="8" cy="8" r="7" stroke="#60a5fa" stroke-width="1.4" />
+              <path d="M8 8v4M8 5v1" stroke="#60a5fa" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+            <div>
+              <div class="al-title fb">Scheduled maintenance</div>
+              <div class="al-body">System maintenance planned Sunday Jan 21 at 2:00 AM UTC.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== MODALS ====== -->
+      <section class="sec" id="modals">
+        <h2 class="stitle">Modals & Dialogs</h2>
+        <p class="sdesc">Overlay dialogs for confirmations, forms, and detailed content.</p>
+        <div class="pv flex flex-wrap gap3" style="gap:.75rem">
+          <button class="btn btn-p" onclick="document.getElementById('m1').classList.add('open')">Open Modal</button>
+          <button class="btn btn-d" onclick="document.getElementById('m2').classList.add('open')">Confirm
+            Dialog</button>
+          <button class="btn btn-s" onclick="document.getElementById('m3').classList.add('open')">Form Modal</button>
+        </div>
+        <div class="pv">
+          <div class="mbox" style="border:none;border-radius:0;box-shadow:none;background:rgba(255,255,255,.03)">
+            <div class="mhead">
+              <div class="mtitle">Modal Title</div>
+            </div>
+            <div class="mbody">Standard modal dialog with glassmorphic surface. Press Escape or click outside to close.
+              Supports any content — text, forms, lists, and media.</div>
+            <div class="mfoot"><button class="btn btn-g">Cancel</button><button class="btn btn-p">Confirm</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== TOAST ====== -->
+      <section class="sec" id="toast">
+        <h2 class="stitle">Toast, Tooltips & Dropdowns</h2>
+        <p class="sdesc">Transient notifications, contextual tooltips, dropdowns, and context menus.</p>
+        <div class="sub">Toast Notifications</div>
+        <div class="pv" style="display:flex;flex-direction:column;gap:.625rem;max-width:320px">
+          <div class="toast ts"><svg width="15" height="15" fill="none" viewBox="0 0 15 15"
+              style="flex-shrink:0;margin-top:1px">
+              <circle cx="7.5" cy="7.5" r="6.5" stroke="#7DF9C2" stroke-width="1.4" />
+              <path d="M4.5 7.5l2.5 2.5 4-4" stroke="#7DF9C2" stroke-width="1.4" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+            <div style="flex:1">
+              <div class="fw7 fs85 fg mb1">Saved successfully</div>
+              <div class="fs8 mu">Your profile has been updated.</div>
+            </div><button
+              style="background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:.875rem">✕</button>
+          </div>
+          <div class="toast te"><svg width="15" height="15" fill="none" viewBox="0 0 15 15"
+              style="flex-shrink:0;margin-top:1px">
+              <circle cx="7.5" cy="7.5" r="6.5" stroke="#f472b6" stroke-width="1.4" />
+              <path d="M7.5 5v4M7.5 10v.5" stroke="#f472b6" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+            <div style="flex:1">
+              <div class="fw7 fs85 fpk mb1">Upload failed</div>
+              <div class="fs8 mu">File exceeds 10MB size limit.</div>
+            </div><button
+              style="background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:.875rem">✕</button>
+          </div>
+          <div class="toast tw"><svg width="15" height="15" fill="none" viewBox="0 0 15 15"
+              style="flex-shrink:0;margin-top:1px">
+              <path d="M7.5 2L1 13h13L7.5 2z" stroke="#fbbf24" stroke-width="1.4" stroke-linejoin="round" />
+              <path d="M7.5 7v2.5M7.5 11v.5" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+            <div style="flex:1">
+              <div class="fw7 fs85 mb1" style="color:#fbbf24">Unsaved changes</div>
+              <div class="fs8 mu">Don't forget to save your work.</div>
+            </div><button
+              style="background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:.875rem">✕</button>
+          </div>
+          <button class="btn btn-s btn-sm" onclick="showToast()" style="align-self:flex-start;margin-top:.25rem">Trigger
+            Toast →</button>
+        </div>
+        <div class="sub">Tooltips</div>
+        <div class="pv flex flex-wrap gap4 items-c" style="gap:1.5rem">
+          <div class="ttp"><button class="btn btn-s">Hover me</button>
+            <div class="ttp-box">Helpful tooltip text here</div>
+          </div>
+          <div class="ttp"><button class="btn btn-g btn-ico"><svg width="13" height="13" fill="none"
+                viewBox="0 0 13 13">
+                <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.4" />
+                <path d="M6.5 5v2M6.5 8v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+              </svg></button>
+            <div class="ttp-box">More information</div>
+          </div>
+          <div class="ttp"><span class="bdg bg-g" style="cursor:default">Active</span>
+            <div class="ttp-box">User is currently online</div>
+          </div>
+        </div>
+        <div class="sub">Dropdown & Context Menu</div>
+        <div class="pv flex flex-wrap gap4 items-start" style="gap:1.25rem">
+          <div class="dd">
+            <button class="btn btn-s" onclick="toggleDD('dd1')">Options <svg width="9" height="9" viewBox="0 0 9 9"
+                fill="none">
+                <path d="M1.5 3l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg></button>
+            <div class="dd-menu" id="dd1">
+              <div class="dd-item">✏️ Edit</div>
+              <div class="dd-item">📋 Duplicate</div>
+              <div class="dd-item">🔗 Share</div>
+              <div class="dd-div"></div>
+              <div class="dd-item">📥 Export</div>
+              <div class="dd-div"></div>
+              <div class="dd-item red">🗑 Delete</div>
+            </div>
+          </div>
+          <div class="ctx">
+            <div class="ctx-i">✏️ Edit <kbd style="margin-left:auto;font-size:.62rem">E</kbd></div>
+            <div class="ctx-i">📋 Copy <kbd style="margin-left:auto;font-size:.62rem">⌘C</kbd></div>
+            <div class="ctx-i">🔗 Share</div>
+            <div class="dd-div"></div>
+            <div class="ctx-i">📌 Pin to top</div>
+            <div class="dd-div"></div>
+            <div class="ctx-i red">🗑 Delete <kbd style="margin-left:auto;font-size:.62rem">Del</kbd></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== BREADCRUMB ====== -->
+      <section class="sec" id="breadcrumb">
+        <h2 class="stitle">Breadcrumb & Stepper</h2>
+        <p class="sdesc">Navigation trails and step-by-step progress indicators.</p>
+        <div class="sub">Breadcrumbs</div>
+        <div class="pv" style="display:flex;flex-direction:column;gap:.875rem">
+          <div class="brd"><span class="brd-i">Home</span><span class="brd-sep">›</span><span
+              class="brd-i">Projects</span><span class="brd-sep">›</span><span class="brd-i">Alpha</span><span
+              class="brd-sep">›</span><span class="brd-i cur">Settings</span></div>
+          <div class="brd"><span>🏠</span><span class="brd-sep">/</span><span class="brd-i">Dashboard</span><span
+              class="brd-sep">/</span><span class="brd-i">Team</span><span class="brd-sep">/</span><span
+              class="brd-i cur">Alice Bennett</span></div>
+        </div>
+        <div class="sub">Stepper</div>
+        <div class="pv">
+          <div class="stpr">
+            <div class="step-i done">
+              <div class="step-c">✓</div>
+              <div class="step-lbl">Account</div>
+            </div>
+            <div class="step-i done">
+              <div class="step-c">✓</div>
+              <div class="step-lbl">Profile</div>
+            </div>
+            <div class="step-i active">
+              <div class="step-c">3</div>
+              <div class="step-lbl">Payment</div>
+            </div>
+            <div class="step-i">
+              <div class="step-c">4</div>
+              <div class="step-lbl">Review</div>
+            </div>
+            <div class="step-i">
+              <div class="step-c">5</div>
+              <div class="step-lbl">Done</div>
+            </div>
+          </div>
+        </div>
+        <div class="sub">Progress Bars</div>
+        <div class="pv" style="display:flex;flex-direction:column;gap:1rem">
+          <div>
+            <div class="flex items-c mb1" style="justify-content:space-between;margin-bottom:.45rem"><span
+                class="fs85">Onboarding</span><span class="fg fw7 ff">60%</span></div>
+            <div class="pbar" style="height:7px">
+              <div class="pfill pg" style="width:60%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-c mb1" style="justify-content:space-between;margin-bottom:.45rem"><span
+                class="fs85">Storage Used</span><span class="fp fw7 ff">78%</span></div>
+            <div class="pbar" style="height:7px">
+              <div class="pfill pp" style="width:78%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-c mb1" style="justify-content:space-between;margin-bottom:.45rem"><span
+                class="fs85">Deployment</span><span class="fb fw7 ff">35%</span></div>
+            <div class="pbar" style="height:7px">
+              <div class="pfill pb" style="width:35%"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== MISC ====== -->
+      <section class="sec" id="misc">
+        <h2 class="stitle">Misc & Utilities</h2>
+        <p class="sdesc">Skeletons, empty states, code blocks, spinners, and utilities.</p>
+        <div class="sub">Skeleton Loading</div>
+        <div class="pv g g3" style="gap:.875rem">
+          <div class="glass r10 p4">
+            <div class="skel" style="height:110px;border-radius:7px;margin-bottom:.875rem"></div>
+            <div class="skel" style="height:12px;border-radius:3px;margin-bottom:.4rem;width:80%"></div>
+            <div class="skel" style="height:11px;border-radius:3px;width:60%"></div>
+          </div>
+          <div class="glass r10 p4">
+            <div class="flex items-c gap2 mb3" style="gap:.6rem;margin-bottom:.875rem">
+              <div class="skel" style="width:36px;height:36px;border-radius:50%;flex-shrink:0"></div>
+              <div style="flex:1">
+                <div class="skel" style="height:11px;border-radius:3px;margin-bottom:.35rem;width:70%"></div>
+                <div class="skel" style="height:10px;border-radius:3px;width:50%"></div>
+              </div>
+            </div>
+            <div class="skel" style="height:11px;border-radius:3px;margin-bottom:.35rem"></div>
+            <div class="skel" style="height:11px;border-radius:3px;margin-bottom:.35rem;width:90%"></div>
+            <div class="skel" style="height:11px;border-radius:3px;width:75%"></div>
+          </div>
+          <div class="glass r10 p4">
+            <div class="skel" style="height:12px;border-radius:3px;margin-bottom:.875rem;width:55%"></div>
+            <div class="skel" style="height:36px;border-radius:6px;margin-bottom:.5rem"></div>
+            <div class="skel" style="height:36px;border-radius:6px;margin-bottom:.5rem"></div>
+            <div class="skel" style="height:36px;border-radius:6px"></div>
+          </div>
+        </div>
+        <div class="sub">Empty States</div>
+        <div class="pv g g2" style="gap:1rem">
+          <div class="glass r12">
+            <div class="empty">
+              <div class="empty-ico">📭</div>
+              <div class="ff fw7 fs9 mb1">No messages yet</div>
+              <p class="fs8 mu" style="max-width:220px;line-height:1.5">Start a conversation with your team.</p><button
+                class="btn btn-p" style="margin-top:1rem">Send Message</button>
+            </div>
+          </div>
+          <div class="glass r12">
+            <div class="empty">
+              <div class="empty-ico">🔍</div>
+              <div class="ff fw7 fs9 mb1">No results found</div>
+              <p class="fs8 mu" style="max-width:220px;line-height:1.5">Try adjusting your filters or search terms.</p>
+              <button class="btn btn-s" style="margin-top:1rem">Clear filters</button>
+            </div>
+          </div>
+        </div>
+        <div class="sub">Spinners</div>
+        <div class="pv flex flex-wrap gap4 items-c" style="gap:1.5rem">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.4rem">
+            <div class="spin" style="width:14px;height:14px;border-width:1.5px"></div><span class="fs7 mu">Small</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.4rem">
+            <div class="spin"></div><span class="fs7 mu">Default</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.4rem">
+            <div class="spin" style="width:30px;height:30px;border-width:2.5px"></div><span class="fs7 mu">Large</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.4rem">
+            <div class="spin" style="width:30px;height:30px;border-width:2.5px;border-top-color:var(--p)"></div><span
+              class="fs7 mu">Purple</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.4rem">
+            <div class="flex gap2" style="gap:4px">
+              <div
+                style="width:6px;height:6px;border-radius:50%;background:var(--g);animation:pulse 1.2s ease-in-out infinite">
+              </div>
+              <div
+                style="width:6px;height:6px;border-radius:50%;background:var(--g);animation:pulse 1.2s ease-in-out .2s infinite">
+              </div>
+              <div
+                style="width:6px;height:6px;border-radius:50%;background:var(--g);animation:pulse 1.2s ease-in-out .4s infinite">
+              </div>
+            </div>
+            <span class="fs7 mu">Pulse</span>
+          </div>
+        </div>
+        <div class="sub">Code Block</div>
+        <div class="pv">
+          <div class="code">
+            <span style="color:rgba(255,255,255,.35)">/* Glassmorphic surface */</span>
+            .glass {
+            background: <span style="color:#f472b6">rgba</span>(<span style="color:#fbbf24">255,255,255, 0.07</span>);
+            border: <span style="color:#fbbf24">1px</span> solid <span style="color:#f472b6">rgba</span>(<span
+              style="color:#fbbf24">255,255,255, 0.13</span>);
+            backdrop-filter: <span style="color:#60a5fa">blur</span>(<span style="color:#fbbf24">16px</span>) <span
+              style="color:#60a5fa">saturate</span>(<span style="color:#fbbf24">180%</span>);
+            box-shadow: <span style="color:#fbbf24">0 8px 32px</span> <span style="color:#f472b6">rgba</span>(<span
+              style="color:#fbbf24">0,0,0, 0.35</span>);
+            }
+          </div>
+        </div>
+        <div style="height:2.5rem"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODALS -->
+  <div class="overlay" id="m1" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="mbox">
+      <div class="mhead">
+        <div class="mtitle">Example Modal</div>
+      </div>
+      <div class="mbody">A glassmorphic modal dialog. Click outside or Cancel to close.</div>
+      <div class="mfoot"><button class="btn btn-g"
+          onclick="document.getElementById('m1').classList.remove('open')">Cancel</button><button class="btn btn-p"
+          onclick="document.getElementById('m1').classList.remove('open')">Confirm</button></div>
+    </div>
+  </div>
+  <div class="overlay" id="m2" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="mbox" style="max-width:400px">
+      <div class="mhead">
+        <div
+          style="width:40px;height:40px;border-radius:9px;background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.22);display:flex;align-items:center;justify-content:center;margin-bottom:.875rem;font-size:1.1rem">
+          🗑</div>
+        <div class="mtitle">Delete Project?</div>
+      </div>
+      <div class="mbody">This action cannot be undone. All data will be permanently removed.</div>
+      <div class="mfoot"><button class="btn btn-g"
+          onclick="document.getElementById('m2').classList.remove('open')">Cancel</button><button class="btn btn-d"
+          onclick="document.getElementById('m2').classList.remove('open')">Yes, delete</button></div>
+    </div>
+  </div>
+  <div class="overlay" id="m3" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="mbox">
+      <div class="mhead">
+        <div class="mtitle">Add Team Member</div>
+      </div>
+      <div class="mbody" style="padding-bottom:0">
+        <div class="mb3" style="margin-bottom:.75rem"><label class="lbl">Full Name</label><input class="inp"
+            placeholder="Jane Doe" /></div>
+        <div class="mb3" style="margin-bottom:.75rem"><label class="lbl">Email</label><input class="inp" type="email"
+            placeholder="jane@company.com" /></div>
+        <div><label class="lbl">Role</label><select class="sel">
+            <option>Developer</option>
+            <option>Designer</option>
+            <option>Manager</option>
+          </select></div>
+      </div>
+      <div class="mfoot"><button class="btn btn-g"
+          onclick="document.getElementById('m3').classList.remove('open')">Cancel</button><button class="btn btn-p"
+          onclick="document.getElementById('m3').classList.remove('open')">Add Member</button></div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="tc"
+    style="position:fixed;bottom:1.25rem;right:1.25rem;z-index:300;display:flex;flex-direction:column;gap:.625rem">
+  </div>
+
+  <script>
+    // Sidebar
+    function toggleSidebar() { const s = document.getElementById('sidebar'); s.style.transform = s.style.transform === 'translateX(0px)' ? '' : 'translateX(0px)' }
+    // Accordion
+    function acc(btn) { const b = btn.nextElementSibling; const o = btn.classList.contains('open'); btn.classList.toggle('open', !o); b.classList.toggle('open', !o) }
+    // Pill tabs
+    function stab(gid, pid, el) { document.getElementById(gid).querySelectorAll('.tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); document.getElementById(gid).parentElement.querySelectorAll('.tp').forEach(p => p.classList.remove('active')); document.getElementById(pid).classList.add('active') }
+    // Underline tabs
+    function sutab(gid, pid, el) { document.getElementById(gid).querySelectorAll('.utab').forEach(t => t.classList.remove('active')); el.classList.add('active'); document.getElementById(gid).parentElement.querySelectorAll('.tp').forEach(p => p.classList.remove('active')); document.getElementById(pid).classList.add('active') }
+    // Vertical tabs
+    function svtab(gid, pid, el) { const g = document.getElementById(gid); g.querySelectorAll('.vtab').forEach(t => t.classList.remove('active')); el.classList.add('active'); g.querySelectorAll('.tp').forEach(p => p.classList.remove('active')); document.getElementById(pid).classList.add('active') }
+    // Sort
+    function sa(el) { const p = el.parentElement; p.querySelectorAll('.srt').forEach(b => { if (b.parentElement === p) b.classList.remove('active') }); el.classList.add('active') }
+    // Dropdown
+    function toggleDD(id) { const m = document.getElementById(id); m.classList.toggle('open'); if (m.classList.contains('open')) { const h = () => { setTimeout(() => { m.classList.remove('open'); document.removeEventListener('click', h) }, 50) }; setTimeout(() => document.addEventListener('click', h), 0) } }
+    // Views
+    function setV(m) { ['grid', 'list', 'table'].forEach(v => { document.getElementById('v' + v).style.display = v === m ? '' : 'none' }); document.getElementById('mainVT').querySelectorAll('.vbtn').forEach((b, i) => b.classList.toggle('active', ['grid', 'list', 'table'][i] === m)); document.getElementById('vlbl').textContent = m.charAt(0).toUpperCase() + m.slice(1) + ' view' }
+    // Toast
+    let tc = 0;
+    function showToast() { const ts = [{ c: 'ts', cl: 'var(--g)', t: 'Saved successfully', m: 'Your changes were saved.' }, { c: 'te', cl: 'var(--pk)', t: 'Upload failed', m: 'File exceeds size limit.' }, { c: 'tw', cl: '#fbbf24', t: 'Heads up', m: 'Check your settings.' }]; const t = ts[tc++ % ts.length]; const el = document.createElement('div'); el.className = 'toast ' + t.c; el.style.cssText = 'animation:slidein .28s ease'; el.innerHTML = `<div style="width:14px;height:14px;border-radius:50%;border:1.5px solid ${t.cl};display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:${t.cl};flex-shrink:0;margin-top:1px">!</div><div style="flex:1"><div style="font-weight:700;font-size:.84rem;color:${t.cl};margin-bottom:.1rem">${t.t}</div><div style="font-size:.78rem;color:var(--mu)">${t.m}</div></div><button onclick="this.closest('.toast').remove()" style="background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:.875rem">✕</button>`; document.getElementById('tc').appendChild(el); setTimeout(() => el.remove(), 4000) }
+    // Sidebar active
+    document.querySelectorAll('.sl').forEach(l => l.addEventListener('click', function () { document.querySelectorAll('.sl').forEach(x => x.classList.remove('active')); this.classList.add('active') }));
+    // Esc close modals
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.querySelectorAll('.overlay.open').forEach(m => m.classList.remove('open')); document.querySelectorAll('.dd-menu.open').forEach(d => d.classList.remove('open')) } });
+  </script>
+</body>
+
+</html>

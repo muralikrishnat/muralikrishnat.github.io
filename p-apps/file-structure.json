@@ -560,6 +560,13 @@
         "type": "file",
         "parentId": "root-styleguide-page",
         "path": "./styleguide-page/index4.html"
+      },
+      {
+        "id": "file-styleguide-page-index5.html",
+        "name": "index5.html",
+        "type": "file",
+        "parentId": "root-styleguide-page",
+        "path": "./styleguide-page/index5.html"
       }
     ]
   },

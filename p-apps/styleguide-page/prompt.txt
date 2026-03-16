@@ -12,3 +12,16 @@ Goal: Styleguide for components
 Use glassmorphic.
 It should be simple, UI rich looking, with suitable font awesome icons, easy to operate.
 Use only html, css, javascript and tailwindcss
+
+
+
+
+
+Build me stuleguide with components like header, top bar, sidebar, list, 
+all form fields, accordion, tabs, vertical tabs, table, filter section, pagination, 
+cards, tiles, grid display, table display, list display, sort, 
+advanced filter, filter query,...think of complete list of components.  
+
+use glassmorphic, 
+use only html, css, javascript and tailwindcss. 
+categorize as sections.
