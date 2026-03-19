@@ -567,6 +567,20 @@
         "type": "file",
         "parentId": "root-styleguide-page",
         "path": "./styleguide-page/index5.html"
+      },
+      {
+        "id": "file-styleguide-page-index6.html",
+        "name": "index6.html",
+        "type": "file",
+        "parentId": "root-styleguide-page",
+        "path": "./styleguide-page/index6.html"
+      },
+      {
+        "id": "file-styleguide-page-index7.html",
+        "name": "index7.html",
+        "type": "file",
+        "parentId": "root-styleguide-page",
+        "path": "./styleguide-page/index7.html"
       }
     ]
   },

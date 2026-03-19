@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeoTerm — Design System & Style Guide</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      /* ── CORE PALETTE ── */
+      --glass-bg: rgba(10, 15, 30, 0.72);
+      --glass-border: rgba(99, 179, 237, 0.18);
+      --glass-shine: rgba(147, 210, 255, 0.06);
+      --accent: #38bdf8;
+      --accent2: #818cf8;
+      --accent3: #34d399;
+      --danger: #f87171;
+      --warn: #fbbf24;
+      --text-primary: #e2e8f0;
+      --text-muted: #64748b;
+      --text-dim: #334155;
+      --bg-deep: #030712;
+      --bg-panel: rgba(8, 14, 28, 0.85);
+      --success: #4ade80;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100vh;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 10%, rgba(56, 189, 248, 0.10) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(129, 140, 248, 0.10) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(52, 211, 153, 0.04) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2338bdf8' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    /* ─────────────────────────────────────────
+     STYLE GUIDE SHELL
+  ───────────────────────────────────────── */
+    .sg-root {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sticky sidebar nav */
+    .sg-nav {
+      width: 220px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      border-right: 1px solid var(--glass-border);
+      background: rgba(5, 10, 22, 0.92);
+      backdrop-filter: blur(20px);
+      padding: 24px 0 40px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--text-dim) transparent;
+    }
+
+    .sg-nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--accent);
+      padding: 0 18px 20px;
+      border-bottom: 1px solid var(--glass-border);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .sg-nav-logo span {
+      color: var(--accent2);
+    }
+
+    .sg-nav-section {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 14px 18px 4px;
+    }
+
+    .sg-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 18px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+    }
+
+    .sg-nav-link:hover {
+      color: var(--text-primary);
+      background: rgba(56, 189, 248, 0.05);
+      border-left-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .sg-nav-link.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: rgba(56, 189, 248, 0.06);
+    }
+
+    /* Main content */
+    .sg-content {
+      flex: 1;
+      padding: 48px 52px 80px;
+      max-width: 1100px;
+      overflow-x: hidden;
+    }
+
+    /* Section headers */
+    .sg-section {
+      margin-bottom: 64px;
+      scroll-margin-top: 32px;
+    }
+
+    .sg-section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      letter-spacing: -1px;
+    }
+
+    .sg-section-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      line-height: 1.7;
+    }
+
+    /* Token table */
+    .token-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .token-card {
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(10, 18, 38, 0.5);
+    }
+
+    .token-swatch {
+      height: 48px;
+      width: 100%;
+    }
+
+    .token-info {
+      padding: 8px 10px;
+    }
+
+    .token-name {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .token-var {
+      font-size: 9px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .token-hex {
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+
+    /* Preview card wrapper */
+    .preview-card {
+      background: rgba(10, 18, 38, 0.6);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--glass-shine) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .preview-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    /* Component row */
+    .comp-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    /* ─────────────────────────────────────────
+     GLASS MORPHISM
+  ───────────────────────────────────────── */
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid var(--glass-border);
+    }
+
+    .glass-light {
+      background: rgba(14, 22, 45, 0.55);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(99, 179, 237, 0.10);
+    }
+
+    /* ─────────────────────────────────────────
+     TYPOGRAPHY
+  ───────────────────────────────────────── */
+    .type-sample {
+      margin-bottom: 20px;
+    }
+
+    .type-meta {
+      font-size: 9px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+
+    /* ─────────────────────────────────────────
+     TOPBAR
+  ───────────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 14px;
+      background: rgba(5, 10, 22, 0.92);
+      border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      border-radius: 8px;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .logo span {
+      color: var(--accent2);
+    }
+
+    /* ─────────────────────────────────────────
+     TABS
+  ───────────────────────────────────────── */
+    .tab-bar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+      background: rgba(255, 255, 255, 0.02);
+      user-select: none;
+    }
+
+    .tab:hover {
+      color: var(--text-primary);
+      background: rgba(56, 189, 248, 0.07);
+      border-color: rgba(56, 189, 248, 0.15);
+    }
+
+    .tab.active {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: rgba(56, 189, 248, 0.3);
+      color: var(--accent);
+    }
+
+    .tab .tab-close {
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 3px;
+      transition: all 0.15s;
+      color: var(--text-muted);
+      font-size: 10px;
+    }
+
+    .tab:hover .tab-close {
+      background: rgba(248, 113, 113, 0.2);
+      color: var(--danger);
+    }
+
+    .tab-add-btn {
+      padding: 5px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-muted);
+      border: 1px dashed rgba(99, 179, 237, 0.2);
+      transition: all 0.18s;
+      background: transparent;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .tab-add-btn:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.06);
+    }
+
+    /* ─────────────────────────────────────────
+     ICON BUTTON
+  ───────────────────────────────────────── */
+    .icon-btn {
+      padding: 5px 7px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.18s;
+      border: 1px solid transparent;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .icon-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--glass-border);
+    }
+
+    .icon-btn.active {
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    /* ─────────────────────────────────────────
+     STATUS TAGS
+  ───────────────────────────────────────── */
+    .status-tag {
+      font-size: 9px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-tag.success {
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+    }
+
+    .status-tag.error {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    .status-tag.running {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      animation: pulse 1.5s infinite;
+    }
+
+    .status-tag.warn {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--warn);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .status-tag.info {
+      background: rgba(129, 140, 248, 0.15);
+      color: var(--accent2);
+      border: 1px solid rgba(129, 140, 248, 0.3);
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    /* ─────────────────────────────────────────
+     BADGES
+  ───────────────────────────────────────── */
+    .badge {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .badge-blue {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+    }
+
+    .badge-purple {
+      background: rgba(129, 140, 248, 0.15);
+      color: var(--accent2);
+    }
+
+    .badge-green {
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--success);
+    }
+
+    .badge-red {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--danger);
+    }
+
+    .badge-yellow {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--warn);
+    }
+
+    /* ─────────────────────────────────────────
+     META PILLS
+  ───────────────────────────────────────── */
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 9px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* ─────────────────────────────────────────
+     INFO CHIPS
+  ───────────────────────────────────────── */
+    .info-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .info-chip.cwd {
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--accent3);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+    }
+
+    .info-chip.branch {
+      background: rgba(129, 140, 248, 0.12);
+      color: var(--accent2);
+      border: 1px solid rgba(129, 140, 248, 0.2);
+    }
+
+    .info-chip.mode {
+      background: rgba(251, 191, 36, 0.12);
+      color: var(--warn);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+
+    /* ─────────────────────────────────────────
+     SUGGESTION CHIPS
+  ───────────────────────────────────────── */
+    .suggestion-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-size: 10px;
+      color: var(--text-muted);
+      border: 1px solid rgba(99, 179, 237, 0.12);
+      background: rgba(56, 189, 248, 0.04);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .suggestion-chip:hover {
+      color: var(--accent);
+      border-color: rgba(56, 189, 248, 0.3);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .suggestion-label {
+      font-size: 8px;
+      color: var(--text-dim);
+    }
+
+    /* ─────────────────────────────────────────
+     BUTTONS
+  ───────────────────────────────────────── */
+    .run-btn {
+      padding: 8px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      border: none;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.9), rgba(99, 102, 241, 0.9));
+      color: white;
+      transition: all 0.18s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+    }
+
+    .run-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 25px rgba(56, 189, 248, 0.35);
+    }
+
+    .run-btn:active {
+      transform: translateY(0);
+    }
+
+    .mode-btn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      transition: all 0.18s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .mode-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--glass-border);
+    }
+
+    .mode-btn.active-seq {
+      color: var(--warn);
+      background: rgba(251, 191, 36, 0.1);
+      border-color: rgba(251, 191, 36, 0.25);
+    }
+
+    .mode-btn.active-par {
+      color: var(--accent2);
+      background: rgba(129, 140, 248, 0.1);
+      border-color: rgba(129, 140, 248, 0.25);
+    }
+
+    .mini-btn {
+      padding: 3px 6px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 10px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .mini-btn:hover {
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent);
+      border-color: rgba(56, 189, 248, 0.2);
+    }
+
+    .mini-btn.danger:hover {
+      background: rgba(248, 113, 113, 0.1);
+      color: var(--danger);
+      border-color: rgba(248, 113, 113, 0.2);
+    }
+
+    .hist-micro-btn {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 3px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.12s;
+      padding: 0;
+      font-size: 9px;
+    }
+
+    .hist-micro-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+    }
+
+    .hist-micro-btn.del:hover {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--danger);
+    }
+
+    .hist-clear-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim);
+      border: 1px solid rgba(248, 113, 113, 0.12);
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .hist-clear-btn:hover {
+      color: var(--danger);
+      border-color: rgba(248, 113, 113, 0.3);
+      background: rgba(248, 113, 113, 0.05);
+    }
+
+    /* ─────────────────────────────────────────
+     INPUT
+  ───────────────────────────────────────── */
+    .input-area {
+      background: rgba(5, 10, 22, 0.88);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      backdrop-filter: blur(20px);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .prompt-symbol {
+      font-size: 16px;
+      color: var(--accent3);
+      font-weight: 700;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .cmd-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(99, 179, 237, 0.2);
+      border-radius: 7px;
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-primary);
+      outline: none;
+      transition: all 0.18s;
+      caret-color: var(--accent);
+    }
+
+    .cmd-input:focus {
+      border-color: rgba(56, 189, 248, 0.5);
+      background: rgba(56, 189, 248, 0.05);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.08);
+    }
+
+    .cmd-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .cmd-input:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Seq input */
+    .seq-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(99, 179, 237, 0.15);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-primary);
+      outline: none;
+      transition: all 0.18s;
+    }
+
+    .seq-input:focus {
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    /* ─────────────────────────────────────────
+     HISTORY ENTRY
+  ───────────────────────────────────────── */
+    .history-entry {
+      border-radius: 8px;
+      border: 1px solid rgba(99, 179, 237, 0.1);
+      background: rgba(10, 18, 38, 0.5);
+      overflow: hidden;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      animation: slideIn 0.2s ease;
+    }
+
+    .history-entry:hover {
+      border-color: rgba(56, 189, 248, 0.25);
+      background: rgba(14, 22, 48, 0.7);
+    }
+
+    .history-entry.expanded {
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .history-cmd-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+    }
+
+    .history-cmd-text {
+      flex: 1;
+      font-size: 12px;
+      color: var(--accent);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .history-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .history-output-inner {
+      padding: 10px 14px;
+      border-top: 1px solid rgba(99, 179, 237, 0.08);
+      font-size: 11px;
+      line-height: 1.7;
+      color: #94a3b8;
+      background: rgba(2, 5, 15, 0.4);
+    }
+
+    .output-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .output-line.err {
+      color: var(--danger);
+    }
+
+    .output-line.info {
+      color: var(--accent2);
+    }
+
+    .source-tag {
+      font-size: 9px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.03);
+      margin-right: 4px;
+    }
+
+    /* ─────────────────────────────────────────
+     SIDEBAR COMPONENTS
+  ───────────────────────────────────────── */
+    .sidebar-demo {
+      width: 240px;
+      background: rgba(5, 10, 22, 0.6);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 10px 12px;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sb-section-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 12px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .sb-section-header:hover {
+      color: var(--text-primary);
+      background: rgba(56, 189, 248, 0.04);
+    }
+
+    .folder-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      transition: all 0.15s;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    .folder-header:hover {
+      color: var(--text-primary);
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    .folder-header.open {
+      color: var(--accent2);
+    }
+
+    .folder-name {
+      flex: 1;
+      font-weight: 500;
+    }
+
+    .folder-count {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 10px;
+      background: rgba(99, 179, 237, 0.1);
+      color: var(--text-muted);
+    }
+
+    .cmd-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px 5px 28px;
+      font-size: 10px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+    }
+
+    .cmd-item:hover {
+      color: var(--text-primary);
+      background: rgba(56, 189, 248, 0.07);
+      border-left-color: var(--accent);
+    }
+
+    .hist-tab-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      font-size: 10px;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+    }
+
+    .hist-tab-header:hover {
+      color: var(--text-primary);
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    .hist-tab-header.active-tab {
+      color: var(--accent);
+    }
+
+    .ht-name {
+      flex: 1;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ht-count {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 8px;
+      background: rgba(99, 179, 237, 0.08);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .hist-cmd-row-sb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px 4px 24px;
+      font-size: 10px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+    }
+
+    .hist-cmd-row-sb:hover {
+      color: var(--text-primary);
+      background: rgba(56, 189, 248, 0.06);
+      border-left-color: var(--accent);
+    }
+
+    .hist-cmd-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .hist-cmd-dot.success {
+      background: var(--success);
+      box-shadow: 0 0 4px var(--success);
+    }
+
+    .hist-cmd-dot.error {
+      background: var(--danger);
+      box-shadow: 0 0 4px var(--danger);
+    }
+
+    .hist-cmd-dot.running {
+      background: var(--accent);
+      box-shadow: 0 0 4px var(--accent);
+      animation: pulse 1.5s infinite;
+    }
+
+    /* ─────────────────────────────────────────
+     QUEUE / PARALLEL BARS
+  ───────────────────────────────────────── */
+    .queue-bar {
+      padding: 6px 14px;
+      background: rgba(251, 191, 36, 0.05);
+      border: 1px solid rgba(251, 191, 36, 0.1);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 10px;
+    }
+
+    .queue-tag {
+      padding: 2px 8px;
+      border-radius: 5px;
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+      color: var(--warn);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+    }
+
+    .queue-arrow {
+      color: var(--text-dim);
+    }
+
+    .parallel-bar {
+      padding: 6px 14px;
+      background: rgba(129, 140, 248, 0.05);
+      border: 1px solid rgba(129, 140, 248, 0.1);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 10px;
+    }
+
+    .par-tag {
+      padding: 2px 8px;
+      border-radius: 5px;
+      background: rgba(129, 140, 248, 0.1);
+      border: 1px solid rgba(129, 140, 248, 0.2);
+      color: var(--accent2);
+      font-size: 10px;
+    }
+
+    /* ─────────────────────────────────────────
+     MODAL
+  ───────────────────────────────────────── */
+    .modal-demo {
+      background: rgba(10, 18, 38, 0.95);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 24px;
+      max-width: 540px;
+      box-shadow: 0 25px 60px rgba(0, 0, 10, 0.5), 0 0 0 1px rgba(56, 189, 248, 0.05);
+    }
+
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .seq-cmd-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .seq-cmd-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .seq-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .seq-connector {
+      font-size: 9px;
+      color: var(--warn);
+      text-align: center;
+      padding: 2px 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .seq-connector::before,
+    .seq-connector::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(251, 191, 36, 0.2);
+    }
+
+    /* ─────────────────────────────────────────
+     PANE TOPBAR
+  ───────────────────────────────────────── */
+    .pane-topbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(5, 10, 22, 0.5);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    .pane-title {
+      flex: 1;
+    }
+
+    /* ─────────────────────────────────────────
+     EMPTY STATE
+  ───────────────────────────────────────── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--text-dim);
+      font-size: 12px;
+      user-select: none;
+      padding: 40px 20px;
+      border: 1px dashed rgba(99, 179, 237, 0.1);
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .empty-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* ─────────────────────────────────────────
+     TOOLTIP DEMO
+  ───────────────────────────────────────── */
+    [data-tip] {
+      position: relative;
+    }
+
+    [data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: 110%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 18, 38, 0.95);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 5px;
+      white-space: nowrap;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    /* ─────────────────────────────────────────
+     ANIMATIONS SHOWCASE
+  ───────────────────────────────────────── */
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .cursor-blink {
+      animation: blink 1s infinite;
+      color: var(--accent);
+    }
+
+    .anim-demo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .anim-card {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 18, 38, 0.5);
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .anim-label {
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 1.5s infinite;
+    }
+
+    .blink-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: blink 1s infinite;
+    }
+
+    @keyframes slideIn2 {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .slide-demo {
+      animation: slideIn2 0.5s ease infinite alternate;
+    }
+
+    /* ─────────────────────────────────────────
+     SCROLLBAR CUSTOM
+  ───────────────────────────────────────── */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--text-dim);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* ─────────────────────────────────────────
+     SECTION LABEL
+  ───────────────────────────────────────── */
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 6px 12px 2px;
+    }
+
+    /* ─────────────────────────────────────────
+     DIVIDER
+  ───────────────────────────────────────── */
+    .sg-divider {
+      height: 1px;
+      background: var(--glass-border);
+      margin: 24px 0;
+    }
+
+    /* ─────────────────────────────────────────
+     CODE SAMPLE
+  ───────────────────────────────────────── */
+    .code-block {
+      background: rgba(2, 5, 15, 0.7);
+      border: 1px solid rgba(99, 179, 237, 0.1);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 11px;
+      line-height: 1.8;
+      color: #94a3b8;
+      overflow-x: auto;
+      margin-top: 8px;
+      white-space: pre;
+    }
+
+    .kw {
+      color: var(--accent2);
+    }
+
+    .str {
+      color: var(--accent3);
+    }
+
+    .var {
+      color: var(--accent);
+    }
+
+    .cmt {
+      color: var(--text-dim);
+    }
+
+    /* ─────────────────────────────────────────
+     CURSOR BLINK in input demo
+  ───────────────────────────────────────── */
+    .prompt-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      padding: 6px 0;
+    }
+
+    .prompt-line .ps {
+      color: var(--accent3);
+      font-weight: 700;
+    }
+
+    .prompt-line .cmd {
+      color: var(--text-primary);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 14px;
+      background: var(--accent);
+      animation: blink 1s infinite;
+      vertical-align: middle;
+    }
+
+    /* ─────────────────────────────────────────
+     GRID COLUMNS
+  ───────────────────────────────────────── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .sg-nav {
+        display: none;
+      }
+
+      .sg-content {
+        padding: 24px 20px;
+      }
+
+      .two-col,
+      .three-col {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sg-root">
+
+    <!-- ══════ SIDEBAR NAV ══════ -->
+    <nav class="sg-nav">
+      <div class="sg-nav-logo">Neo<span>Term</span></div>
+
+      <div class="sg-nav-section">Foundations</div>
+      <a class="sg-nav-link" href="#colors">Color Tokens</a>
+      <a class="sg-nav-link" href="#typography">Typography</a>
+      <a class="sg-nav-link" href="#glass">Glass Morphism</a>
+      <a class="sg-nav-link" href="#animations">Animations</a>
+
+      <div class="sg-nav-section">Navigation</div>
+      <a class="sg-nav-link" href="#topbar">Top Bar</a>
+      <a class="sg-nav-link" href="#tabs">Tabs</a>
+      <a class="sg-nav-link" href="#sidebar">Sidebar</a>
+
+      <div class="sg-nav-section">Controls</div>
+      <a class="sg-nav-link" href="#buttons">Buttons</a>
+      <a class="sg-nav-link" href="#inputs">Inputs</a>
+      <a class="sg-nav-link" href="#chips">Chips & Pills</a>
+      <a class="sg-nav-link" href="#tags">Status Tags & Badges</a>
+      <a class="sg-nav-link" href="#tooltips">Tooltips</a>
+
+      <div class="sg-nav-section">Panels</div>
+      <a class="sg-nav-link" href="#history">History Entry</a>
+      <a class="sg-nav-link" href="#queues">Queue & Parallel Bars</a>
+      <a class="sg-nav-link" href="#modal">Modal / Sequential</a>
+      <a class="sg-nav-link" href="#pane">Pane Chrome</a>
+      <a class="sg-nav-link" href="#empty">Empty State</a>
+
+      <div class="sg-nav-section">Patterns</div>
+      <a class="sg-nav-link" href="#terminal">Terminal Output</a>
+      <a class="sg-nav-link" href="#input-area">Input Area</a>
+    </nav>
+
+    <!-- ══════ MAIN CONTENT ══════ -->
+    <main class="sg-content">
+
+      <!-- HERO -->
+      <div style="margin-bottom: 52px;">
+        <div
+          style="font-family: 'Syne', sans-serif; font-size: 38px; font-weight: 800; letter-spacing: -2px; color: var(--text-primary); line-height: 1.1; margin-bottom: 10px;">
+          NeoTerm<br><span style="color: var(--accent);">Design System</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); max-width: 520px; line-height: 1.8;">
+          Complete component library and visual language for the NeoTerm web terminal interface.
+          Built on JetBrains Mono + Syne, glassmorphism surfaces, and a deep navy/cyan palette.
+        </div>
+      </div>
+
+      <!-- ── COLOR TOKENS ── -->
+      <section class="sg-section" id="colors">
+        <div class="sg-section-title">Color Tokens</div>
+        <div class="sg-section-sub">All semantic color roles used across NeoTerm. Reference via CSS custom properties.
+        </div>
+
+        <div class="preview-label">Accent Palette</div>
+        <div class="token-grid">
+          <div class="token-card">
+            <div class="token-swatch" style="background: #38bdf8;"></div>
+            <div class="token-info">
+              <div class="token-name">Accent / Sky</div>
+              <div class="token-var">--accent</div>
+              <div class="token-hex">#38bdf8</div>
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background: #818cf8;"></div>
+            <div class="token-info">
+              <div class="token-name">Accent 2 / Indigo</div>
+              <div class="token-var">--accent2</div>
+              <div class="token-hex">#818cf8</div>
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background: #34d399;"></div>
+            <div class="token-info">
+              <div class="token-name">Accent 3 / Emerald</div>
+              <div class="token-var">--accent3</div>
+              <div class="token-hex">#34d399</div>
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background: #4ade80;"></div>
+            <div class="token-info">
+              <div class="token-name">Success</div>
+              <div class="token-var">--success</div>
+              <div class="token-hex">#4ade80</div>
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background: #f87171;"></div>
+            <div class="token-info">
+              <div class="token-name">Danger</div>
+              <div class="token-var">--danger</div>
+              <div class="token-hex">#f87171</div>
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background: #fbbf24;"></div>
+            <div class="token-info">
+              <div class="token-name">Warning</div>
+              <div class="token-var">--warn</div>
+              <div class="token-hex">#fbbf24</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-label" style="margin-top: 16px;">Text Hierarchy</div>
+        <div class="token-grid">
+          <div class="token-card">
+            <div class="token-swatch" style="background: #e2e8f0;"></div>
+            <div class="token-info">
+              <div class="token-name">Text Primary</div>
+              <div class="token-var">--text-primary</div>
+              <div class="token-hex">#e2e8f0</div>
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background: #64748b;"></div>
+            <div class="token-info">
+              <div class="token-name">Text Muted</div>
+              <div class="token-var">--text-muted</div>
+              <div class="token-hex">#64748b</div>
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background: #334155;"></div>
+            <div class="token-info">
+              <div class="token-name">Text Dim</div>
+              <div class="token-var">--text-dim</div>
+              <div class="token-hex">#334155</div>
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background: #030712;"></div>
+            <div class="token-info">
+              <div class="token-name">BG Deep</div>
+              <div class="token-var">--bg-deep</div>
+              <div class="token-hex">#030712</div>
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background: rgba(8,14,28,0.85); border: 1px solid #1e293b;"></div>
+            <div class="token-info">
+              <div class="token-name">BG Panel</div>
+              <div class="token-var">--bg-panel</div>
+              <div class="token-hex">rgba(8,14,28,0.85)</div>
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-swatch" style="background: rgba(99,179,237,0.18); border: 1px solid #1e293b;"></div>
+            <div class="token-info">
+              <div class="token-name">Glass Border</div>
+              <div class="token-var">--glass-border</div>
+              <div class="token-hex">rgba(99,179,237,0.18)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TYPOGRAPHY ── -->
+      <section class="sg-section" id="typography">
+        <div class="sg-section-title">Typography</div>
+        <div class="sg-section-sub">Two typefaces: <strong>Syne</strong> for display/headings, <strong>JetBrains
+            Mono</strong> for everything else. All text is rendered on dark backgrounds with careful contrast ratios.
+        </div>
+
+        <div class="preview-card">
+          <div class="type-sample">
+            <div
+              style="font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--text-primary); letter-spacing: -1.5px;">
+              NeoTerm Interface</div>
+            <div class="type-meta">Syne 800 — 32px / display heading</div>
+          </div>
+          <div class="type-sample">
+            <div
+              style="font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px;">
+              Section Title</div>
+            <div class="type-meta">Syne 700 — 22px / section heading</div>
+          </div>
+          <div class="type-sample">
+            <div
+              style="font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 600; color: var(--text-primary);">
+              Modal / Panel Title</div>
+            <div class="type-meta">Syne 600 — 16px / modal title</div>
+          </div>
+          <div class="sg-divider"></div>
+          <div class="type-sample">
+            <div style="font-size: 13px; color: var(--text-primary);">git commit -m "feat: add terminal split panes"
+            </div>
+            <div class="type-meta">JetBrains Mono 400 — 13px / command input</div>
+          </div>
+          <div class="type-sample">
+            <div style="font-size: 12px; color: var(--accent);">npm run dev --port 3000</div>
+            <div class="type-meta">JetBrains Mono 500 — 12px / history command</div>
+          </div>
+          <div class="type-sample">
+            <div style="font-size: 11px; color: #94a3b8; line-height: 1.7;">Server running at http://localhost:3000<br>
+              Ready in 345ms. Hot reload enabled.</div>
+            <div class="type-meta">JetBrains Mono 400 — 11px / terminal output</div>
+          </div>
+          <div class="type-sample">
+            <div style="font-size: 10px; color: var(--text-muted);">EXPLORER · HISTORY · BOOKMARKS</div>
+            <div class="type-meta">JetBrains Mono 600 — 10px / labels / all-caps</div>
+          </div>
+          <div class="type-sample">
+            <div
+              style="font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim);">
+              SECTION HEADER</div>
+            <div class="type-meta">JetBrains Mono 700 — 9px / micro labels</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── GLASS MORPHISM ── -->
+      <section class="sg-section" id="glass">
+        <div class="sg-section-title">Glass Morphism</div>
+        <div class="sg-section-sub">Two glass surface levels. Use <code>.glass</code> for primary panels and
+          <code>.glass-light</code> for secondary/nested surfaces.</div>
+
+        <div class="two-col">
+          <div>
+            <div class="preview-label">.glass — Primary Surface</div>
+            <div class="glass" style="border-radius: 10px; padding: 20px;">
+              <div style="font-size: 11px; color: var(--text-muted); line-height: 1.8;">
+                background: rgba(10, 15, 30, 0.72)<br>
+                backdrop-filter: blur(20px) saturate(160%)<br>
+                border: 1px solid rgba(99, 179, 237, 0.18)
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="preview-label">.glass-light — Secondary Surface</div>
+            <div class="glass-light" style="border-radius: 10px; padding: 20px;">
+              <div style="font-size: 11px; color: var(--text-muted); line-height: 1.8;">
+                background: rgba(14, 22, 45, 0.55)<br>
+                backdrop-filter: blur(12px)<br>
+                border: 1px solid rgba(99, 179, 237, 0.10)
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── ANIMATIONS ── -->
+      <section class="sg-section" id="animations">
+        <div class="sg-section-title">Animations</div>
+        <div class="sg-section-sub">Minimal animation vocabulary. Pulse for ongoing activity, blink for cursor/caret,
+          slideIn for new entries.</div>
+
+        <div class="preview-card">
+          <div class="anim-demo">
+            <div class="anim-card">
+              <div class="pulse-dot"></div>
+              <div class="anim-label">pulse</div>
+              <div style="font-size: 10px; color: var(--text-dim);">status / running</div>
+            </div>
+            <div class="anim-card">
+              <div class="blink-dot"></div>
+              <div class="anim-label">blink</div>
+              <div style="font-size: 10px; color: var(--text-dim);">cursor / caret</div>
+            </div>
+            <div class="anim-card">
+              <div class="slide-demo"
+                style="padding: 6px 12px; border: 1px solid var(--glass-border); border-radius: 6px; font-size: 10px; color: var(--text-muted);">
+                New Entry</div>
+              <div class="anim-label">slideIn</div>
+              <div style="font-size: 10px; color: var(--text-dim);">history items</div>
+            </div>
+            <div class="anim-card">
+              <span class="cursor-blink" style="font-size: 16px;">_</span>
+              <div class="anim-label">cursor-blink</div>
+              <div style="font-size: 10px; color: var(--text-dim);">input caret</div>
+            </div>
+          </div>
+          <div class="code-block"><span class="cmt">/* Pulse — 1.5s ease, used on running tags & dots */</span>
+            <span class="kw">@keyframes</span> <span class="var">pulse</span> { <span class="str">0%</span>,<span
+              class="str">100%</span> { opacity: 1; } <span class="str">50%</span> { opacity: 0.5; } }
+
+            <span class="cmt">/* Blink — 1s step, cursor / indicator */</span>
+            <span class="kw">@keyframes</span> <span class="var">blink</span> { <span class="str">0%</span>,<span
+              class="str">100%</span> { opacity: 1; } <span class="str">50%</span> { opacity: 0; } }
+
+            <span class="cmt">/* SlideIn — 0.2s ease, new history entries */</span>
+            <span class="kw">@keyframes</span> <span class="var">slideIn</span> { <span class="kw">from</span> {
+            opacity:0; transform: translateY(8px); } <span class="kw">to</span> { opacity:1; transform: translateY(0); }
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TOP BAR ── -->
+      <section class="sg-section" id="topbar">
+        <div class="sg-section-title">Top Bar</div>
+        <div class="sg-section-sub">Fixed application chrome at the top. Contains logo, tab bar, and action buttons.
+          Height ~36px.</div>
+
+        <div class="preview-card">
+          <div class="topbar">
+            <div class="logo">Neo<span>Term</span></div>
+            <div style="flex:1; display:flex; align-items:center; gap:4px;">
+              <div class="tab active">⚡ bash — 1 <span class="tab-close">✕</span></div>
+              <div class="tab">📦 node — 2 <span class="tab-close">✕</span></div>
+              <div class="tab-add-btn">+ New</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <button class="icon-btn">⊞ Split</button>
+              <button class="icon-btn active">◧ Sidebar</button>
+              <button class="icon-btn">⚙</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TABS ── -->
+      <section class="sg-section" id="tabs">
+        <div class="sg-section-title">Tabs</div>
+        <div class="sg-section-sub">Terminal session tabs. Three states: default, hover, active. Plus the add-new
+          button.</div>
+
+        <div class="preview-card">
+          <div class="preview-label">Tab States</div>
+          <div class="comp-row">
+            <div class="tab">⚡ bash — default</div>
+            <div class="tab"
+              style="color: var(--text-primary); background: rgba(56,189,248,0.07); border-color: rgba(56,189,248,0.15);">
+              ⚡ bash — hover</div>
+            <div class="tab active">⚡ bash — active <span class="tab-close">✕</span></div>
+            <div class="tab-add-btn">+ New Tab</div>
+          </div>
+
+          <div class="sg-divider"></div>
+          <div class="preview-label">Full Tab Bar</div>
+          <div class="tab-bar" style="padding: 6px; background: rgba(5,10,22,0.5); border-radius: 8px;">
+            <div class="tab active">⚡ bash — 1 <span class="tab-close">✕</span></div>
+            <div class="tab">📦 node — 2 <span class="tab-close">✕</span></div>
+            <div class="tab">🐍 python — 3 <span class="tab-close">✕</span></div>
+            <div class="tab">🐳 docker — 4 <span class="tab-close">✕</span></div>
+            <div class="tab-add-btn">+ New</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SIDEBAR ── -->
+      <section class="sg-section" id="sidebar">
+        <div class="sg-section-title">Sidebar</div>
+        <div class="sg-section-sub">240px collapsible panel. Contains Explorer (folders/commands) and History (per-tab
+          command history). Features folder expand/collapse and per-row action buttons.</div>
+
+        <div class="preview-card">
+          <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+            <!-- Explorer sidebar -->
+            <div>
+              <div class="preview-label">Explorer Panel</div>
+              <div class="sidebar-demo">
+                <div class="sidebar-header">
+                  Explorer
+                  <span style="font-size: 10px; cursor: pointer; color: var(--text-dim);">✕</span>
+                </div>
+                <div style="padding: 4px 0;">
+                  <div class="sb-section-header">
+                    <span>▶</span>
+                    <span class="sb-section-label">Bookmarks</span>
+                  </div>
+                  <div class="folder-header open">
+                    <span>▼</span>
+                    <span class="folder-name">dev-servers</span>
+                    <span class="folder-count">3</span>
+                  </div>
+                  <div>
+                    <div class="cmd-item"><span>⚡</span><span class="cmd-name">npm run dev</span><span
+                        style="font-size:9px; color:var(--accent); opacity:0;">▶ run</span></div>
+                    <div class="cmd-item"><span>⚡</span><span class="cmd-name">yarn start</span></div>
+                    <div class="cmd-item"><span>⚡</span><span class="cmd-name">python -m http.server</span></div>
+                  </div>
+                  <div class="folder-header">
+                    <span>▶</span>
+                    <span class="folder-name">git-shortcuts</span>
+                    <span class="folder-count">5</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- History sidebar -->
+            <div>
+              <div class="preview-label">History Panel</div>
+              <div class="sidebar-demo">
+                <div class="sidebar-header">History</div>
+                <div style="padding: 4px 0;">
+                  <div class="hist-tab-header active-tab">
+                    <span>▼</span>
+                    <span class="ht-name">⚡ bash — 1</span>
+                    <span class="ht-count">4</span>
+                  </div>
+                  <div>
+                    <div class="hist-cmd-row-sb">
+                      <span class="hist-cmd-dot success"></span>
+                      <span
+                        style="flex:1; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">git
+                        pull origin main</span>
+                    </div>
+                    <div class="hist-cmd-row-sb">
+                      <span class="hist-cmd-dot error"></span>
+                      <span
+                        style="flex:1; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">npm
+                        run build</span>
+                    </div>
+                    <div class="hist-cmd-row-sb">
+                      <span class="hist-cmd-dot running"></span>
+                      <span
+                        style="flex:1; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">docker-compose
+                        up -d</span>
+                    </div>
+                  </div>
+                  <div class="hist-tab-header">
+                    <span>▶</span>
+                    <span class="ht-name">📦 node — 2</span>
+                    <span class="ht-count">2</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ── BUTTONS ── -->
+      <section class="sg-section" id="buttons">
+        <div class="sg-section-title">Buttons</div>
+        <div class="sg-section-sub">Six button variants with distinct use cases. All use JetBrains Mono. Hover states
+          include subtle transforms and glow effects.</div>
+
+        <div class="preview-card">
+          <div class="preview-label">Run Button — Primary CTA</div>
+          <div class="comp-row">
+            <button class="run-btn">▶ Run</button>
+            <button class="run-btn">⚡ Execute</button>
+          </div>
+
+          <div class="sg-divider"></div>
+          <div class="preview-label">Mode Buttons — Execution Mode Selector</div>
+          <div class="comp-row">
+            <button class="mode-btn">◆ Normal</button>
+            <button class="mode-btn active-seq">⟶ Sequential</button>
+            <button class="mode-btn active-par">⊕ Parallel</button>
+          </div>
+
+          <div class="sg-divider"></div>
+          <div class="preview-label">Icon Buttons — Topbar Actions</div>
+          <div class="comp-row">
+            <button class="icon-btn">⊞ Split</button>
+            <button class="icon-btn active">◧ Sidebar</button>
+            <button class="icon-btn">⚙ Settings</button>
+            <button class="icon-btn">⊡ Zoom</button>
+          </div>
+
+          <div class="sg-divider"></div>
+          <div class="preview-label">Mini Buttons — In-row Actions</div>
+          <div class="comp-row">
+            <button class="mini-btn">↩ Rerun</button>
+            <button class="mini-btn">⎘ Copy</button>
+            <button class="mini-btn danger">✕ Delete</button>
+          </div>
+
+          <div class="sg-divider"></div>
+          <div class="preview-label">Micro Buttons — 16×16 Icon-only</div>
+          <div class="comp-row">
+            <button class="hist-micro-btn" title="Copy">⎘</button>
+            <button class="hist-micro-btn" title="Rerun">↩</button>
+            <button class="hist-micro-btn del" title="Delete">✕</button>
+          </div>
+
+          <div class="sg-divider"></div>
+          <div class="preview-label">Clear Button — Destructive Outline</div>
+          <div class="comp-row">
+            <button class="hist-clear-btn">✕ Clear history</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── INPUTS ── -->
+      <section class="sg-section" id="inputs">
+        <div class="sg-section-title">Inputs</div>
+        <div class="sg-section-sub">Command input variants. Focus ring uses accent glow. Disabled state reduces opacity
+          to 40%.</div>
+
+        <div class="preview-card">
+          <div class="preview-label">Primary Command Input</div>
+          <div class="input-row" style="margin-bottom: 12px;">
+            <span class="prompt-symbol">$</span>
+            <input class="cmd-input" placeholder="Type a command..." value="">
+            <button class="run-btn">▶ Run</button>
+          </div>
+          <div class="input-row" style="margin-bottom: 12px;">
+            <span class="prompt-symbol">$</span>
+            <input class="cmd-input" value="git commit -m &quot;feat: add split panes&quot;"
+              style="border-color: rgba(56,189,248,0.5); background: rgba(56,189,248,0.05); box-shadow: 0 0 0 3px rgba(56,189,248,0.08);">
+            <button class="run-btn">▶ Run</button>
+          </div>
+          <div class="input-row">
+            <span class="prompt-symbol" style="opacity:0.4;">$</span>
+            <input class="cmd-input" placeholder="Disabled..." disabled>
+            <button class="run-btn" style="opacity:0.4;" disabled>▶ Run</button>
+          </div>
+
+          <div class="sg-divider"></div>
+          <div class="preview-label">Sequential Command Inputs</div>
+          <div class="seq-cmd-list">
+            <div class="seq-cmd-row">
+              <div class="seq-num">1</div>
+              <input class="seq-input" value="npm install">
+            </div>
+            <div class="seq-connector">then</div>
+            <div class="seq-cmd-row">
+              <div class="seq-num">2</div>
+              <input class="seq-input" value="npm run build">
+            </div>
+            <div class="seq-connector">then</div>
+            <div class="seq-cmd-row">
+              <div class="seq-num">3</div>
+              <input class="seq-input" placeholder="Add command...">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── CHIPS & PILLS ── -->
+      <section class="sg-section" id="chips">
+        <div class="sg-section-title">Chips & Pills</div>
+        <div class="sg-section-sub">Three chip types: info chips (context indicators), meta pills (compact metadata),
+          and suggestion chips (clickable autocomplete hints).</div>
+
+        <div class="preview-card">
+          <div class="preview-label">Info Chips — Context Bar</div>
+          <div class="comp-row" style="margin-bottom: 16px;">
+            <span class="info-chip cwd">📁 ~/projects/neoterm</span>
+            <span class="info-chip branch">⎇ main</span>
+            <span class="info-chip mode">⟶ Sequential</span>
+          </div>
+
+          <div class="preview-label">Meta Pills — History Metadata</div>
+          <div class="comp-row" style="margin-bottom: 16px;">
+            <span class="meta-pill">⏱ 2.3s</span>
+            <span class="meta-pill">📤 exit 0</span>
+            <span class="meta-pill">🕐 2m ago</span>
+            <span class="meta-pill">⊞ pane 1</span>
+          </div>
+
+          <div class="preview-label">Suggestion Chips — Autocomplete</div>
+          <div class="comp-row">
+            <span class="suggestion-chip"><span class="suggestion-label">recent</span> git status</span>
+            <span class="suggestion-chip"><span class="suggestion-label">book</span> npm run dev</span>
+            <span class="suggestion-chip"><span class="suggestion-label">cmd</span> docker ps</span>
+            <span class="suggestion-chip"><span class="suggestion-label">hist</span> ls -la</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── STATUS TAGS & BADGES ── -->
+      <section class="sg-section" id="tags">
+        <div class="sg-section-title">Status Tags & Badges</div>
+        <div class="sg-section-sub">Status tags are pill-shaped with border + fill. Badges are inline label decorations.
+          The <code>running</code> variant pulses.</div>
+
+        <div class="preview-card">
+          <div class="preview-label">Status Tags</div>
+          <div class="comp-row" style="margin-bottom: 16px;">
+            <span class="status-tag success">✓ success</span>
+            <span class="status-tag error">✕ error</span>
+            <span class="status-tag running">● running</span>
+            <span class="status-tag warn">⚠ warn</span>
+            <span class="status-tag info">ℹ info</span>
+          </div>
+
+          <div class="preview-label">Dot Indicators — Sidebar History</div>
+          <div class="comp-row" style="margin-bottom: 16px;">
+            <span class="hist-cmd-dot success" style="width:8px; height:8px;"></span>
+            <span style="font-size:10px; color:var(--text-muted);">success</span>
+            &nbsp;&nbsp;
+            <span class="hist-cmd-dot error" style="width:8px; height:8px;"></span>
+            <span style="font-size:10px; color:var(--text-muted);">error</span>
+            &nbsp;&nbsp;
+            <span class="hist-cmd-dot running" style="width:8px; height:8px;"></span>
+            <span style="font-size:10px; color:var(--text-muted);">running</span>
+          </div>
+
+          <div class="preview-label">Badges — Inline Labels</div>
+          <div class="comp-row">
+            <span class="badge badge-blue">new</span>
+            <span class="badge badge-purple">beta</span>
+            <span class="badge badge-green">v2.1</span>
+            <span class="badge badge-red">deprecated</span>
+            <span class="badge badge-yellow">alpha</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TOOLTIPS ── -->
+      <section class="sg-section" id="tooltips">
+        <div class="sg-section-title">Tooltips</div>
+        <div class="sg-section-sub">CSS-only <code>[data-tip]</code> attribute tooltips. Appear 110% above the element
+          on hover. No JS required.</div>
+
+        <div class="preview-card">
+          <div class="comp-row">
+            <button class="icon-btn" data-tip="Toggle sidebar">◧ Hover me</button>
+            <button class="mini-btn" data-tip="Copy output to clipboard">⎘ Copy</button>
+            <span class="status-tag success" data-tip="Exit code 0 · 1.2s">✓ success</span>
+          </div>
+          <div class="code-block"><span class="cmt">/* Usage: add data-tip attribute — no JS needed */</span>
+            &lt;<span class="kw">button</span> <span class="var">data-tip</span>=<span class="str">"Toggle
+              sidebar"</span>&gt;◧ Sidebar&lt;/<span class="kw">button</span>&gt;</div>
+        </div>
+      </section>
+
+      <!-- ── HISTORY ENTRY ── -->
+      <section class="sg-section" id="history">
+        <div class="sg-section-title">History Entry</div>
+        <div class="sg-section-sub">Expandable history entry card. Click to expand output. Hover reveals action buttons.
+          Slide-in animation on new entries.</div>
+
+        <div class="preview-card">
+          <div class="preview-label">Collapsed</div>
+          <div class="history-entry" style="margin-bottom: 10px;">
+            <div class="history-cmd-row">
+              <span class="status-tag success">✓ ok</span>
+              <span class="history-cmd-text">git pull origin main</span>
+              <div
+                style="display:flex; align-items:center; gap:8px; font-size:9px; color:var(--text-muted); flex-shrink:0;">
+                <span class="meta-pill">⏱ 0.8s</span>
+                <span class="meta-pill">🕐 5m ago</span>
+              </div>
+              <div class="history-actions">
+                <button class="mini-btn">↩ Rerun</button>
+                <button class="mini-btn">⎘ Copy</button>
+                <button class="mini-btn danger">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="preview-label">Expanded with Output</div>
+          <div class="history-entry expanded">
+            <div class="history-cmd-row">
+              <span class="status-tag error">✕ fail</span>
+              <span class="history-cmd-text">npm run build</span>
+              <div
+                style="display:flex; align-items:center; gap:8px; font-size:9px; color:var(--text-muted); flex-shrink:0;">
+                <span class="meta-pill">⏱ 12.4s</span>
+                <span class="meta-pill">📤 exit 1</span>
+              </div>
+              <div class="history-actions">
+                <button class="mini-btn">↩ Rerun</button>
+                <button class="mini-btn danger">✕</button>
+              </div>
+            </div>
+            <div class="history-output-inner">
+              <div class="output-line"><span class="source-tag">stdout</span>Building for production...</div>
+              <div class="output-line"><span class="source-tag">stdout</span>Compiling TypeScript...</div>
+              <div class="output-line err"><span class="source-tag">stderr</span>✕ Type error: Argument of type 'string'
+                is not assignable to parameter of type 'number'</div>
+              <div class="output-line err"><span class="source-tag">stderr</span> at src/terminal/index.ts:142:18</div>
+              <div class="output-line info"><span class="source-tag">info</span>Found 1 error in 1 file.</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 10px;">
+            <div class="history-entry">
+              <div class="history-cmd-row">
+                <span class="status-tag running">● running</span>
+                <span class="history-cmd-text">docker-compose up --build</span>
+                <div
+                  style="display:flex; align-items:center; gap:8px; font-size:9px; color:var(--text-muted); flex-shrink:0;">
+                  <span class="meta-pill">⏱ 34s…</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── QUEUE & PARALLEL BARS ── -->
+      <section class="sg-section" id="queues">
+        <div class="sg-section-title">Queue & Parallel Bars</div>
+        <div class="sg-section-sub">Status bars displayed above the history panel when commands are queued (sequential
+          mode) or running simultaneously (parallel mode).</div>
+
+        <div class="preview-card">
+          <div class="preview-label">Sequential Queue Bar</div>
+          <div class="queue-bar" style="margin-bottom: 12px;">
+            <span style="color: var(--warn); font-size: 10px;">⟶ Queued:</span>
+            <span class="queue-tag">npm install</span>
+            <span class="queue-arrow">→</span>
+            <span class="queue-tag">npm run build</span>
+            <span class="queue-arrow">→</span>
+            <span class="queue-tag">npm run test</span>
+          </div>
+
+          <div class="preview-label">Parallel Execution Bar</div>
+          <div class="parallel-bar">
+            <span style="color: var(--accent2); font-size: 10px;">⊕ Parallel:</span>
+            <span class="par-tag">npm run dev</span>
+            <span class="par-tag">python -m server</span>
+            <span class="par-tag">redis-server</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── MODAL ── -->
+      <section class="sg-section" id="modal">
+        <div class="sg-section-title">Modal — Sequential Commands</div>
+        <div class="sg-section-sub">Glassmorphism dialog for building sequential command chains. Heavy backdrop blur +
+          dark overlay. 540px max width.</div>
+
+        <div class="preview-card">
+          <div
+            style="background: rgba(2,5,15,0.4); border-radius: 10px; padding: 24px; display: flex; align-items: center; justify-content: center;">
+            <div class="modal-demo">
+              <div class="modal-title">⟶ Sequential Commands</div>
+              <div class="seq-cmd-list">
+                <div class="seq-cmd-row">
+                  <div class="seq-num">1</div>
+                  <input class="seq-input" value="git pull origin main">
+                </div>
+                <div class="seq-connector">then</div>
+                <div class="seq-cmd-row">
+                  <div class="seq-num">2</div>
+                  <input class="seq-input" value="npm install">
+                </div>
+                <div class="seq-connector">then</div>
+                <div class="seq-cmd-row">
+                  <div class="seq-num">3</div>
+                  <input class="seq-input" value="npm run build">
+                </div>
+                <div class="seq-connector">then</div>
+                <div class="seq-cmd-row">
+                  <div class="seq-num">4</div>
+                  <input class="seq-input" placeholder="Add another command...">
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button class="mode-btn">Cancel</button>
+                <button class="run-btn">▶ Run Queue</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── PANE CHROME ── -->
+      <section class="sg-section" id="pane">
+        <div class="sg-section-title">Pane Chrome</div>
+        <div class="sg-section-sub">Terminal pane top bar. Used in split-view layouts. Focused pane gets a subtle accent
+          border.</div>
+
+        <div class="preview-card">
+          <div class="two-col">
+            <div>
+              <div class="preview-label">Focused Pane</div>
+              <div style="border: 1px solid rgba(56,189,248,0.25); border-radius: 8px; overflow: hidden;">
+                <div class="pane-topbar">
+                  <span class="pane-title">⚡ bash · pane 1</span>
+                  <span class="status-tag running" style="font-size: 8px; padding: 1px 5px;">● live</span>
+                  <button class="hist-micro-btn">⊡</button>
+                  <button class="hist-micro-btn del">✕</button>
+                </div>
+                <div
+                  style="background: rgba(2,5,15,0.6); padding: 14px 12px; font-size: 11px; line-height: 1.8; color: #94a3b8; min-height: 80px;">
+                  <div class="prompt-line"><span class="ps">$</span> <span class="cmd">npm run dev</span></div>
+                  <div style="color: var(--accent3); margin-left: 16px;">Server running at http://localhost:3000</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="preview-label">Unfocused Pane</div>
+              <div style="border: 1px solid transparent; border-radius: 8px; overflow: hidden;">
+                <div class="pane-topbar">
+                  <span class="pane-title">📦 node · pane 2</span>
+                  <button class="hist-micro-btn">⊡</button>
+                  <button class="hist-micro-btn del">✕</button>
+                </div>
+                <div
+                  style="background: rgba(2,5,15,0.6); padding: 14px 12px; font-size: 11px; line-height: 1.8; color: #94a3b8; min-height: 80px;">
+                  <div class="prompt-line"><span class="ps">$</span> <span class="cmd"> <span
+                        class="cursor"></span></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── EMPTY STATE ── -->
+      <section class="sg-section" id="empty">
+        <div class="sg-section-title">Empty State</div>
+        <div class="sg-section-sub">Shown in the history panel when no commands have been run yet. Dashed border,
+          centered layout, Syne display font.</div>
+
+        <div class="preview-card">
+          <div class="empty-state">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              style="color: var(--text-muted); opacity: 0.3;">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
+            <div class="empty-title">No Commands Yet</div>
+            <div style="font-size: 11px; color: var(--text-dim);">Run a command to see your history here.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TERMINAL OUTPUT ── -->
+      <section class="sg-section" id="terminal">
+        <div class="sg-section-title">Terminal Output</div>
+        <div class="sg-section-sub">Output line variants inside a history entry. Three semantic types: stdout (default),
+          stderr (danger), info (accent2). Source tag labels the origin stream.</div>
+
+        <div class="preview-card">
+          <div class="history-output-inner" style="border-radius: 8px; border: 1px solid rgba(99,179,237,0.08);">
+            <div class="output-line"><span class="source-tag">stdout</span>Initializing build pipeline...</div>
+            <div class="output-line"><span class="source-tag">stdout</span>✓ Loaded 42 modules</div>
+            <div class="output-line"><span class="source-tag">stdout</span>✓ TypeScript compiled in 1.8s</div>
+            <div class="output-line info"><span class="source-tag">info</span>Warning: deprecated API usage in
+              utils/format.ts:88</div>
+            <div class="output-line"><span class="source-tag">stdout</span>Bundling assets...</div>
+            <div class="output-line err"><span class="source-tag">stderr</span>✕ ENOENT: no such file or directory
+              './dist/index.js'</div>
+            <div class="output-line err"><span class="source-tag">stderr</span> Build failed with 1 error.</div>
+            <div class="output-line"><span class="source-tag">stdout</span>Process exited with code <span
+                style="color: var(--danger);">1</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── INPUT AREA ── -->
+      <section class="sg-section" id="input-area">
+        <div class="sg-section-title">Input Area</div>
+        <div class="sg-section-sub">The complete bottom input zone assembly. From top: context info row → suggestion
+          chips row → command input row with mode buttons and run button.</div>
+
+        <div class="preview-card">
+          <div class="input-area">
+            <!-- Context row -->
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; flex-wrap: wrap;">
+              <span class="info-chip cwd">📁 ~/dev/neoterm</span>
+              <span class="info-chip branch">⎇ feature/split-panes</span>
+              <span class="info-chip mode">⟶ Sequential</span>
+            </div>
+            <!-- Suggestions row -->
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span
+                style="font-size: 9px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase;">Suggest:</span>
+              <span class="suggestion-chip"><span class="suggestion-label">recent</span>git status</span>
+              <span class="suggestion-chip"><span class="suggestion-label">recent</span>npm run dev</span>
+              <span class="suggestion-chip"><span class="suggestion-label">book</span>docker ps -a</span>
+            </div>
+            <!-- Input row -->
+            <div class="input-row">
+              <span class="prompt-symbol">$</span>
+              <input class="cmd-input" placeholder="Enter command...">
+              <button class="mode-btn active-seq">⟶ Seq</button>
+              <button class="mode-btn">⊕ Par</button>
+              <button class="run-btn">▶ Run</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <div
+        style="margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; flex-wrap: gap; gap: 12px;">
+        <div style="font-family: 'Syne', sans-serif; font-weight: 700; color: var(--text-dim);">NeoTerm Design System
+        </div>
+        <div style="font-size: 10px; color: var(--text-dim);">JetBrains Mono + Syne · Glassmorphism · #030712 base</div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // Smooth scroll for nav links
+    document.querySelectorAll('.sg-nav-link').forEach(link => {
+      link.addEventListener('click', e => {
+        const href = link.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+          document.querySelectorAll('.sg-nav-link').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Highlight active section on scroll
+    const sections = document.querySelectorAll('.sg-section[id]');
+    const navLinks = document.querySelectorAll('.sg-nav-link');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(l => l.classList.remove('active'));
+          const active = document.querySelector(`.sg-nav-link[href="#${entry.target.id}"]`);
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { threshold: 0.3 });
+    sections.forEach(s => observer.observe(s));
+  </script>
+</body>
+
+</html>
