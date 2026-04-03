@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Terminal | The Ultimate Browser-Based CLI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            glass: 'rgba(255, 255, 255, 0.05)',
+            glassHover: 'rgba(255, 255, 255, 0.08)',
+            glassBorder: 'rgba(255, 255, 255, 0.1)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background Orbs */
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: -1;
+      animation: float 20s infinite alternate ease-in-out;
+    }
+
+    .orb-1 {
+      width: 400px;
+      height: 400px;
+      background: rgba(56, 189, 248, 0.15);
+      top: -100px;
+      left: -100px;
+    }
+
+    .orb-2 {
+      width: 500px;
+      height: 500px;
+      background: rgba(168, 85, 247, 0.15);
+      bottom: -100px;
+      right: -100px;
+      animation-delay: -5s;
+    }
+
+    .orb-3 {
+      width: 300px;
+      height: 300px;
+      background: rgba(236, 72, 153, 0.1);
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -10s;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      33% {
+        transform: translate(30px, -50px) scale(1.1);
+      }
+
+      66% {
+        transform: translate(-20px, 20px) scale(0.9);
+      }
+
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+    }
+
+    /* Glassmorphism Utilities */
+    .glass-panel {
+      background: var(--tw-colors-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--tw-colors-glassBorder);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .glass-button:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .gradient-text {
+      background: linear-gradient(to right, #38bdf8, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* Terminal Mockup Specifics */
+    .terminal-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .terminal-scroll::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .terminal-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body class="antialiased relative min-h-screen selection:bg-purple-500/30">
+
+  <!-- Background Orbs -->
+  <div class="bg-orb orb-1 fixed"></div>
+  <div class="bg-orb orb-2 fixed"></div>
+  <div class="bg-orb orb-3 fixed"></div>
+
+  <!-- Navigation -->
+  <nav class="fixed w-full z-50 glass-panel border-b-0 border-x-0 border-t-0 bg-slate-900/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-2">
+          <i data-lucide="terminal-square" class="w-6 h-6 text-sky-400"></i>
+          <span class="font-bold text-xl tracking-tight">WebTerminal</span>
+        </div>
+        <div class="hidden md:block">
+          <div class="ml-10 flex items-baseline space-x-8">
+            <a href="#features"
+              class="hover:text-sky-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Benefits</a>
+            <a href="#efficiency"
+              class="hover:text-sky-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Efficiency</a>
+            <a href="#installation"
+              class="hover:text-sky-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Install</a>
+            <a href="#issues"
+              class="hover:text-sky-400 transition-colors px-3 py-2 rounded-md text-sm font-medium">Known Issues</a>
+          </div>
+        </div>
+        <div>
+          <a href="#installation"
+            class="glass-button px-4 py-2 rounded-lg text-sm font-medium hidden sm:inline-block">Get Started</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="relative pt-32 pb-20 sm:pt-40 sm:pb-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight mb-6">
+        Your Server CLI,<br>
+        <span class="gradient-text">Anywhere in the Browser</span>
+      </h1>
+      <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-300 mb-10">
+        Web Terminal is a lightweight, secure, and incredibly fast tool that brings your machine's command line directly
+        to your web browser. Perfect for remote management, quick edits, and seamless developer workflows.
+      </p>
+      <div class="flex justify-center gap-4">
+        <a href="#installation"
+          class="bg-sky-500 hover:bg-sky-600 text-white px-8 py-3 rounded-xl font-medium transition-all shadow-lg shadow-sky-500/30 flex items-center gap-2">
+          <i data-lucide="download" class="w-5 h-5"></i> Installation Guide
+        </a>
+        <a href="#efficiency" class="glass-button px-8 py-3 rounded-xl font-medium flex items-center gap-2">
+          <i data-lucide="eye" class="w-5 h-5"></i> View Interface
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Benefits Section -->
+  <div id="features" class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold">Why use Web Terminal?</h2>
+        <div class="h-1 w-20 bg-gradient-to-r from-sky-400 to-purple-500 mx-auto mt-4 rounded-full"></div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Benefit 1 -->
+        <div class="glass-panel p-6 rounded-2xl hover:bg-white/10 transition-colors duration-300">
+          <div class="w-12 h-12 bg-sky-500/20 rounded-xl flex items-center justify-center mb-4 text-sky-400">
+            <i data-lucide="zap"></i>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Zero Latency</h3>
+          <p class="text-slate-400 text-sm">Built on pure WebSockets. Keystrokes are transmitted and rendered with
+            practically zero overhead.</p>
+        </div>
+        <!-- Benefit 2 -->
+        <div class="glass-panel p-6 rounded-2xl hover:bg-white/10 transition-colors duration-300">
+          <div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4 text-purple-400">
+            <i data-lucide="shield-check"></i>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Secure by Default</h3>
+          <p class="text-slate-400 text-sm">Supports native HTTPS and wss:// out of the box. Your terminal sessions are
+            fully encrypted.</p>
+        </div>
+        <!-- Benefit 3 -->
+        <div class="glass-panel p-6 rounded-2xl hover:bg-white/10 transition-colors duration-300">
+          <div class="w-12 h-12 bg-pink-500/20 rounded-xl flex items-center justify-center mb-4 text-pink-400">
+            <i data-lucide="layout-grid"></i>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Cross-Platform</h3>
+          <p class="text-slate-400 text-sm">Access it from Windows, macOS, Linux, or even your iPad. If it has a
+            browser, it has a terminal.</p>
+        </div>
+        <!-- Benefit 4 -->
+        <div class="glass-panel p-6 rounded-2xl hover:bg-white/10 transition-colors duration-300">
+          <div class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-4 text-emerald-400">
+            <i data-lucide="cpu"></i>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Resource Friendly</h3>
+          <p class="text-slate-400 text-sm">Minimal memory footprint. It runs quietly in the background without draining
+            server resources.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interface & Efficiency Section -->
+  <div id="efficiency" class="py-16 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold">Designed for Developer Efficiency</h2>
+        <p class="text-slate-400 mt-4 max-w-2xl mx-auto">A look at how Web Terminal turbocharges your workflow with
+          built-in productivity tools.</p>
+      </div>
+
+      <!-- Terminal Mockup UI -->
+      <div class="glass-panel rounded-2xl border border-white/20 overflow-hidden shadow-2xl relative">
+
+        <!-- Mac-like Header -->
+        <div class="bg-slate-900/80 px-4 py-3 border-b border-white/10 flex items-center justify-between">
+          <div class="flex space-x-2">
+            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+          </div>
+          <div class="text-xs text-slate-400 font-mono flex items-center gap-2">
+            <i data-lucide="lock" class="w-3 h-3"></i> user@production-server: ~
+          </div>
+          <div class="flex space-x-3 text-slate-400">
+            <i data-lucide="plus" class="w-4 h-4 hover:text-white cursor-pointer"></i>
+            <i data-lucide="settings" class="w-4 h-4 hover:text-white cursor-pointer"></i>
+          </div>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="flex flex-col md:flex-row h-[500px]">
+
+          <!-- Sidebar (Efficiency Feature 1) -->
+          <div class="w-full md:w-64 bg-black/40 border-r border-white/10 p-4 flex flex-col gap-4 relative group">
+            <!-- Annotation Badge -->
+            <div
+              class="absolute -left-3 -top-3 bg-purple-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-lg z-10 hidden lg:block border border-purple-300 animate-pulse">
+              Quick Snippets & History
+            </div>
+
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Saved Snippets</div>
+            <div class="space-y-2">
+              <div
+                class="bg-white/5 p-2 rounded cursor-pointer hover:bg-white/10 text-sm font-mono flex justify-between items-center text-sky-300">
+                <span>docker ps -a</span>
+                <i data-lucide="play" class="w-3 h-3"></i>
+              </div>
+              <div
+                class="bg-white/5 p-2 rounded cursor-pointer hover:bg-white/10 text-sm font-mono flex justify-between items-center text-sky-300">
+                <span>pm2 logs api</span>
+                <i data-lucide="play" class="w-3 h-3"></i>
+              </div>
+              <div
+                class="bg-white/5 p-2 rounded cursor-pointer hover:bg-white/10 text-sm font-mono flex justify-between items-center text-sky-300">
+                <span>git pull origin</span>
+                <i data-lucide="play" class="w-3 h-3"></i>
+              </div>
+            </div>
+
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-4 mb-2">Live Resources</div>
+            <div class="bg-white/5 p-3 rounded space-y-3">
+              <div>
+                <div class="flex justify-between text-xs mb-1"><span>CPU</span> <span
+                    class="text-emerald-400">12%</span></div>
+                <div class="w-full bg-slate-800 rounded-full h-1.5">
+                  <div class="bg-emerald-400 h-1.5 rounded-full" style="width: 12%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1"><span>RAM</span> <span
+                    class="text-yellow-400">2.4GB</span></div>
+                <div class="w-full bg-slate-800 rounded-full h-1.5">
+                  <div class="bg-yellow-400 h-1.5 rounded-full" style="width: 65%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Terminal Area -->
+          <div class="flex-1 bg-[#0d1117] p-4 font-mono text-sm terminal-scroll overflow-y-auto relative">
+            <!-- Annotation Badge -->
+            <div
+              class="absolute right-4 top-4 bg-sky-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-lg z-10 hidden lg:block border border-sky-300 animate-pulse">
+              Syntax Highlighted Output
+            </div>
+
+            <div class="text-emerald-400 mb-2">Welcome to Web Terminal v1.2.0</div>
+            <div class="text-slate-400 mb-4">Connected securely via wss:// 192.168.1.100:8080</div>
+
+            <div class="mb-2">
+              <span class="text-sky-400">user@production</span>:<span class="text-blue-400">~/app</span>$ <span
+                class="text-white">npm run build</span>
+            </div>
+            <div class="text-slate-300 ml-4 mb-4">
+              > app@1.0.0 build<br>
+              > tsc && vite build<br>
+              <span class="text-purple-400">vite v4.4.9 building for production...</span><br>
+              <span class="text-emerald-400">✓</span> 34 modules transformed.<br>
+              dist/index.html 0.45 kB │ gzip: 0.29 kB<br>
+              dist/assets/index-4e9b8d.js 145.2 kB │ gzip: 45.1 kB<br>
+              <span class="text-emerald-400">✓ built in 1.2s</span>
+            </div>
+
+            <div class="mb-2">
+              <span class="text-sky-400">user@production</span>:<span class="text-blue-400">~/app</span>$ <span
+                class="text-white">htop</span><span
+                class="w-2 h-4 bg-white inline-block align-middle ml-1 animate-pulse"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div class="flex items-start gap-3">
+          <div class="mt-1 text-sky-400"><i data-lucide="mouse-pointer-click"></i></div>
+          <div>
+            <h4 class="font-semibold text-white">Clickable Links & Paths</h4>
+            <p class="text-sm text-slate-400">URLs and file paths in the output are instantly clickable, saving you
+              manual copy-pasting.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="mt-1 text-purple-400"><i data-lucide="split-square-horizontal"></i></div>
+          <div>
+            <h4 class="font-semibold text-white">Split Panes</h4>
+            <p class="text-sm text-slate-400">Run multiple commands side-by-side. Monitor logs in one pane while editing
+              files in another.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="mt-1 text-pink-400"><i data-lucide="history"></i></div>
+          <div>
+            <h4 class="font-semibold text-white">Persistent History</h4>
+            <p class="text-sm text-slate-400">Your session history, snippets, and layouts are saved locally, ready for
+              your next login.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Installation Section -->
+  <div id="installation" class="py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold">Ways to Run</h2>
+        <p class="text-slate-400 mt-2">Choose the installation method that fits your environment.</p>
+      </div>
+
+      <div class="glass-panel rounded-2xl overflow-hidden border border-white/10">
+        <!-- Tabs Header -->
+        <div class="flex overflow-x-auto border-b border-white/10 bg-black/20" id="install-tabs">
+          <button onclick="switchTab('git')" id="tab-git"
+            class="flex-1 py-4 px-6 text-sm font-medium text-sky-400 border-b-2 border-sky-400 whitespace-nowrap bg-white/5 transition-all">
+            <i data-lucide="github" class="w-4 h-4 inline mr-2"></i>Git Clone
+          </button>
+          <button onclick="switchTab('npm')" id="tab-npm"
+            class="flex-1 py-4 px-6 text-sm font-medium text-slate-400 border-b-2 border-transparent hover:text-white whitespace-nowrap transition-all">
+            <i data-lucide="package" class="w-4 h-4 inline mr-2"></i>NPM Install
+          </button>
+          <button onclick="switchTab('portable')" id="tab-portable"
+            class="flex-1 py-4 px-6 text-sm font-medium text-slate-400 border-b-2 border-transparent hover:text-white whitespace-nowrap transition-all">
+            <i data-lucide="file-box" class="w-4 h-4 inline mr-2"></i>Portable Executable
+          </button>
+          <button disabled
+            class="flex-1 py-4 px-6 text-sm font-medium text-slate-600 border-b-2 border-transparent whitespace-nowrap cursor-not-allowed">
+            <i data-lucide="monitor" class="w-4 h-4 inline mr-2"></i>Electron App <span
+              class="text-[10px] bg-slate-800 px-2 py-0.5 rounded ml-1 text-slate-400">Soon</span>
+          </button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="p-6 bg-[#0a0f1c]">
+
+          <!-- Git Content -->
+          <div id="content-git" class="block animate-fade-in">
+            <p class="text-slate-300 text-sm mb-4">Clone the repository and install dependencies. Recommended for users
+              who want to modify the source code.</p>
+            <div class="relative">
+              <pre
+                class="bg-black/50 p-4 rounded-xl text-sm font-mono overflow-x-auto border border-white/5 text-slate-300">
+<span class="text-slate-500"># 1. Clone and install</span>
+git clone https://github.com/your-username/web-terminal.git
+cd web-terminal
+npm install
+
+<span class="text-slate-500"># 2. Test run the application</span>
+npm run start
+
+<span class="text-slate-500"># 3. Setup to start on boot (using PM2)</span>
+npm install -g pm2
+pm2 start npm --name "web-terminal" -- start
+pm2 startup
+pm2 save</pre>
+              <button onclick="copyCode(this)"
+                class="absolute top-3 right-3 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 transition-colors">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- NPM Content -->
+          <div id="content-npm" class="hidden animate-fade-in">
+            <p class="text-slate-300 text-sm mb-4">Install globally via NPM. Quickest setup for node environments. Make
+              sure your local files/repo configurations are updated if required.</p>
+            <div class="relative">
+              <pre
+                class="bg-black/50 p-4 rounded-xl text-sm font-mono overflow-x-auto border border-white/5 text-slate-300">
+<span class="text-slate-500"># 1. Install globally</span>
+npm install -g web-terminal-cli
+
+<span class="text-slate-500"># 2. Run initialization (creates config files in current dir)</span>
+web-terminal init
+<span class="text-slate-500"># Update the generated config.json with your specific repo/folder paths</span>
+
+<span class="text-slate-500"># 3. Run securely on startup with PM2</span>
+npm install -g pm2
+pm2 start web-terminal --name "web-terminal-service"
+pm2 startup
+pm2 save</pre>
+              <button onclick="copyCode(this)"
+                class="absolute top-3 right-3 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 transition-colors">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Portable Content -->
+          <div id="content-portable" class="hidden animate-fade-in">
+            <p class="text-slate-300 text-sm mb-4">Download a single standalone executable. No Node.js or dependencies
+              required on the host machine.</p>
+            <ol class="list-decimal list-inside text-sm text-slate-300 space-y-3 mb-4">
+              <li>Download the latest executable for your OS from the <a href="#"
+                  class="text-sky-400 hover:underline">Releases page</a>.</li>
+              <li>(Linux/macOS) Make the file executable: <code
+                  class="bg-black/50 px-2 py-1 rounded text-sky-300 font-mono">chmod +x web-terminal-linux</code></li>
+              <li>Run the application by double-clicking or running via CLI.</li>
+            </ol>
+            <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+              <h5 class="text-white font-medium mb-2 text-sm flex items-center gap-2"><i data-lucide="settings"
+                  class="w-4 h-4"></i> Starting on Boot</h5>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <span class="text-xs font-bold text-slate-500 uppercase">Windows</span>
+                  <p class="text-xs text-slate-400 mt-1">Press Win+R, type <code
+                      class="text-sky-300">shell:startup</code>, and place a shortcut to the .exe inside the folder.</p>
+                </div>
+                <div>
+                  <span class="text-xs font-bold text-slate-500 uppercase">Linux</span>
+                  <p class="text-xs text-slate-400 mt-1">Create a systemd service file pointing to the executable and
+                    run <code class="text-sky-300">systemctl enable web-terminal</code>.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Known Issues Section -->
+  <div id="issues" class="py-16">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row justify-between items-end mb-8">
+        <div>
+          <h2 class="text-3xl font-bold">Known Issues Roadmap</h2>
+          <p class="text-slate-400 mt-2">We believe in transparency. Here is what we are currently fixing.</p>
+        </div>
+        <div class="mt-4 sm:mt-0 text-sm text-slate-500 flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          Actively tracking
+        </div>
+      </div>
+
+      <div class="glass-panel rounded-2xl overflow-hidden border border-white/10">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-slate-300">
+            <thead class="text-xs text-slate-400 uppercase bg-black/40 border-b border-white/10">
+              <tr>
+                <th scope="col" class="px-6 py-4">Issue Description</th>
+                <th scope="col" class="px-6 py-4">Impact</th>
+                <th scope="col" class="px-6 py-4">Workaround</th>
+                <th scope="col" class="px-6 py-4 text-right">Expected Fix</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+              <tr class="hover:bg-white/5 transition-colors">
+                <td class="px-6 py-4 font-medium text-white flex items-center gap-2">
+                  <i data-lucide="alert-circle" class="w-4 h-4 text-yellow-500"></i>
+                  Mobile keyboard overlapping input field
+                </td>
+                <td class="px-6 py-4"><span
+                    class="bg-yellow-500/10 text-yellow-400 px-2 py-1 rounded text-xs border border-yellow-500/20">Medium</span>
+                </td>
+                <td class="px-6 py-4">Scroll up manually after keyboard opens</td>
+                <td class="px-6 py-4 text-right font-mono text-sky-400">May 15, 2026</td>
+              </tr>
+              <tr class="hover:bg-white/5 transition-colors">
+                <td class="px-6 py-4 font-medium text-white flex items-center gap-2">
+                  <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500"></i>
+                  Memory leak on prolonged SSH sessions (>48h)
+                </td>
+                <td class="px-6 py-4"><span
+                    class="bg-red-500/10 text-red-400 px-2 py-1 rounded text-xs border border-red-500/20">High</span>
+                </td>
+                <td class="px-6 py-4">Restart the web service periodically via PM2</td>
+                <td class="px-6 py-4 text-right font-mono text-sky-400">June 02, 2026</td>
+              </tr>
+              <tr class="hover:bg-white/5 transition-colors">
+                <td class="px-6 py-4 font-medium text-white flex items-center gap-2">
+                  <i data-lucide="info" class="w-4 h-4 text-blue-500"></i>
+                  Custom theme parser failing on edge cases
+                </td>
+                <td class="px-6 py-4"><span
+                    class="bg-blue-500/10 text-blue-400 px-2 py-1 rounded text-xs border border-blue-500/20">Low</span>
+                </td>
+                <td class="px-6 py-4">Stick to the default built-in themes for now</td>
+                <td class="px-6 py-4 text-right font-mono text-sky-400">Q3 2026</td>
+              </tr>
+              <tr class="hover:bg-white/5 transition-colors">
+                <td class="px-6 py-4 font-medium text-slate-400 flex items-center gap-2">
+                  <i data-lucide="monitor" class="w-4 h-4 text-slate-500"></i>
+                  Electron Standalone App Missing
+                </td>
+                <td class="px-6 py-4"><span
+                    class="bg-slate-500/10 text-slate-400 px-2 py-1 rounded text-xs border border-slate-500/20">Feature</span>
+                </td>
+                <td class="px-6 py-4">Use browser version or Portable Executable</td>
+                <td class="px-6 py-4 text-right font-mono text-purple-400">Q4 2026</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/10 mt-12 bg-black/20 backdrop-blur-md">
+    <div
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-2 text-slate-400">
+        <i data-lucide="terminal-square" class="w-5 h-5"></i>
+        <span class="font-semibold text-white">Web Terminal</span>
+        <span class="text-sm ml-2">© 2026 All rights reserved.</span>
+      </div>
+      <div class="flex space-x-6">
+        <a href="#" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="github"
+            class="w-5 h-5"></i></a>
+        <a href="#" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="twitter"
+            class="w-5 h-5"></i></a>
+        <a href="#" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="message-square"
+            class="w-5 h-5"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Initialize Icons
+    lucide.createIcons();
+
+    // Tab Switching Logic
+    function switchTab(tabId) {
+      // Arrays of tabs and contents
+      const tabs = ['git', 'npm', 'portable'];
+
+      tabs.forEach(t => {
+        // Reset styles
+        const tabBtn = document.getElementById(`tab-${t}`);
+        const contentDiv = document.getElementById(`content-${t}`);
+
+        if (t === tabId) {
+          // Activate selected
+          tabBtn.classList.remove('text-slate-400', 'border-transparent');
+          tabBtn.classList.add('text-sky-400', 'border-sky-400', 'bg-white/5');
+          contentDiv.classList.remove('hidden');
+          contentDiv.classList.add('block');
+        } else {
+          // Deactivate others
+          tabBtn.classList.add('text-slate-400', 'border-transparent');
+          tabBtn.classList.remove('text-sky-400', 'border-sky-400', 'bg-white/5');
+          contentDiv.classList.add('hidden');
+          contentDiv.classList.remove('block');
+        }
+      });
+    }
+
+    // Copy Code Functionality
+    function copyCode(btn) {
+      // Find the pre tag sibling inside the relative parent
+      const preElement = btn.previousElementSibling;
+      if (!preElement) return;
+
+      // Extract text (remove span tags used for coloring)
+      const codeText = preElement.innerText;
+
+      // Modern copy API
+      navigator.clipboard.writeText(codeText).then(() => {
+        // Change icon to check
+        btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>';
+        lucide.createIcons();
+
+        // Revert after 2 seconds
+        setTimeout(() => {
+          btn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i>';
+          lucide.createIcons();
+        }, 2000);
+      }).catch(err => {
+        // Fallback for older browsers or iframe restrictions
+        const textarea = document.createElement('textarea');
+        textarea.value = codeText;
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>';
+          lucide.createIcons();
+          setTimeout(() => {
+            btn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i>';
+            lucide.createIcons();
+          }, 2000);
+        } catch (e) {
+          console.error('Copy failed', e);
+        }
+        document.body.removeChild(textarea);
+      });
+    }
+  </script>
+</body>
+
+</html>

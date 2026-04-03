@@ -14,3 +14,24 @@ Build web page for web terminal with below features:
 Use glassmorphic.
 It should be simple, UI rich looking, with suitable icons, easy to operate.
 Use only html, css, javascript and tailwindcss
+
+
+
+
+Build a product page for my product, web terminal.
+- Shows description of tool
+- Shows list of ways to run the tools
+- Shows benifits of tool
+- Shows list of known issues with exepected release dates to fix them.
+- Show screenshot of tool and sections that improves developer efficiency
+
+Installation methods:
+- Git clone: Do git clone the repo or download the folder and run the simple command "npm install && npm run start", along with pm2 to start app in startup
+- NPM install: Install package from npm and run npm commands along with file updates in your repo, , along with pm2 to start app in startup
+- Portable executable: Download single executable application file and peform few steps to enable to run it, steps to start the app on startup.
+- Electron app (Comming soon)
+
+=====instructions for app======
+Use glassmorphic.
+It should be simple, UI rich looking, with suitable icons, easy to operate.
+Use only html, css, javascript and tailwindcss

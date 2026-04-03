@@ -696,6 +696,13 @@
         "type": "file",
         "parentId": "root-web-terminal",
         "path": "./web-terminal/index5.html"
+      },
+      {
+        "id": "file-web-terminal-product-page.html",
+        "name": "product-page.html",
+        "type": "file",
+        "parentId": "root-web-terminal",
+        "path": "./web-terminal/product-page.html"
       }
     ]
   }
