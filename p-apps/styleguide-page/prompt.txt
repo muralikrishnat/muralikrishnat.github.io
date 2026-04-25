@@ -17,11 +17,38 @@ Use only html, css, javascript and tailwindcss
 
 
 
-Build me stuleguide with components like header, top bar, sidebar, list, 
-all form fields, accordion, tabs, vertical tabs, table, filter section, pagination, 
-cards, tiles, grid display, table display, list display, sort, 
-advanced filter, filter query,...think of complete list of components.  
+Build me stuleguide with components like header, top bar, sidebar, list,
+all form fields, accordion, tabs, vertical tabs, table, filter section, pagination,
+cards, tiles, grid display, table display, list display, sort,
+advanced filter, filter query,...think of complete list of components.
 
-use glassmorphic, 
-use only html, css, javascript and tailwindcss. 
+use glassmorphic,
+use only html, css, javascript and tailwindcss.
 categorize as sections.
+
+Build me page that has below features.
+Page will have vertical tabs such as Commands and Folders, Saved categories, Saved apps
+
+Commands and Folders tab:
+- Show two list of items side by side, left side list of commands, and right side list of folders
+- When the command item selected it will highlight the associated folders in the ride side.
+- Same thing for folder, will highlight commands that are executed in that folder.
+- Ability to add command, same way ability to add folder.
+Saved categories:
+- Ability to see list of categories like GIT, NPM, Docker, File system and System commands
+- Ability to add/delete category.
+- Ability to see list of commands available in each category.
+- Ability to add/edit/delete command under category.
+- Dont allow deletion/updation operations on core categories.
+Saved apps:
+- Ability to see list of apps saved in the system and executed times, execution status (running, failed, active)
+- Ability to add/edit/delete saved apps.
+- Each app is something that helpful to execute sequential or parallel commands in particular folders.
+- Ability to add app,
+- each app will have execution,
+- each execution will have folder, folders can be from existing list or create new one,
+- each folder will have commands (seq or parallel), commands can be pulled from saved commands or add new one
+
+use glassmorphic,
+use only html, css, javascript and tailwindcss.
+Use the uploaded file styles.

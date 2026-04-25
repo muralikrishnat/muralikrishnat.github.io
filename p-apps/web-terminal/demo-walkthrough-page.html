@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeoTerm — Log Flow Terminal & Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@400;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #020617;
+      --border-dim: #1e293b;
+      --accent: #38bdf8;
+      --stdin: #10b981;
+      --stdout: #94a3b8;
+      --stderr: #f87171;
+      --stdinfo: #6366f1;
+      --warn: #fbbf24;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-main);
+      color: #f1f5f9;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Continuous Flow Styles */
+    .log-entry {
+      border-bottom: 1px solid rgba(30, 41, 59, 0.3);
+    }
+
+    .stream-label {
+      min-width: 65px;
+      text-align: right;
+      user-select: none;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* Ribbon Styling for STDIN */
+    .stdin-ribbon {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+      border-left: 4px solid var(--stdin);
+      position: relative;
+    }
+
+    .stdin-badge {
+      background: var(--stdin);
+      color: #064e3b;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 8px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+
+    .status-sending {
+      background: rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+    }
+
+    .status-running {
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--accent);
+      animation: pulse 1.5s infinite;
+    }
+
+    .status-passed {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--stdin);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-failed {
+      background: rgba(248, 113, 113, 0.2);
+      color: var(--stderr);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    .status-config {
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--stdinfo);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Action Buttons Visibility */
+    .action-group {
+      opacity: 0.4;
+      transition: opacity 0.2s;
+    }
+
+    .log-entry:hover .action-group {
+      opacity: 1;
+    }
+
+    .ribbon-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      transition: all 0.15s;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: #64748b;
+    }
+
+    .ribbon-btn:hover {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--stdin);
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    .glass-input {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border-dim);
+    }
+
+    /* Specialized Components for help/config */
+    .config-key { color: var(--accent); }
+    .config-string { color: var(--stdin); }
+    .config-number { color: var(--warn); }
+    .config-bracket { color: #475569; }
+
+    /* =========================================
+       VIRTUAL CURSOR & DEMO ANIMATIONS
+       ========================================= */
+    #virtual-cursor {
+      pointer-events: none;
+      z-index: 99999;
+      position: fixed;
+      /* default out of bounds slightly */
+      top: 50%;
+      left: 50%;
+      transition: top 0.7s cubic-bezier(0.25, 1, 0.5, 1),
+                  left 0.7s cubic-bezier(0.25, 1, 0.5, 1),
+                  opacity 0.3s ease;
+      opacity: 0;
+    }
+
+    #cursor-icon {
+      transition: transform 0.1s ease;
+      transform-origin: top left;
+      filter: drop-shadow(0px 3px 5px rgba(0,0,0,0.5));
+    }
+
+    .cursor-clicking #cursor-icon {
+      transform: scale(0.85);
+    }
+
+    .demo-ripple {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: rgba(52, 211, 153, 0.5); /* Emerald 400 */
+      transform: scale(0);
+      opacity: 1;
+      pointer-events: none;
+    }
+
+    .cursor-clicking .demo-ripple {
+      animation: rippleEffect 0.5s ease-out forwards;
+    }
+
+    @keyframes rippleEffect {
+      0% { transform: scale(0); opacity: 1; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+
+    .demo-btn.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+      filter: grayscale(1);
+    }
+  </style>
+</head>
+
+<body class="flex flex-col">
+
+  <!-- VIRTUAL CURSOR (Injected for walkthroughs) -->
+  <div id="virtual-cursor">
+    <div class="demo-ripple"></div>
+    <svg width="28" height="28" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" id="cursor-icon" class="-ml-[10px] -mt-[4px]">
+      <path d="M10.5 4.5L25 15L17.5 16.5L22 25L18.5 27L14 18.5L8.5 23V4.5Z" fill="black" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- HEADER -->
+  <header class="h-12 border-b border-slate-800 flex items-center justify-between px-6 shrink-0 bg-slate-950 relative z-10">
+    <div class="flex items-center gap-3">
+      <div class="w-6 h-6 bg-emerald-500 rounded flex items-center justify-center">
+        <svg class="w-4 h-4 text-emerald-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 9l3 3-3 3m5 0h3" />
+        </svg>
+      </div>
+      <h1 class="text-sm font-bold tracking-tight">NeoTerm <span
+          class="text-emerald-500 font-normal opacity-70">LogFlow</span></h1>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <div
+        class="hidden sm:flex items-center gap-2 px-2 py-0.5 bg-slate-900 rounded border border-slate-800 text-[10px] font-mono text-slate-400">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        session.active
+      </div>
+      <button id="btn-clear-logs" onclick="clearLogs()"
+        class="text-slate-500 hover:text-white transition-colors text-xs flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-800">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+        Clear
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 flex overflow-hidden">
+    <!-- LEFT SIDEBAR: HISTORY -->
+    <aside class="w-56 border-r border-slate-800 bg-slate-950/50 hidden lg:flex flex-col relative z-10">
+      <div class="p-4 uppercase text-[10px] font-bold tracking-widest text-slate-600">History</div>
+      <div id="sidebarHistory" class="flex-1 px-2 space-y-0.5 overflow-y-auto">
+        <!-- History items -->
+      </div>
+    </aside>
+
+    <!-- TERMINAL AREA -->
+    <section class="flex-1 flex flex-col min-w-0 bg-[#020617] relative z-0">
+      <div id="logContainer" class="flex-1 overflow-y-auto font-mono text-[13px] leading-relaxed relative">
+        <div id="emptyState" class="h-full flex items-center justify-center opacity-20 select-none">
+          <div class="text-center">
+            <code class="block mb-2 text-emerald-500 font-bold tracking-tighter">NEOTERM ENGINE v1.2.0</code>
+            <p class="text-xs">Stream localized. Awaiting standard input sequence...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- INPUT AREA -->
+      <div class="glass-input p-4 relative z-20">
+        <div class="max-w-4xl mx-auto flex items-center gap-3">
+          <span class="text-emerald-500 font-bold shrink-0">❯</span>
+          <input id="cmdInput" type="text"
+            placeholder="Type /help for commands, /info for system details"
+            class="flex-1 bg-transparent border-none focus:ring-0 text-slate-200 placeholder:text-slate-700 outline-none font-mono"
+            autocomplete="off">
+          <div class="flex items-center gap-2 shrink-0">
+            <kbd class="hidden md:block text-[10px] text-slate-600 border border-slate-800 px-1.5 rounded">ENTER</kbd>
+            <button id="btn-run-command" onclick="handleExecute()"
+              class="text-xs font-bold text-emerald-500 hover:text-emerald-400 bg-emerald-500/10 rounded px-3 py-1.5 transition-colors border border-emerald-500/20">RUN</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT SIDEBAR: DEMO WALKTHROUGH -->
+    <aside class="w-72 border-l border-slate-800 bg-slate-950/80 hidden md:flex flex-col relative z-10 shrink-0 shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
+      <div class="p-4 border-b border-slate-800 flex items-center gap-2">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        </span>
+        <div class="uppercase text-[10px] font-bold tracking-widest text-slate-400">Interactive Tour</div>
+      </div>
+
+      <div class="flex-1 p-4 space-y-3 overflow-y-auto">
+        <p class="text-[11px] text-slate-500 mb-4 leading-relaxed">
+          Welcome to the playground. Select an action below to watch the automated cursor demonstrate how the terminal works.
+        </p>
+
+        <!-- Demo Action 1 -->
+        <button onclick="demoRunCommand()" class="demo-btn w-full text-left p-3 rounded-lg border border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group relative overflow-hidden bg-slate-900/50">
+          <div class="text-[11px] font-bold text-emerald-400 mb-1 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Execute a Command
+          </div>
+          <div class="text-[10px] text-slate-500 leading-tight">Types 'docker ps' and executes it via the RUN button.</div>
+        </button>
+
+        <!-- Demo Action 2 -->
+        <button onclick="demoReplayHistory()" class="demo-btn w-full text-left p-3 rounded-lg border border-slate-800 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all group bg-slate-900/50">
+          <div class="text-[11px] font-bold text-indigo-400 mb-1 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            Replay from History
+          </div>
+          <div class="text-[10px] text-slate-500 leading-tight">Clicks the most recent command in the left sidebar and runs it.</div>
+        </button>
+
+        <!-- Demo Action 3 -->
+        <button onclick="demoClearScreen()" class="demo-btn w-full text-left p-3 rounded-lg border border-slate-800 hover:border-rose-500/50 hover:bg-rose-500/5 transition-all group bg-slate-900/50">
+          <div class="text-[11px] font-bold text-rose-400 mb-1 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            Clear Terminal
+          </div>
+          <div class="text-[10px] text-slate-500 leading-tight">Navigates to the top header and clears all active logs.</div>
+        </button>
+
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const logContainer = document.getElementById('logContainer');
+    const cmdInput = document.getElementById('cmdInput');
+    const emptyState = document.getElementById('emptyState');
+    const sidebarHistory = document.getElementById('sidebarHistory');
+
+    let sessionLogs = [];
+
+    // Configuration Data
+    const configData = {
+      availableShells: ["bash", "zsh", "fish", "powershell"],
+      defaultShell: "zsh",
+      logLevel: "VERBOSE",
+      bufferSize: 5000,
+      autoScroll: true,
+      theme: {
+        name: "NeoDark",
+        accents: ["emerald", "indigo", "slate"],
+        customCSS: false,
+        metadata: {
+          version: "2.1.0",
+          author: "NeoTerm-Core"
+        }
+      }
+    };
+
+    // System Information
+    const systemInfo = {
+      node: {
+        version: "v21.7.3",
+        executablePath: "/Users/muralikrishnat/.nvm/versions/node/v21.7.3/bin/node"
+      },
+      os: {
+        version: "24.5.0",
+        name: "Darwin"
+      },
+      shell: {
+        availableList: [
+          { name: "zsh", path: "/bin/zsh" },
+          { name: "sh", path: "/bin/sh" },
+          { name: "bash", path: "/bin/bash" }
+        ],
+        defaultShell: "/bin/zsh"
+      },
+      cpu: {
+        model: "Apple M2",
+        cores: 8,
+        arch: "arm64",
+        totalMemoryGB: "16.00"
+      },
+      gpu: {
+        card: "Chipset Model: Apple M2"
+      }
+    };
+
+    // Commands Metadata
+    const commandsList = [
+      { cmd: "/help", desc: "List all available terminal commands", cat: "System" },
+      { cmd: "/config", desc: "View current environment configuration", cat: "System" },
+      { cmd: "/info", desc: "Display detailed system and hardware information", cat: "System" },
+      { cmd: "npm start", desc: "Initialize local development server", cat: "Dev" },
+      { cmd: "docker ps", desc: "List running container processes", cat: "Dev" },
+      { cmd: "python3 train.py", desc: "Execute machine learning training script", cat: "AI" },
+      { cmd: "git status", desc: "Show the working tree status", cat: "Git" },
+      { cmd: "ls -la", desc: "List directory contents in long format", cat: "Utils" },
+      { cmd: "clear", desc: "Clear all logs from terminal screen", cat: "System" }
+    ];
+
+    const mockResponses = {
+      'npm start': {
+        stdout: ['> neoterm@1.0.0 start', '> node server.js', 'Server running at http://localhost:3000', 'Watching for changes...'],
+        stderr: [],
+        stdinfo: ['PID: 4410', 'USR: admin', 'MEM: 12.4MB'],
+        status: 'passed'
+      },
+      'git status': {
+        stdout: ['On branch main', 'Your branch is up to date.', 'Changes not staged for commit:', '  modified: index.html'],
+        stderr: [],
+        stdinfo: ['GIT: 2.39', 'REPO: local'],
+        status: 'passed'
+      },
+      'ls -la': {
+        stdout: ['total 24', 'drwxr-xr-x  5 user  staff  160 Mar 26 .', 'drwxr-xr-x  3 user  staff   96 Mar 25 ..', '-rw-r--r--  1 user  staff  521 Mar 26 index.html'],
+        stderr: [],
+        stdinfo: ['FILES: 3'],
+        status: 'passed'
+      },
+      'docker ps': {
+        stdout: ['CONTAINER ID   IMAGE         COMMAND                  CREATED          STATUS          PORTS                    NAMES', '8a4b3c2d1e0f   redis:alpine  "docker-entrypoint.s…"   12 minutes ago   Up 12 minutes   0.0.0.0:6379->6379/tcp   cache-db', 'f9e8d7c6b5a4   node:18       "docker-entrypoint.s…"   45 minutes ago   Up 45 minutes   0.0.0.0:3000->3000/tcp   api-server'],
+        stderr: [],
+        stdinfo: ['DOCKER: v24.0.5', 'ACTIVE: 2'],
+        status: 'passed'
+      }
+    };
+
+    function handleExecute() {
+      const cmd = cmdInput.value.trim();
+      if (!cmd) return;
+
+      if (cmd.toLowerCase() === 'clear') {
+        clearLogs();
+        cmdInput.value = '';
+        return;
+      }
+
+      if (emptyState) emptyState.remove();
+      execute(cmd);
+      cmdInput.value = '';
+    }
+
+    cmdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleExecute();
+    });
+
+    async function execute(cmd) {
+      const id = 'entry-' + Date.now();
+      const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      const logObj = { id, cmd, time, stdout: [], stderr: [], stdinfo: [], status: 'sending', type: 'standard' };
+
+      if (cmd === '/config') logObj.type = 'config';
+      if (cmd === '/help') logObj.type = 'help';
+      if (cmd === '/info') logObj.type = 'info';
+
+      sessionLogs.push(logObj);
+      renderEntry(logObj);
+
+      await new Promise(r => setTimeout(r, 400));
+      updateStatus(id, 'running');
+      await new Promise(r => setTimeout(r, 600));
+
+      if (logObj.type === 'standard') {
+        const res = mockResponses[cmd.toLowerCase()] || {
+          stdout: [`Executed: ${cmd}`, `Operation finished with default parameters.`],
+          stderr: cmd.includes('err') ? [`Generic error captured from ${cmd}`] : [],
+          stdinfo: [`EXIT: ${Math.random() > 0.8 ? 1 : 0}`, `T: ${Date.now()}`],
+          status: Math.random() > 0.8 ? 'failed' : 'passed'
+        };
+        const index = sessionLogs.findIndex(e => e.id === id);
+        sessionLogs[index] = { ...logObj, ...res };
+      } else {
+        const index = sessionLogs.findIndex(e => e.id === id);
+        sessionLogs[index].status = 'config';
+      }
+
+      updateEntryUI(id);
+      updateSidebar(cmd);
+    }
+
+    function updateStatus(id, status) {
+      const entry = sessionLogs.find(e => e.id === id);
+      if (entry) entry.status = status;
+      const badge = document.querySelector(`#${id} .status-badge`);
+      if (badge) {
+        badge.className = `status-badge status-${status}`;
+        badge.innerText = status;
+      }
+    }
+
+    function renderEntry(entry) {
+      const container = document.createElement('div');
+      container.className = 'log-entry pb-4 flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300';
+      container.id = entry.id;
+
+      container.innerHTML = buildRibbonHTML(entry) + `<div class="entry-content px-6"></div>`;
+      logContainer.appendChild(container);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    function updateEntryUI(id) {
+      const entry = sessionLogs.find(e => e.id === id);
+      const container = document.getElementById(id);
+      const contentArea = container.querySelector('.entry-content');
+      if (!container || !entry) return;
+
+      if (entry.type === 'config') {
+        contentArea.innerHTML = renderConfigView(configData);
+      } else if (entry.type === 'help') {
+        contentArea.innerHTML = renderHelpView(commandsList);
+      } else if (entry.type === 'info') {
+        contentArea.innerHTML = renderInfoView(systemInfo);
+      } else {
+        renderStandardLogs(entry, contentArea);
+      }
+
+      updateStatus(id, entry.status);
+    }
+
+    function renderStandardLogs(entry, container) {
+      let html = '';
+      entry.stdout.forEach(line => {
+        html += `<div class="flex items-start text-slate-400 py-0.5"><div class="stream-label pt-1 opacity-40">stdout</div><div class="w-[1px] self-stretch bg-slate-800 mx-4"></div><div class="flex-1 min-w-0 font-mono text-[12px] whitespace-pre-wrap">${escapeHTML(line)}</div></div>`;
+      });
+      entry.stderr.forEach(line => {
+        html += `<div class="flex items-start text-red-400 py-0.5"><div class="stream-label pt-1 text-red-500/60 font-bold">stderr</div><div class="w-[1px] self-stretch bg-red-900/40 mx-4"></div><div class="flex-1 min-w-0 font-bold font-mono text-[12px]">${escapeHTML(line)}</div></div>`;
+      });
+      if (entry.stdinfo.length) {
+        html += `<div class="flex items-start mt-1 opacity-60"><div class="stream-label pt-1 text-indigo-500/80">info</div><div class="w-[1px] self-stretch bg-indigo-900/30 mx-4"></div><div class="flex-1 flex flex-wrap gap-x-3 text-[10px] text-slate-500 font-bold uppercase tracking-wider">${entry.stdinfo.map(tag => `<span class="bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10">${escapeHTML(tag)}</span>`).join('')}</div></div>`;
+      }
+      container.innerHTML = html;
+    }
+
+    function renderConfigView(data) {
+      const renderValue = (val, indent = 0) => {
+        if (Array.isArray(val)) return `<span class="config-bracket">[</span> ${val.map((v, i) => `<span class="config-string">"${v}"</span>${i < val.length - 1 ? '<span class="opacity-30">, </span>' : ''}`).join('')} <span class="config-bracket">]</span>`;
+        if (typeof val === 'object' && val !== null) {
+          const entries = Object.entries(val);
+          let objHtml = `<span class="config-bracket">{</span><div class="pl-4 border-l border-indigo-500/10">`;
+          entries.forEach(([k, v], i) => {
+            objHtml += `<div class="flex items-start gap-1"><span class="config-key">"${k}"</span><span class="opacity-30">:</span><div class="min-w-0">${renderValue(v, indent + 1)}</div>${i < entries.length - 1 ? '<span class="opacity-30">,</span>' : ''}</div>`;
+          });
+          objHtml += `</div><span class="config-bracket">}</span>`;
+          return objHtml;
+        }
+        if (typeof val === 'string') return `<span class="config-string">"${val}"</span>`;
+        if (typeof val === 'number' || typeof val === 'boolean') return `<span class="config-number">${val}</span>`;
+        return val;
+      };
+      return `<div class="mt-2 border border-indigo-500/20 rounded-lg bg-indigo-500/5 p-4 font-mono text-[11px] leading-relaxed"><div class="mb-4 text-indigo-400 font-bold flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-width="2"/></svg> ENVIRONMENT_CONFIG </div><div class="space-y-0.5">${Object.entries(data).map(([k, v]) => `<div class="flex items-start gap-2"><span class="config-key shrink-0">"${k}"</span><span class="opacity-30 shrink-0">:</span><div class="min-w-0">${renderValue(v)}</div></div>`).join('')}</div></div>`;
+    }
+
+    function renderInfoView(info) {
+      const labelValue = (label, value, subValue = null) => `
+        <div class="flex flex-col gap-0.5 mb-3">
+          <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">${label}</div>
+          <div class="text-[12px] font-mono text-slate-200">${value}</div>
+          ${subValue ? `<div class="text-[10px] font-mono text-slate-500 break-all">${subValue}</div>` : ''}
+        </div>
+      `;
+
+      return `
+        <div class="mt-2 border border-slate-800 rounded-lg bg-slate-950/40 p-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
+            <!-- OS & NODE -->
+            <div class="space-y-2">
+              <div class="text-indigo-400 font-bold text-[10px] mb-4 flex items-center gap-2">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                RUNTIME_STACK
+              </div>
+              ${labelValue('Node Version', info.node.version, info.node.executablePath)}
+              ${labelValue('Operating System', info.os.name, `Kernel: ${info.os.version}`)}
+            </div>
+
+            <!-- HARDWARE -->
+            <div class="space-y-2">
+              <div class="text-emerald-400 font-bold text-[10px] mb-4 flex items-center gap-2">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" stroke-width="2"/></svg>
+                HARDWARE_RESOURCES
+              </div>
+              ${labelValue('Processor', info.cpu.model, `${info.cpu.cores} Cores • ${info.cpu.arch}`)}
+              ${labelValue('Graphics Unit', info.gpu.card)}
+              ${labelValue('Memory (RAM)', `${info.cpu.totalMemoryGB} GB`)}
+            </div>
+
+            <!-- SHELL -->
+            <div class="space-y-2">
+              <div class="text-amber-400 font-bold text-[10px] mb-4 flex items-center gap-2">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 9l3 3-3 3m5 0h3" stroke-width="2"/></svg>
+                SHELL_ENVIRONMENT
+              </div>
+              ${labelValue('Active Shell', info.shell.defaultShell)}
+              <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Available Binaries</div>
+              <div class="space-y-1.5">
+                ${info.shell.availableList.map(s => `
+                  <div class="flex items-center justify-between p-1.5 bg-slate-900/50 rounded border border-slate-800/50 group">
+                    <span class="text-[10px] font-bold text-emerald-500">${s.name}</span>
+                    <span class="text-[9px] text-slate-600 font-mono">${s.path}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHelpView(cmds) {
+      let html = `<div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">`;
+      cmds.forEach(item => {
+        html += `<div onclick="insertToInput('${item.cmd}')" class="group flex items-center justify-between p-2.5 border border-slate-800 rounded-md hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all cursor-pointer"><div class="flex flex-col gap-1"><div class="flex items-center gap-2"><span class="text-emerald-500 font-bold font-mono text-xs">${item.cmd}</span><span class="text-[9px] px-1.5 py-0.5 bg-slate-800 text-slate-500 rounded uppercase font-bold tracking-widest">${item.cat}</span></div><span class="text-[10px] text-slate-500 group-hover:text-slate-400">${item.desc}</span></div><svg class="w-3 h-3 text-slate-700 group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+      });
+      html += `</div>`;
+      return html;
+    }
+
+    function buildRibbonHTML(entry) {
+      const isSystem = entry.type !== 'standard';
+      return `<div class="stdin-ribbon flex items-center px-6 py-2 group/line mb-1"><div class="flex items-center gap-3 flex-1 min-w-0"><div class="stdin-badge">${isSystem ? 'system' : 'stdin'}</div><span class="${isSystem ? 'text-indigo-400' : 'text-emerald-400'} font-bold break-all truncate font-mono">${escapeHTML(entry.cmd)}</span><span class="text-[10px] text-slate-600 font-mono opacity-60 ml-1">${entry.time}</span><div class="status-badge status-${entry.status}">${entry.status}</div></div><div class="action-group flex items-center gap-1.5 shrink-0 ml-4"><button onclick="insertCmd('${entry.id}')" class="ribbon-btn">Insert</button><button onclick="rerunCmd('${entry.id}')" class="ribbon-btn">Rerun</button></div></div>`;
+    }
+
+    function insertToInput(text) {
+      cmdInput.value = text;
+      cmdInput.focus();
+    }
+
+    function insertCmd(id) {
+      const entry = sessionLogs.find(e => e.id === id);
+      if (entry) insertToInput(entry.cmd);
+    }
+
+    function rerunCmd(id) {
+      const entry = sessionLogs.find(e => e.id === id);
+      if (entry) execute(entry.cmd);
+    }
+
+    function updateSidebar(cmd) {
+      const item = document.createElement('div');
+      item.className = 'history-item px-3 py-1.5 rounded hover:bg-slate-900 text-xs text-slate-500 hover:text-emerald-500 cursor-pointer truncate transition-colors font-mono';
+      item.innerText = `> ${cmd}`;
+      item.onclick = () => insertToInput(cmd);
+      sidebarHistory.prepend(item);
+    }
+
+    function clearLogs() {
+      logContainer.innerHTML = '';
+      logContainer.appendChild(emptyState);
+      sessionLogs = [];
+    }
+
+    function escapeHTML(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+
+    /* =========================================
+       WALKTHROUGH DEMO SYSTEM
+       ========================================= */
+
+    const cursor = document.getElementById('virtual-cursor');
+    let isDemoActive = false;
+
+    // Helper: Async Sleep
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Helper: Setup Demo state to disable buttons during run
+    function setDemoState(isActive) {
+      isDemoActive = isActive;
+      const btns = document.querySelectorAll('.demo-btn');
+      btns.forEach(b => isActive ? b.classList.add('disabled') : b.classList.remove('disabled'));
+    }
+
+    // Move cursor helper
+    async function moveCursorTo(selector, offsetX = 0, offsetY = 0) {
+      const element = typeof selector === 'string' ? document.querySelector(selector) : selector;
+      if (!element) return;
+
+      // Make sure element is scrolled into view (especially for history)
+      element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      await sleep(200);
+
+      const rect = element.getBoundingClientRect();
+      // Default to center of the element
+      const targetLeft = rect.left + (rect.width / 2) + offsetX;
+      const targetTop = rect.top + (rect.height / 2) + offsetY;
+
+      cursor.style.left = `${targetLeft}px`;
+      cursor.style.top = `${targetTop}px`;
+
+      // Wait for CSS transition
+      await sleep(700);
+    }
+
+    // Simulate Mouse Click
+    async function simulateClick() {
+      cursor.classList.add('cursor-clicking');
+      await sleep(150);
+      cursor.classList.remove('cursor-clicking');
+      await sleep(350); // wait for ripple animation and settle
+    }
+
+    // Simulate Typing Keystrokes
+    async function simulateTyping(inputEl, text) {
+      for (let i = 0; i < text.length; i++) {
+        inputEl.value += text[i];
+        inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+        await sleep(Math.random() * 50 + 60); // random delay between 60-110ms per char
+      }
+      await sleep(200);
+    }
+
+    // Toggle cursor visibility
+    async function showCursor() {
+      cursor.style.opacity = '1';
+      await sleep(300);
+    }
+    async function hideCursor() {
+      cursor.style.opacity = '0';
+      // Reset position to center screen while hidden
+      setTimeout(() => {
+        cursor.style.top = '50%';
+        cursor.style.left = '50%';
+      }, 500);
+      await sleep(300);
+    }
+
+    // -------------------------
+    // Scenario 1: Execute Command
+    // -------------------------
+    async function demoRunCommand() {
+      if (isDemoActive) return;
+      setDemoState(true);
+
+      const input = document.getElementById('cmdInput');
+      const runBtn = document.getElementById('btn-run-command');
+
+      // 1. Clean input if it has value
+      input.value = '';
+
+      // 2. Show Cursor and Move to Input (offset left to click the start of input)
+      await showCursor();
+      await moveCursorTo(input, -120, 0);
+
+      // 3. Click to Focus
+      await simulateClick();
+      input.focus();
+      await sleep(200);
+
+      // 4. Type text
+      await simulateTyping(input, "docker ps");
+      await sleep(400);
+
+      // 5. Move to Run button
+      await moveCursorTo(runBtn);
+      await simulateClick();
+
+      // 6. Execute (Call original logic)
+      handleExecute();
+
+      // 7. Cleanup
+      await sleep(1000);
+      await hideCursor();
+      setDemoState(false);
+    }
+
+    // -------------------------
+    // Scenario 2: Replay History
+    // -------------------------
+    async function demoReplayHistory() {
+      if (isDemoActive) return;
+
+      const historyItems = document.querySelectorAll('.history-item');
+      if (historyItems.length === 0) {
+        alert("History is empty. Please run a command first.");
+        return;
+      }
+
+      setDemoState(true);
+      const firstItem = historyItems[0];
+      const runBtn = document.getElementById('btn-run-command');
+
+      // 1. Show Cursor and move to top history item
+      await showCursor();
+      await moveCursorTo(firstItem);
+
+      // 2. Click History item (inserts text into input)
+      await simulateClick();
+      firstItem.click();
+      await sleep(500);
+
+      // 3. Move to Run button
+      await moveCursorTo(runBtn);
+      await simulateClick();
+
+      // 4. Execute
+      handleExecute();
+
+      // 5. Cleanup
+      await sleep(1000);
+      await hideCursor();
+      setDemoState(false);
+    }
+
+    // -------------------------
+    // Scenario 3: Clear Terminal
+    // -------------------------
+    async function demoClearScreen() {
+      if (isDemoActive) return;
+      setDemoState(true);
+
+      const clearBtn = document.getElementById('btn-clear-logs');
+
+      // 1. Show Cursor and move to clear button in header
+      await showCursor();
+      await moveCursorTo(clearBtn);
+
+      // 2. Click clear button
+      await simulateClick();
+      clearLogs();
+
+      // 3. Cleanup
+      await sleep(800);
+      await hideCursor();
+      setDemoState(false);
+    }
+
+
+    /* =========================================
+       INITIALIZATION
+       ========================================= */
+    window.onload = async () => {
+      // Execute standard startup commands
+      await execute('/help');
+      await execute('/info');
+    };
+  </script>
+</body>
+
+</html>

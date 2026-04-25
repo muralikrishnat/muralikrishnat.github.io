@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuminaFlow | Professional Flow Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --sidebar-bg: rgba(255, 255, 255, 0.7);
+            --node-bg: rgba(255, 255, 255, 0.8);
+            --text-color: #1f2937;
+            --border-color: rgba(209, 213, 219, 0.5);
+            --accent-color: #6366f1;
+            --canvas-dots: #d1d5db;
+        }
+
+        .dark {
+            --bg-color: #0f172a;
+            --sidebar-bg: rgba(30, 41, 59, 0.7);
+            --node-bg: rgba(51, 65, 85, 0.8);
+            --text-color: #f8fafc;
+            --border-color: rgba(71, 85, 105, 0.5);
+            --accent-color: #818cf8;
+            --canvas-dots: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease;
+            overflow: hidden;
+        }
+
+        .glass {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .canvas-container {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background-image: radial-gradient(var(--canvas-dots) 1px, transparent 1px);
+            background-size: 30px 30px;
+            cursor: grab;
+        }
+
+        .canvas-container:active { cursor: grabbing; }
+
+        #artboard {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 10000px;
+            height: 10000px;
+            transform-origin: 0 0;
+        }
+
+        .node {
+            position: absolute;
+            width: 240px;
+            padding: 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease, left 0.4s cubic-bezier(0.4, 0, 0.2, 1), top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            background: var(--node-bg);
+        }
+
+        .node:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .node-active {
+            border: 2px solid var(--accent-color) !important;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2) !important;
+        }
+
+        .port {
+            width: 14px;
+            height: 14px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            position: absolute;
+            border: 2.5px solid white;
+            z-index: 30;
+            cursor: crosshair;
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .port:hover { transform: scale(1.5); background: #4f46e5; }
+
+        .port-in { left: -7px; }
+        .port-out { right: -7px; }
+
+        .connection-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .connection-path {
+            fill: none;
+            stroke: var(--accent-color);
+            stroke-width: 3.5;
+            stroke-linecap: round;
+            opacity: 0.5;
+            transition: opacity 0.2s, stroke-width 0.2s;
+            pointer-events: stroke;
+            cursor: pointer;
+        }
+
+        .connection-path:hover {
+            opacity: 1;
+            stroke-width: 5;
+        }
+
+        .sidebar-item {
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-item:active { transform: scale(0.95); }
+
+        .category-header {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            opacity: 0.5;
+            padding-left: 0.5rem;
+        }
+
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
+        /* Animations */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .animate-slide-right {
+            animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .node-btn-container {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .node:hover .node-btn-container {
+            opacity: 1;
+        }
+
+        .dragging {
+            transition: none !important;
+        }
+    </style>
+</head>
+<body class="light">
+
+    <!-- Left Sidebar -->
+    <aside class="fixed left-4 top-4 bottom-4 w-72 glass rounded-3xl z-40 p-6 flex flex-col overflow-hidden shadow-2xl">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                <i class="fas fa-project-diagram"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight">LuminaFlow</h1>
+        </div>
+
+        <div class="flex-1 overflow-y-auto pr-2" id="sidebar-content"></div>
+
+        <div class="mt-auto pt-6 border-t border-white/10 flex flex-col gap-3">
+            <button onclick="toggleTheme()" class="flex items-center justify-between p-4 rounded-2xl bg-black/5 hover:bg-black/10 transition-all">
+                <span class="text-sm font-semibold">Theme Mode</span>
+                <i id="theme-icon" class="fas fa-moon"></i>
+            </button>
+            <button onclick="openJsonModal()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-lg shadow-indigo-500/30 transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-code"></i> JSON Flow
+            </button>
+        </div>
+    </aside>
+
+    <!-- Canvas Area -->
+    <main class="canvas-container" id="canvas-container">
+        <div id="artboard">
+            <svg class="connection-svg" id="connection-svg"></svg>
+        </div>
+    </main>
+
+    <!-- Controls Overlay -->
+    <div class="fixed bottom-8 left-[310px] flex gap-3 z-40">
+        <div class="glass p-2 rounded-2xl flex items-center gap-2 shadow-xl">
+            <button onclick="zoom(1.1)" title="Zoom In" class="w-10 h-10 rounded-xl hover:bg-black/5 flex items-center justify-center transition-all"><i class="fas fa-plus"></i></button>
+            <button onclick="zoom(0.9)" title="Zoom Out" class="w-10 h-10 rounded-xl hover:bg-black/5 flex items-center justify-center transition-all"><i class="fas fa-minus"></i></button>
+            <button onclick="resetZoom()" title="Reset View" class="w-10 h-10 rounded-xl hover:bg-black/5 flex items-center justify-center transition-all"><i class="fas fa-compress"></i></button>
+        </div>
+        <div class="glass p-2 rounded-2xl flex items-center gap-2 shadow-xl">
+            <button onclick="organizeFlow()" title="Auto-Arrange" class="w-10 h-10 rounded-xl text-indigo-500 hover:bg-indigo-500/10 flex items-center justify-center transition-all"><i class="fas fa-magic"></i></button>
+            <button onclick="loadDummyFlow()" title="Reset to Dummy Flow" class="w-10 h-10 rounded-xl text-amber-500 hover:bg-amber-500/10 flex items-center justify-center transition-all"><i class="fas fa-vial"></i></button>
+            <button onclick="deleteSelected()" title="Delete Selected" class="w-10 h-10 rounded-xl text-red-500 hover:bg-red-500/10 flex items-center justify-center transition-all"><i class="fas fa-trash-alt"></i></button>
+        </div>
+    </div>
+
+    <!-- Edit Panel -->
+    <div id="edit-modal" class="hidden fixed inset-0 z-[100] modal-overlay flex justify-end">
+        <div class="absolute inset-0" onclick="closeEditModal()"></div>
+        <div class="relative glass w-full max-w-md h-full shadow-2xl p-8 overflow-hidden animate-slide-right flex flex-col">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold">Node Settings</h2>
+                    <p class="text-xs opacity-50 font-bold uppercase tracking-widest mt-1" id="edit-node-id-display">NODE_ID</p>
+                </div>
+                <button onclick="closeEditModal()" class="w-10 h-10 rounded-full hover:bg-black/10 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 space-y-8 overflow-y-auto pr-2">
+                <div>
+                    <label class="block text-xs font-bold uppercase opacity-60 mb-3 tracking-widest">Step Name</label>
+                    <input type="text" id="node-name-input" class="w-full bg-black/5 border border-white/10 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium text-lg">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="block text-xs font-bold uppercase opacity-60 tracking-widest">Configuration</label>
+                        <button onclick="addConfigRow()" class="text-indigo-500 text-xs font-bold hover:bg-indigo-500/10 px-3 py-1 rounded-full transition-colors">+ Add Key</button>
+                    </div>
+                    <div id="config-container" class="space-y-3"></div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase opacity-60 mb-4 tracking-widest">Output Ports</label>
+                    <div id="outputs-list" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex gap-3 pt-6 border-t border-white/10">
+                <button onclick="closeEditModal()" class="flex-1 py-4 rounded-2xl bg-black/5 hover:bg-black/10 font-bold transition-all">Cancel</button>
+                <button onclick="saveNodeDetails()" class="flex-1 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-500/30 transition-all">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JSON Modal -->
+    <div id="json-modal" class="hidden fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4">
+        <div class="glass w-full max-w-2xl rounded-3xl shadow-2xl p-8 flex flex-col animate-fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Workflow JSON</h2>
+                <div class="flex gap-2">
+                    <button onclick="copyJson()" class="px-4 py-2 bg-indigo-600/10 text-indigo-500 rounded-lg text-sm font-bold hover:bg-indigo-600/20">Copy</button>
+                    <button onclick="closeJsonModal()" class="w-8 h-8 rounded-full hover:bg-black/5 flex items-center justify-center"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <textarea id="json-textarea" class="w-full flex-1 min-h-[300px] bg-black/5 border border-white/10 p-4 rounded-2xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+            <div class="mt-6 flex gap-3">
+                <button onclick="importFlow()" class="flex-1 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-500/30 transition-all">Import Workflow</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const NODE_TYPES = {
+            TRIGGER: { name: 'Trigger', icon: 'fa-bolt', color: 'indigo', category: 'General', outputs: 1 },
+            ACTION: { name: 'Action', icon: 'fa-cog', color: 'blue', category: 'Actions', outputs: 1 },
+            HTTP: { name: 'HTTP Request', icon: 'fa-globe', color: 'emerald', category: 'Network', outputs: 1 },
+            DATABASE: { name: 'DB Query', icon: 'fa-database', color: 'amber', category: 'Data', outputs: 1 },
+            IF_ELSE: { name: 'If/Else', icon: 'fa-code-branch', color: 'rose', category: 'Logic', outputs: 2, labels: ['True', 'False'] },
+            DIVERGE: { name: 'Diverge', icon: 'fa-random', color: 'violet', category: 'Logic', outputs: 3, labels: ['Option 1', 'Option 2', 'Option 3'] },
+            FINISH: { name: 'Finish', icon: 'fa-flag-checkered', color: 'slate', category: 'General', outputs: 0 }
+        };
+
+        const CATEGORIES = ['General', 'Actions', 'Network', 'Data', 'Logic'];
+
+        let flow = { nodes: [], connections: [] };
+        let selectedNodeId = null;
+        let selectedConnectionId = null;
+        let scale = 1;
+        let pan = { x: 350, y: 100 };
+        let isPanning = false;
+        let isDraggingNode = false;
+        let activeConnection = null;
+
+        const artboard = document.getElementById('artboard');
+        const canvasContainer = document.getElementById('canvas-container');
+        const connectionSvg = document.getElementById('connection-svg');
+        const sidebarContent = document.getElementById('sidebar-content');
+
+        window.onload = () => {
+            renderSidebar();
+            initListeners();
+            updateTransform();
+            loadDummyFlow();
+        };
+
+        function renderSidebar() {
+            sidebarContent.innerHTML = '';
+            CATEGORIES.forEach(cat => {
+                const head = document.createElement('div');
+                head.className = 'category-header';
+                head.innerText = cat;
+                sidebarContent.appendChild(head);
+
+                Object.entries(NODE_TYPES).forEach(([key, type]) => {
+                    if (type.category === cat) {
+                        const item = document.createElement('div');
+                        item.className = 'sidebar-item glass p-4 mb-3 rounded-2xl flex items-center gap-4 hover:shadow-lg border-indigo-500/10 group bg-white/40 dark:bg-slate-800/40';
+                        item.draggable = true;
+                        item.innerHTML = `
+                            <div class="w-10 h-10 rounded-xl bg-${type.color}-500/20 text-${type.color}-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <i class="fas ${type.icon}"></i>
+                            </div>
+                            <span class="font-semibold text-sm">${type.name}</span>
+                        `;
+                        item.addEventListener('dragstart', (e) => e.dataTransfer.setData('nodeType', key));
+                        sidebarContent.appendChild(item);
+                    }
+                });
+            });
+        }
+
+        function initListeners() {
+            canvasContainer.addEventListener('mousedown', (e) => {
+                if (e.target === canvasContainer || e.target === artboard || e.target.tagName === 'svg') {
+                    isPanning = true;
+                    if (selectedNodeId || selectedConnectionId) {
+                        selectedNodeId = null;
+                        selectedConnectionId = null;
+                        render();
+                    }
+                }
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (isPanning) {
+                    pan.x += e.movementX;
+                    pan.y += e.movementY;
+                    updateTransform();
+                }
+                if (isDraggingNode && selectedNodeId) {
+                    const node = flow.nodes.find(n => n.id === selectedNodeId);
+                    node.x += e.movementX / scale;
+                    node.y += e.movementY / scale;
+                    const el = document.querySelector(`[data-id="${selectedNodeId}"]`);
+                    if (el) {
+                        el.style.left = node.x + 'px';
+                        el.style.top = node.y + 'px';
+                        renderConnections();
+                    }
+                }
+                if (activeConnection) drawActivePath(e);
+            });
+
+            window.addEventListener('mouseup', () => {
+                isPanning = false;
+                isDraggingNode = false;
+                document.querySelectorAll('.node').forEach(n => n.classList.remove('dragging'));
+                if (activeConnection) {
+                    activeConnection = null;
+                    render();
+                }
+            });
+
+            canvasContainer.addEventListener('dragover', (e) => e.preventDefault());
+            canvasContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const type = e.dataTransfer.getData('nodeType');
+                if (!type) return;
+                const rect = canvasContainer.getBoundingClientRect();
+                const x = (e.clientX - rect.left - pan.x) / scale;
+                const y = (e.clientY - rect.top - pan.y) / scale;
+                addNode(type, x - 120, y - 40);
+            });
+
+            canvasContainer.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                zoom(e.deltaY > 0 ? 0.9 : 1.1);
+            }, { passive: false });
+        }
+
+        function addNode(typeKey, x, y, customName, idPrefix = 'NODE_') {
+            const typeConfig = NODE_TYPES[typeKey];
+            const id = idPrefix + Math.random().toString(36).substr(2, 6).toUpperCase();
+            const newNode = {
+                id,
+                type: typeKey,
+                name: customName || typeConfig.name,
+                x,
+                y,
+                config: {},
+                outputs: typeConfig.outputs
+            };
+            flow.nodes.push(newNode);
+            render();
+            return id;
+        }
+
+        function deleteSelected() {
+            if (selectedNodeId) {
+                flow.nodes = flow.nodes.filter(n => n.id !== selectedNodeId);
+                flow.connections = flow.connections.filter(c => c.fromId !== selectedNodeId && c.toId !== selectedNodeId);
+                selectedNodeId = null;
+                closeEditModal();
+            } else if (selectedConnectionId) {
+                flow.connections = flow.connections.filter(c => c.id !== selectedConnectionId);
+                selectedConnectionId = null;
+            }
+            render();
+        }
+
+        function zoom(factor) {
+            scale = Math.min(Math.max(0.3, scale * factor), 2);
+            updateTransform();
+        }
+
+        function resetZoom() {
+            scale = 1;
+            pan = { x: 350, y: 100 };
+            updateTransform();
+        }
+
+        function updateTransform() {
+            artboard.style.transform = `translate(${pan.x}px, ${pan.y}px) scale(${scale})`;
+        }
+
+        function render() {
+            const artboardNodes = artboard.querySelectorAll('.node');
+            artboardNodes.forEach(n => n.remove());
+
+            flow.nodes.forEach(node => {
+                const type = NODE_TYPES[node.type];
+                const nodeHeight = Math.max(90, (node.outputs || 1) * 44 + 48);
+
+                const el = document.createElement('div');
+                el.className = `node ${selectedNodeId === node.id ? 'node-active' : ''}`;
+                el.style.left = node.x + 'px';
+                el.style.top = node.y + 'px';
+                el.style.height = nodeHeight + 'px';
+                el.dataset.id = node.id;
+
+                el.innerHTML = `
+                    <div class="flex items-start justify-between w-full">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <div class="shrink-0 w-9 h-9 rounded-xl bg-${type.color}-500/20 text-${type.color}-500 flex items-center justify-center text-sm">
+                                <i class="fas ${type.icon}"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <h3 class="text-sm font-bold truncate pr-1">${node.name}</h3>
+                                <p class="text-[9px] opacity-40 uppercase font-extrabold tracking-tighter">${node.type}</p>
+                            </div>
+                        </div>
+                        <div class="node-btn-container flex gap-1">
+                             <button class="w-6 h-6 rounded-lg bg-black/5 hover:bg-indigo-500 hover:text-white transition-all flex items-center justify-center text-[10px]"
+                                onclick="openEditModalById(event, '${node.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                if (node.type !== 'TRIGGER') {
+                    const inPort = document.createElement('div');
+                    inPort.className = 'port port-in';
+                    inPort.style.top = (nodeHeight / 2 - 7) + 'px';
+                    inPort.addEventListener('mouseup', (e) => {
+                        e.stopPropagation();
+                        if (activeConnection) createConnection(activeConnection.fromNodeId, activeConnection.fromPortIdx, node.id);
+                    });
+                    el.appendChild(inPort);
+                }
+
+                for (let i = 0; i < node.outputs; i++) {
+                    const outPort = document.createElement('div');
+                    outPort.className = 'port port-out';
+                    const spacing = 100 / (node.outputs + 1);
+                    const topPos = (nodeHeight * (spacing * (i + 1)) / 100) - 7;
+                    outPort.style.top = topPos + 'px';
+
+                    if (node.outputs > 1) {
+                        const label = document.createElement('span');
+                        label.className = 'absolute right-5 top-1/2 -translate-y-1/2 text-[9px] font-bold opacity-30 pointer-events-none whitespace-nowrap';
+                        label.innerText = type.labels ? type.labels[i] : `Out ${i + 1}`;
+                        label.style.top = (topPos + 7) + 'px';
+                        el.appendChild(label);
+                    }
+
+                    outPort.addEventListener('mousedown', (e) => {
+                        e.stopPropagation();
+                        const startPos = getPortPosition(node, 'out', i);
+                        activeConnection = { fromNodeId: node.id, fromPortIdx: i, x1: startPos.x, y1: startPos.y };
+                    });
+                    el.appendChild(outPort);
+                }
+
+                el.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    if (selectedNodeId !== node.id) {
+                        selectedNodeId = node.id;
+                        selectedConnectionId = null;
+                        render();
+                    }
+                    el.classList.add('dragging');
+                    isDraggingNode = true;
+                });
+
+                el.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    openEditModal(node);
+                });
+
+                artboard.appendChild(el);
+            });
+
+            renderConnections();
+        }
+
+        function createConnection(fromId, fromIdx, toId) {
+            if (fromId === toId) return;
+            flow.connections = flow.connections.filter(c => !(c.fromId === fromId && c.fromIdx === fromIdx));
+            flow.connections.push({
+                id: 'CONN_' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+                fromId, fromIdx, toId
+            });
+            activeConnection = null;
+            render();
+        }
+
+        function renderConnections() {
+            connectionSvg.innerHTML = '';
+            flow.connections.forEach(conn => {
+                const fromNode = flow.nodes.find(n => n.id === conn.fromId);
+                const toNode = flow.nodes.find(n => n.id === conn.toId);
+                if (!fromNode || !toNode) return;
+
+                const start = getPortPosition(fromNode, 'out', conn.fromIdx);
+                const end = getPortPosition(toNode, 'in', 0);
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', calculateBezier(start.x, start.y, end.x, end.y));
+                path.setAttribute('class', `connection-path ${selectedConnectionId === conn.id ? 'opacity-100' : ''}`);
+                if (selectedConnectionId === conn.id) {
+                    path.setAttribute('stroke-width', '6');
+                }
+
+                path.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    selectedConnectionId = conn.id;
+                    selectedNodeId = null;
+                    render();
+                });
+                connectionSvg.appendChild(path);
+            });
+        }
+
+        function drawActivePath(e) {
+            renderConnections();
+            const containerRect = canvasContainer.getBoundingClientRect();
+            const mouseX = (e.clientX - containerRect.left - pan.x) / scale;
+            const mouseY = (e.clientY - containerRect.top - pan.y) / scale;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', calculateBezier(activeConnection.x1, activeConnection.y1, mouseX, mouseY));
+            path.setAttribute('class', 'connection-path opacity-40');
+            path.setAttribute('stroke-dasharray', '8,6');
+            connectionSvg.appendChild(path);
+        }
+
+        function getPortPosition(node, side, idx) {
+            const nodeWidth = 240;
+            const nodeHeight = Math.max(90, (node.outputs || 1) * 44 + 48);
+            if (side === 'in') return { x: node.x, y: node.y + (nodeHeight / 2) };
+            const spacing = 100 / (node.outputs + 1);
+            return { x: node.x + nodeWidth, y: node.y + (nodeHeight * (spacing * (idx + 1)) / 100) };
+        }
+
+        function calculateBezier(x1, y1, x2, y2) {
+            const diff = Math.abs(x1 - x2);
+            const dx = Math.min(Math.max(diff * 0.5, 60), 180);
+            return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+        }
+
+        function organizeFlow() {
+            if (flow.nodes.length === 0) return;
+
+            const nodeLevels = {};
+            const nodesByLevel = {};
+            const processed = new Set();
+
+            const findLevel = (nodeId, level) => {
+                nodeLevels[nodeId] = Math.max(nodeLevels[nodeId] || 0, level);
+                flow.connections.filter(c => c.fromId === nodeId).forEach(c => {
+                    findLevel(c.toId, level + 1);
+                });
+            };
+
+            const rootNodes = flow.nodes.filter(n => !flow.connections.some(c => c.toId === n.id));
+            rootNodes.forEach(rn => findLevel(rn.id, 0));
+
+            // Default level 0 for any disconnected nodes
+            flow.nodes.forEach(n => {
+                if (nodeLevels[n.id] === undefined) nodeLevels[n.id] = 0;
+                const level = nodeLevels[n.id];
+                if (!nodesByLevel[level]) nodesByLevel[level] = [];
+                nodesByLevel[level].push(n);
+            });
+
+            const xSpacing = 350;
+            const ySpacing = 180;
+
+            Object.entries(nodesByLevel).forEach(([level, nodes]) => {
+                const totalHeight = (nodes.length - 1) * ySpacing;
+                nodes.forEach((node, idx) => {
+                    node.x = level * xSpacing + 100;
+                    node.y = (idx * ySpacing) - (totalHeight / 2) + 300;
+                });
+            });
+
+            render();
+        }
+
+        function loadDummyFlow() {
+            flow = { nodes: [], connections: [] };
+
+            const n1 = addNode('TRIGGER', 0, 0, 'User Sign Up');
+            const n2 = addNode('HTTP', 0, 0, 'Verify Email');
+            const n3 = addNode('IF_ELSE', 0, 0, 'Is Verified?');
+            const n4 = addNode('ACTION', 0, 0, 'Send Welcome Email');
+            const n5 = addNode('DATABASE', 0, 0, 'Log Verification Error');
+            const n6 = addNode('DIVERGE', 0, 0, 'Assign Role');
+            const n7 = addNode('ACTION', 0, 0, 'Admin Setup');
+            const n8 = addNode('ACTION', 0, 0, 'User Setup');
+            const n9 = addNode('FINISH', 0, 0, 'Complete Flow');
+
+            createConnection(n1, 0, n2);
+            createConnection(n2, 0, n3);
+            createConnection(n3, 0, n4); // True
+            createConnection(n3, 1, n5); // False
+            createConnection(n4, 0, n6);
+            createConnection(n6, 0, n7);
+            createConnection(n6, 1, n8);
+            createConnection(n6, 2, n9);
+            createConnection(n8, 0, n9);
+
+            organizeFlow();
+            resetZoom();
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            if (body.classList.contains('light')) {
+                body.classList.replace('light', 'dark');
+                icon.className = 'fas fa-sun';
+            } else {
+                body.classList.replace('dark', 'light');
+                icon.className = 'fas fa-moon';
+            }
+        }
+
+        function openEditModalById(event, id) {
+            if(event) event.stopPropagation();
+            const node = flow.nodes.find(n => n.id === id);
+            if (node) openEditModal(node);
+        }
+
+        function openEditModal(node) {
+            selectedNodeId = node.id;
+            selectedConnectionId = null;
+
+            const modal = document.getElementById('edit-modal');
+            const idDisplay = document.getElementById('edit-node-id-display');
+            const nameInput = document.getElementById('node-name-input');
+            const configContainer = document.getElementById('config-container');
+            const outputsList = document.getElementById('outputs-list');
+
+            idDisplay.innerText = node.id;
+            nameInput.value = node.name;
+
+            configContainer.innerHTML = '';
+            Object.entries(node.config).forEach(([k, v]) => addConfigRow(k, v));
+            if (Object.keys(node.config).length === 0) addConfigRow();
+
+            const type = NODE_TYPES[node.type];
+            outputsList.innerHTML = '';
+            for(let i=0; i < node.outputs; i++) {
+                const label = type.labels ? type.labels[i] : `Port ${i+1}`;
+                const connection = flow.connections.find(c => c.fromId === node.id && c.fromIdx === i);
+                const targetNode = connection ? flow.nodes.find(n => n.id === connection.toId) : null;
+
+                outputsList.innerHTML += `
+                    <div class="flex items-center justify-between p-4 bg-black/5 rounded-2xl text-xs">
+                        <span class="font-bold opacity-70">${label}</span>
+                        <span class="${targetNode ? 'text-indigo-500 font-bold' : 'opacity-30'}">
+                            ${targetNode ? '<i class="fas fa-link mr-1"></i>' + targetNode.name : 'Unconnected'}
+                        </span>
+                    </div>
+                `;
+            }
+
+            modal.classList.remove('hidden');
+            render();
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+        }
+
+        function addConfigRow(key = '', value = '') {
+            const row = document.createElement('div');
+            row.className = 'flex gap-2 config-row group';
+            row.innerHTML = `
+                <input type="text" placeholder="Key" value="${key}" class="flex-1 bg-black/5 border border-white/10 p-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <input type="text" placeholder="Value" value="${value}" class="flex-1 bg-black/5 border border-white/10 p-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <button onclick="this.parentElement.remove()" class="w-8 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fas fa-trash-alt"></i></button>
+            `;
+            document.getElementById('config-container').appendChild(row);
+        }
+
+        function saveNodeDetails() {
+            const nodeIndex = flow.nodes.findIndex(n => n.id === selectedNodeId);
+            if (nodeIndex === -1) return;
+
+            flow.nodes[nodeIndex].name = document.getElementById('node-name-input').value || flow.nodes[nodeIndex].name;
+            const newConfig = {};
+            document.querySelectorAll('.config-row').forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const k = inputs[0].value.trim();
+                const v = inputs[1].value.trim();
+                if (k) newConfig[k] = v;
+            });
+            flow.nodes[nodeIndex].config = newConfig;
+
+            closeEditModal();
+            render();
+        }
+
+        function openJsonModal() {
+            document.getElementById('json-textarea').value = JSON.stringify(flow, null, 4);
+            document.getElementById('json-modal').classList.remove('hidden');
+        }
+
+        function closeJsonModal() {
+            document.getElementById('json-modal').classList.add('hidden');
+        }
+
+        function copyJson() {
+            const textarea = document.getElementById('json-textarea');
+            textarea.select();
+            document.execCommand('copy');
+        }
+
+        function importFlow() {
+            try {
+                const data = JSON.parse(document.getElementById('json-textarea').value);
+                if (data.nodes && data.connections) {
+                    flow = data;
+                    render();
+                    closeJsonModal();
+                }
+            } catch (e) { alert('Invalid JSON structure.'); }
+        }
+    </script>
+</body>
+</html>

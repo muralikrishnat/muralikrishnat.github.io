@@ -15,11 +15,14 @@ Build app for flow builder with below features:
 * Each option has individual condition, like switch logic.
 * Ability to see the nodes and connections in JSON format.
 * Ability to import and export the flow using JSON field window.
+* Paths between nodes should be properly aligned.
+* Nodes should have proper alignment for connections.
 
 
 
 =====instructions for app======
-Use glassmorphic.
+Use glassmorphic, ability to switch day and night themes.
 It should be simple, UI rich looking, with suitable font-awesome icons, easy to operate.
-Use suitable animations.
-Use only html, css, javascript and tailwindcss
+Use suitable animations, Try to use SVG for icons and font-awesome icons.
+Use only html, css, javascript and tailwindcss.
+Use modular approach which can be easy to upgrade.

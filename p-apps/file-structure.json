@@ -265,6 +265,13 @@
         "type": "file",
         "parentId": "root-flow-builder",
         "path": "./flow-builder/index4.html"
+      },
+      {
+        "id": "file-flow-builder-index5.html",
+        "name": "index5.html",
+        "type": "file",
+        "parentId": "root-flow-builder",
+        "path": "./flow-builder/index5.html"
       }
     ]
   },
@@ -662,6 +669,13 @@
     "parentId": null,
     "path": "/web-terminal",
     "children": [
+      {
+        "id": "file-web-terminal-demo-walkthrough-page.html",
+        "name": "demo-walkthrough-page.html",
+        "type": "file",
+        "parentId": "root-web-terminal",
+        "path": "./web-terminal/demo-walkthrough-page.html"
+      },
       {
         "id": "file-web-terminal-index.html",
         "name": "index.html",
