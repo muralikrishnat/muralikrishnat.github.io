@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glassmorphic Flow Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        glass: {
+                            light: 'rgba(255, 255, 255, 0.6)',
+                            dark: 'rgba(17, 24, 39, 0.7)'
+                        },
+                        glassBorder: {
+                            light: 'rgba(255, 255, 255, 0.3)',
+                            dark: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'blob': 'blob 7s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.8); }
+
+        /* Background Blobs for Glassmorphism depth */
+        .bg-blobs {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1; overflow: hidden;
+            background-color: #f3f4f6; /* Light mode bg */
+            transition: background-color 0.5s ease;
+        }
+        .dark .bg-blobs {
+            background-color: #0f172a; /* Dark mode bg */
+        }
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6;
+            animation: blob 10s infinite alternate;
+        }
+        /* Connection Lines */
+        .flow-connector {
+            width: 2px;
+            height: 24px;
+            margin: 0 auto;
+            background: linear-gradient(to bottom, rgba(156, 163, 175, 0.5), transparent);
+            transition: all 0.3s;
+        }
+        .dark .flow-connector {
+            background: linear-gradient(to bottom, rgba(156, 163, 175, 0.3), transparent);
+        }
+
+        .glass-card {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-width: 1px;
+            border-style: solid;
+        }
+    </style>
+</head>
+<body class="text-gray-800 dark:text-gray-100 min-h-screen font-sans antialiased transition-colors duration-500">
+
+    <!-- Animated Background -->
+    <div class="bg-blobs">
+        <div class="blob bg-purple-300 dark:bg-purple-900 w-96 h-96 top-0 left-0 mix-blend-multiply dark:mix-blend-screen"></div>
+        <div class="blob bg-blue-300 dark:bg-blue-900 w-96 h-96 top-40 right-20 mix-blend-multiply dark:mix-blend-screen animation-delay-2000"></div>
+        <div class="blob bg-pink-300 dark:bg-pink-900 w-80 h-80 bottom-0 left-40 mix-blend-multiply dark:mix-blend-screen animation-delay-4000"></div>
+    </div>
+
+    <!-- Top Navigation -->
+    <nav class="fixed top-0 w-full z-40 glass-card bg-glass-light dark:bg-glass-dark border-glassBorder-light dark:border-glassBorder-dark px-6 py-4 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-500 rounded-lg text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </div>
+            <h1 class="text-xl font-bold tracking-wide">FlowGenius</h1>
+        </div>
+        <button id="themeToggle" class="p-2 rounded-full hover:bg-white/20 dark:hover:bg-white/10 transition-colors">
+            <!-- Sun/Moon icon injected via JS -->
+        </button>
+    </nav>
+
+    <!-- Main Canvas -->
+    <main class="pt-24 pb-32 px-4 md:px-8 max-w-5xl mx-auto min-h-screen">
+        <div id="flow-container" class="flex flex-col items-center">
+            <!-- Flow elements rendered here -->
+        </div>
+
+        <div class="mt-8 flex justify-center">
+            <button onclick="FlowApp.openAddModal('root')" class="glass-card bg-glass-light dark:bg-glass-dark border-glassBorder-light dark:border-glassBorder-dark px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 group text-blue-600 dark:text-blue-400 font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:rotate-90 transition-transform"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Starting Step
+            </button>
+        </div>
+    </main>
+
+    <!-- Add Step Modal -->
+    <div id="addModal" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="FlowApp.closeModals()"></div>
+        <div class="glass-card bg-glass-light dark:bg-glass-dark border-glassBorder-light dark:border-glassBorder-dark p-6 rounded-2xl w-full max-w-3xl relative z-10 shadow-2xl transform scale-95 transition-transform duration-300" id="addModalContent">
+            <h2 class="text-2xl font-bold mb-6">Add New Step</h2>
+
+            <div id="addModalGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto p-1">
+                <!-- Dynamically populated by JS configuration -->
+            </div>
+
+            <button onclick="FlowApp.closeModals()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Edit Step Modal -->
+    <div id="editModal" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="FlowApp.closeModals()"></div>
+        <div class="glass-card bg-glass-light dark:bg-glass-dark border-glassBorder-light dark:border-glassBorder-dark p-6 rounded-2xl w-full max-w-lg relative z-10 shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]" id="editModalContent">
+            <h2 class="text-2xl font-bold mb-4 shrink-0">Edit Step</h2>
+            <form id="editForm" onsubmit="FlowApp.saveEdit(event)" class="space-y-4 overflow-y-auto flex-1 pr-2">
+                <input type="hidden" id="editStepId">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Title</label>
+                    <input type="text" id="editTitle" required class="w-full bg-white/50 dark:bg-black/30 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Description</label>
+                    <textarea id="editDescription" rows="2" class="w-full bg-white/50 dark:bg-black/30 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"></textarea>
+                </div>
+
+                <!-- Dynamic Fields Container -->
+                <div id="dynamicFieldsContainer" class="space-y-4 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <!-- Fields injected here based on step type -->
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6 pt-4 shrink-0">
+                    <button type="button" onclick="FlowApp.closeModals()" class="px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition-colors">Save Changes</button>
+                </div>
+            </form>
+            <button onclick="FlowApp.closeModals()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Icons Library Object -->
+    <script>
+        const Icons = {
+            edit: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
+            trash: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`,
+            up: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>`,
+            down: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>`,
+            copy: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
+            plus: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+            action: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
+            branch: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><path d="m3 9 9-6 9 6"></path><path d="m3 15 9 6 9-6"></path></svg>`,
+            api: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`,
+            database: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>`,
+            file: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
+            terminal: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`,
+            nodejs: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`,
+            sun: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`,
+            moon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
+            close: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`
+        };
+    </script>
+
+    <!-- App Logic -->
+    <script>
+        /**
+         * Flow Builder Application core module
+         * Handles state, rendering, and interactions
+         */
+        const FlowApp = (function() {
+            // --- Configuration for Step Types ---
+            const StepConfig = {
+                condition: {
+                    name: 'Branching', desc: 'Branch flow based on rules', icon: 'branch', color: 'purple', defaultTitle: 'Condition',
+                    fields: [
+                        { name: 'variable', label: 'Variable to Evaluate', type: 'text', placeholder: 'e.g., user.status' },
+                        { name: 'operator', label: 'Operator', type: 'select', options: ['Equals (==)', 'Not Equals (!=)', 'Greater Than (>)', 'Less Than (<)', 'Contains'] },
+                        { name: 'value', label: 'Comparison Value', type: 'text', placeholder: 'e.g., active' }
+                    ]
+                },
+                api: {
+                    name: 'API Call', desc: 'Make HTTP/REST request', icon: 'api', color: 'green', defaultTitle: 'API Request',
+                    fields: [
+                        { name: 'method', label: 'HTTP Method', type: 'select', options: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] },
+                        { name: 'url', label: 'Endpoint URL', type: 'text', placeholder: 'https://api.example.com/v1/data' },
+                        { name: 'body', label: 'Request Body (JSON)', type: 'textarea', placeholder: '{\n  "key": "value"\n}' }
+                    ]
+                },
+                database: {
+                    name: 'Database Activity', desc: 'Execute query or mutation', icon: 'database', color: 'red', defaultTitle: 'DB Query',
+                    fields: [
+                        { name: 'connection', label: 'Connection String / ID', type: 'text', placeholder: 'db_production_cluster_1' },
+                        { name: 'query', label: 'SQL Query / Operation', type: 'textarea', placeholder: 'SELECT * FROM users WHERE active = true;' }
+                    ]
+                },
+                file: {
+                    name: 'File System', desc: 'Read, write, or move files', icon: 'file', color: 'orange', defaultTitle: 'File Operation',
+                    fields: [
+                        { name: 'operation', label: 'File Operation', type: 'select', options: ['Read File', 'Write File', 'Delete File', 'Move File'] },
+                        { name: 'path', label: 'File Path', type: 'text', placeholder: '/var/www/uploads/file.txt' },
+                        { name: 'content', label: 'File Content (if writing)', type: 'textarea', placeholder: 'Data to write...' }
+                    ]
+                },
+                command: {
+                    name: 'Command Execution', desc: 'Run a shell command', icon: 'terminal', color: 'gray', defaultTitle: 'Run Command',
+                    fields: [
+                        { name: 'command', label: 'Shell Command', type: 'text', placeholder: 'npm run build' }
+                    ]
+                },
+                nodejs: {
+                    name: 'Node.js Script', desc: 'Execute custom JS code', icon: 'nodejs', color: 'yellow', defaultTitle: 'Execute Node.js',
+                    fields: [
+                        { name: 'script', label: 'JavaScript Code', type: 'textarea', placeholder: 'const data = await fetch("...");\nreturn data;' }
+                    ]
+                },
+                action: {
+                    name: 'Generic Action', desc: 'Perform a standard task', icon: 'action', color: 'blue', defaultTitle: 'New Action',
+                    fields: [
+                        { name: 'taskName', label: 'Task Identifier', type: 'text', placeholder: 'process_queue_item' }
+                    ]
+                }
+            };
+
+            const getColorClasses = (color) => {
+                const map = {
+                    purple: { bg: 'bg-purple-100 dark:bg-purple-900/50', text: 'text-purple-600 dark:text-purple-400', borderHover: 'hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30' },
+                    blue: { bg: 'bg-blue-100 dark:bg-blue-900/50', text: 'text-blue-600 dark:text-blue-400', borderHover: 'hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30' },
+                    green: { bg: 'bg-green-100 dark:bg-green-900/50', text: 'text-green-600 dark:text-green-400', borderHover: 'hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/30' },
+                    red: { bg: 'bg-red-100 dark:bg-red-900/50', text: 'text-red-600 dark:text-red-400', borderHover: 'hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/30' },
+                    orange: { bg: 'bg-orange-100 dark:bg-orange-900/50', text: 'text-orange-600 dark:text-orange-400', borderHover: 'hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30' },
+                    gray: { bg: 'bg-gray-200 dark:bg-gray-800', text: 'text-gray-600 dark:text-gray-300', borderHover: 'hover:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800/80' },
+                    yellow: { bg: 'bg-yellow-100 dark:bg-yellow-900/50', text: 'text-yellow-600 dark:text-yellow-400', borderHover: 'hover:border-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/30' },
+                };
+                return map[color] || map.blue;
+            };
+
+            // --- State ---
+            let flowData = [
+                { id: 'start_1', type: 'action', title: 'Send Welcome Email', description: 'Triggered when user signs up.' }
+            ];
+
+            let currentTargetParentId = null; // Used when adding a new step
+            let currentTargetInsertIndex = null; // Used for inserting between steps
+
+            // --- Utilities ---
+            const generateId = () => 'step_' + Math.random().toString(36).substr(2, 9);
+
+            const deepClone = (obj) => JSON.parse(JSON.stringify(obj));
+
+            // Theme Management
+            const toggleTheme = () => {
+                const html = document.documentElement;
+                const btn = document.getElementById('themeToggle');
+                if (html.classList.contains('dark')) {
+                    html.classList.remove('dark');
+                    btn.innerHTML = Icons.moon;
+                } else {
+                    html.classList.add('dark');
+                    btn.innerHTML = Icons.sun;
+                }
+            };
+
+            // Init Theme
+            document.getElementById('themeToggle').innerHTML = Icons.sun;
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+            // --- State Helpers ---
+            /**
+             * Recursively finds a step, its parent array, and its index within that array.
+             */
+            const findStepInfo = (id, currentArray = flowData) => {
+                for (let i = 0; i < currentArray.length; i++) {
+                    const step = currentArray[i];
+                    if (step.id === id) {
+                        return { step, parentArray: currentArray, index: i };
+                    }
+                    if (step.type === 'condition' && step.branches) {
+                        for (let j = 0; j < step.branches.length; j++) {
+                            const found = findStepInfo(id, step.branches[j].steps);
+                            if (found) return found;
+                        }
+                    }
+                }
+                return null;
+            };
+
+            /**
+             * Finds a specific branch array by its ID (used for adding steps to branches)
+             */
+            const findBranchStepsArray = (branchId, currentArray = flowData) => {
+                for (let i = 0; i < currentArray.length; i++) {
+                    const step = currentArray[i];
+                    if (step.type === 'condition' && step.branches) {
+                        for (let j = 0; j < step.branches.length; j++) {
+                            if (step.branches[j].id === branchId) {
+                                return step.branches[j].steps;
+                            }
+                            // Also search deeply inside branch
+                            const foundDeep = findBranchStepsArray(branchId, step.branches[j].steps);
+                            if(foundDeep) return foundDeep;
+                        }
+                    }
+                }
+                return null;
+            }
+
+            // --- Actions ---
+
+            const openAddModal = (parentId, insertIndex = null) => {
+                currentTargetParentId = parentId;
+                currentTargetInsertIndex = insertIndex;
+                const modal = document.getElementById('addModal');
+                const content = document.getElementById('addModalContent');
+                modal.classList.remove('hidden');
+                // trigger reflow
+                void modal.offsetWidth;
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            };
+
+            const closeModals = () => {
+                const addModal = document.getElementById('addModal');
+                const editModal = document.getElementById('editModal');
+                const addContent = document.getElementById('addModalContent');
+                const editContent = document.getElementById('editModalContent');
+
+                addModal.classList.add('opacity-0');
+                editModal.classList.add('opacity-0');
+                addContent.classList.add('scale-95');
+                editContent.classList.add('scale-95');
+
+                setTimeout(() => {
+                    addModal.classList.add('hidden');
+                    editModal.classList.add('hidden');
+                }, 300);
+            };
+
+            const addStep = (type) => {
+                const config = StepConfig[type] || StepConfig.action;
+                const newStep = {
+                    id: generateId(),
+                    type: type,
+                    title: config.defaultTitle,
+                    description: config.desc,
+                    details: {} // Storage for dynamic fields
+                };
+
+                if (type === 'condition') {
+                    newStep.branches = [
+                        { id: generateId(), name: 'Path A', steps: [] },
+                        { id: generateId(), name: 'Path B', steps: [] }
+                    ];
+                }
+
+                const targetArray = currentTargetParentId === 'root' ? flowData : findBranchStepsArray(currentTargetParentId);
+
+                if (targetArray) {
+                    if (currentTargetInsertIndex !== null) {
+                        targetArray.splice(currentTargetInsertIndex, 0, newStep);
+                    } else {
+                        targetArray.push(newStep);
+                    }
+                } else {
+                    // Fallback
+                    const info = findStepInfo(currentTargetParentId);
+                    if(info) {
+                        info.parentArray.splice(info.index + 1, 0, newStep);
+                    }
+                }
+
+                closeModals();
+                render();
+            };
+
+            const deleteStep = (id) => {
+                const info = findStepInfo(id);
+                if (info) {
+                    info.parentArray.splice(info.index, 1);
+                    render();
+                }
+            };
+
+            const moveStep = (id, direction) => {
+                const info = findStepInfo(id);
+                if (!info) return;
+
+                const { parentArray, index } = info;
+
+                if (direction === 'up' && index > 0) {
+                    const temp = parentArray[index];
+                    parentArray[index] = parentArray[index - 1];
+                    parentArray[index - 1] = temp;
+                    render();
+                } else if (direction === 'down' && index < parentArray.length - 1) {
+                    const temp = parentArray[index];
+                    parentArray[index] = parentArray[index + 1];
+                    parentArray[index + 1] = temp;
+                    render();
+                }
+            };
+
+            // Recursively update IDs for duplicated complex structures
+            const regenerateIds = (step) => {
+                step.id = generateId();
+                if(step.type === 'condition' && step.branches) {
+                    step.branches.forEach(branch => {
+                        branch.id = generateId();
+                        branch.steps.forEach(subStep => regenerateIds(subStep));
+                    });
+                }
+            }
+
+            const duplicateStep = (id) => {
+                const info = findStepInfo(id);
+                if (info) {
+                    const clonedStep = deepClone(info.step);
+                    regenerateIds(clonedStep);
+                    clonedStep.title += ' (Copy)';
+                    info.parentArray.splice(info.index + 1, 0, clonedStep);
+                    render();
+                }
+            };
+
+            const openEditModal = (id) => {
+                const info = findStepInfo(id);
+                if (!info) return;
+
+                const step = info.step;
+                document.getElementById('editStepId').value = id;
+                document.getElementById('editTitle').value = step.title;
+                document.getElementById('editDescription').value = step.description || '';
+
+                // Generate dynamic fields HTML based on step type
+                const config = StepConfig[step.type] || StepConfig.action;
+                const fieldsContainer = document.getElementById('dynamicFieldsContainer');
+                let fieldsHtml = '';
+
+                if (config.fields && config.fields.length > 0) {
+                    fieldsHtml += `<h3 class="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wider flex items-center gap-2">${Icons[config.icon]} Configuration</h3>`;
+
+                    config.fields.forEach(f => {
+                        const val = (step.details && step.details[f.name]) ? step.details[f.name] : '';
+                        fieldsHtml += `<div><label class="block text-sm font-medium mb-1">${f.label}</label>`;
+
+                        if (f.type === 'text') {
+                            fieldsHtml += `<input type="text" id="edit_detail_${f.name}" value="${val}" placeholder="${f.placeholder || ''}" class="w-full bg-white/50 dark:bg-black/30 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all">`;
+                        } else if (f.type === 'textarea') {
+                            fieldsHtml += `<textarea id="edit_detail_${f.name}" rows="3" placeholder="${f.placeholder || ''}" class="w-full bg-white/50 dark:bg-black/30 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono text-sm">${val}</textarea>`;
+                        } else if (f.type === 'select') {
+                            fieldsHtml += `<select id="edit_detail_${f.name}" class="w-full bg-white/50 dark:bg-black/30 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:bg-gray-800">`;
+                            f.options.forEach(opt => {
+                                fieldsHtml += `<option value="${opt}" ${val === opt ? 'selected' : ''}>${opt}</option>`;
+                            });
+                            fieldsHtml += `</select>`;
+                        }
+                        fieldsHtml += `</div>`;
+                    });
+                }
+
+                fieldsContainer.innerHTML = fieldsHtml;
+
+                const modal = document.getElementById('editModal');
+                const content = document.getElementById('editModalContent');
+                modal.classList.remove('hidden');
+                void modal.offsetWidth;
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            };
+
+            const saveEdit = (e) => {
+                e.preventDefault();
+                const id = document.getElementById('editStepId').value;
+                const newTitle = document.getElementById('editTitle').value;
+                const newDesc = document.getElementById('editDescription').value;
+
+                const info = findStepInfo(id);
+                if (info) {
+                    info.step.title = newTitle;
+                    info.step.description = newDesc;
+
+                    // Save dynamic fields back to step object
+                    const config = StepConfig[info.step.type] || StepConfig.action;
+                    if (config.fields) {
+                        info.step.details = info.step.details || {};
+                        config.fields.forEach(f => {
+                            const el = document.getElementById(`edit_detail_${f.name}`);
+                            if (el) {
+                                info.step.details[f.name] = el.value;
+                            }
+                        });
+                    }
+
+                    closeModals();
+                    render();
+                }
+            };
+
+            const addBranch = (stepId) => {
+                const info = findStepInfo(stepId);
+                if (info && info.step.type === 'condition') {
+                    // Auto-generate name based on next available letter (A, B, C...)
+                    const existingNames = info.step.branches.map(b => b.name);
+                    let newChar = 'C';
+                    for (let i = 67; i <= 90; i++) { // ASCII C-Z
+                        let char = String.fromCharCode(i);
+                        if (!existingNames.includes(`Path ${char}`)) {
+                            newChar = char;
+                            break;
+                        }
+                    }
+
+                    info.step.branches.push({
+                        id: generateId(),
+                        name: `Path ${newChar}`,
+                        steps: []
+                    });
+                    render();
+                }
+            };
+
+            const deleteBranch = (stepId, branchId) => {
+                const info = findStepInfo(stepId);
+                if (info && info.step.type === 'condition' && info.step.branches.length > 2) {
+                    info.step.branches = info.step.branches.filter(b => b.id !== branchId);
+                    render();
+                }
+            };
+
+            // --- Rendering ---
+
+            const buildControlsHtml = (step, index, arrayLength) => {
+                return `
+                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-4 top-4 bg-white/80 dark:bg-black/80 backdrop-blur rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-1 z-10">
+                        <button onclick="FlowApp.openEditModal('${step.id}')" class="p-1.5 text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded" title="Edit">
+                            ${Icons.edit}
+                        </button>
+                        <button onclick="FlowApp.duplicateStep('${step.id}')" class="p-1.5 text-gray-500 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 rounded" title="Duplicate">
+                            ${Icons.copy}
+                        </button>
+                        <div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                        <button onclick="FlowApp.moveStep('${step.id}', 'up')" class="p-1.5 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 rounded disabled:opacity-30 disabled:hover:text-gray-500 disabled:cursor-not-allowed" ${index === 0 ? 'disabled' : ''} title="Move Up">
+                            ${Icons.up}
+                        </button>
+                        <button onclick="FlowApp.moveStep('${step.id}', 'down')" class="p-1.5 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 rounded disabled:opacity-30 disabled:hover:text-gray-500 disabled:cursor-not-allowed" ${index === arrayLength - 1 ? 'disabled' : ''} title="Move Down">
+                            ${Icons.down}
+                        </button>
+                        <div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                        <button onclick="FlowApp.deleteStep('${step.id}')" class="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded" title="Delete">
+                            ${Icons.trash}
+                        </button>
+                    </div>
+                `;
+            };
+
+            const renderStandardStep = (step, index, arrayLength) => {
+                const config = StepConfig[step.type] || StepConfig.action;
+                const colors = getColorClasses(config.color);
+
+                return `
+                    <div class="flex flex-col items-center animate-slide-up w-full max-w-sm">
+                        <div class="glass-card bg-glass-light dark:bg-glass-dark border-glassBorder-light dark:border-glassBorder-dark p-5 rounded-xl shadow-lg w-full relative group transition-all hover:shadow-xl ${colors.borderHover}">
+                            ${buildControlsHtml(step, index, arrayLength)}
+                            <div class="flex items-start gap-4">
+                                <div class="mt-1 p-2 ${colors.bg} ${colors.text} rounded-lg shrink-0 shadow-sm">
+                                    ${Icons[config.icon] || Icons.action}
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg mb-1 pr-16">${step.title}</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">${step.description}</p>
+                                    <span class="inline-block mt-3 text-[10px] uppercase font-bold tracking-wider ${colors.text} bg-black/5 dark:bg-white/5 px-2 py-1 rounded">
+                                        ${config.name}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
+
+            const renderConditionStep = (step, index, arrayLength) => {
+                let branchesHtml = '';
+
+                step.branches.forEach((branch, bIdx) => {
+                    const isFirst = bIdx === 0;
+                    const isLast = bIdx === step.branches.length - 1;
+
+                    // Complex border logic for flow lines
+                    let topBorderClass = "border-t-2 border-gray-300 dark:border-gray-600";
+                    let widthPosClass = "w-full left-0";
+
+                    if (step.branches.length > 1) {
+                        if (isFirst) {
+                            topBorderClass += " rounded-tl-xl";
+                            widthPosClass = "w-[50%] left-[50%]";
+                        } else if (isLast) {
+                            topBorderClass += " rounded-tr-xl";
+                            widthPosClass = "w-[50%] left-0";
+                        }
+                    } else {
+                         topBorderClass = "";
+                         widthPosClass = "hidden";
+                    }
+
+                    branchesHtml += `
+                        <div class="flex-1 flex flex-col items-center relative min-w-[250px] px-2">
+                            <!-- Visual connecting lines for branches -->
+                            <div class="absolute top-0 h-4 ${widthPosClass} ${topBorderClass}"></div>
+                            <div class="w-0.5 h-4 bg-gray-300 dark:bg-gray-600 relative z-10"></div>
+
+                            <!-- Branch Label -->
+                            <div class="group/branch px-3 py-1 bg-gray-200 dark:bg-gray-800 text-xs font-semibold rounded-full shadow-sm mb-4 border border-gray-300 dark:border-gray-600 z-10 whitespace-nowrap flex items-center justify-center min-w-[80px]">
+                                <span>${branch.name}</span>
+                                ${step.branches.length > 2 ? `
+                                <button onclick="FlowApp.deleteBranch('${step.id}', '${branch.id}')" class="text-gray-400 hover:text-red-500 opacity-0 group-hover/branch:opacity-100 transition-opacity ml-1 -mr-1" title="Remove Path">
+                                    ${Icons.close}
+                                </button>
+                                ` : ''}
+                            </div>
+
+                            <!-- Branch Flow Content -->
+                            <div class="w-full flex flex-col items-center flex-grow">
+                                ${branch.steps.length > 0 ? buildFlowHtml(branch.steps, branch.id) : ''}
+
+                                <!-- Add button at end of branch -->
+                                <button onclick="FlowApp.openAddModal('${branch.id}')" class="mt-4 w-8 h-8 rounded-full border-2 border-dashed border-gray-400 hover:border-blue-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 flex items-center justify-center transition-colors shadow-sm text-gray-500">
+                                    ${Icons.plus}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                return `
+                    <div class="flex flex-col items-center animate-slide-up w-full">
+                        <!-- Condition Header Card -->
+                        <div class="glass-card bg-glass-light dark:bg-glass-dark border-glassBorder-light dark:border-glassBorder-dark p-4 rounded-xl shadow-lg w-full max-w-sm relative group z-20 hover:border-purple-300 dark:hover:border-purple-500/50 transition-all">
+                            ${buildControlsHtml(step, index, arrayLength)}
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 rounded-lg shrink-0 shadow-sm">
+                                    ${Icons.branch}
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-md pr-16">${step.title}</h3>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Condition</p>
+                                </div>
+                            </div>
+
+                            <!-- Add Branch Button -->
+                            <button onclick="FlowApp.addBranch('${step.id}')" class="absolute -bottom-3 right-1/2 translate-x-1/2 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 text-[10px] uppercase font-bold px-3 py-1 rounded-full border border-purple-200 dark:border-purple-700 hover:bg-purple-200 dark:hover:bg-purple-800 shadow-sm z-30 transition-all flex items-center gap-1 opacity-0 group-hover:opacity-100 scale-90 hover:scale-100">
+                                <span class="scale-75">${Icons.plus}</span> Add Path
+                            </button>
+                        </div>
+
+                        <!-- Connection to Branches -->
+                        <div class="w-0.5 h-6 bg-gray-300 dark:bg-gray-600"></div>
+
+                        <!-- Branches Container -->
+                        <div class="flex w-full justify-center relative mt-[-1px]">
+                             ${branchesHtml}
+                        </div>
+                    </div>
+                `;
+            };
+
+            const buildFlowHtml = (stepsArray, parentId = 'root') => {
+                if (!stepsArray || stepsArray.length === 0) return '';
+
+                let html = '';
+                stepsArray.forEach((step, index) => {
+                    // Add interactive connector line before every step except the very first one in a block
+                    if (index > 0) {
+                        html += `
+                            <div class="relative flex items-center justify-center h-10 group w-full">
+                                <div class="w-0.5 h-full bg-gray-300 dark:bg-gray-600 transition-colors group-hover:bg-blue-400 dark:group-hover:bg-blue-500"></div>
+                                <button onclick="FlowApp.openAddModal('${parentId}', ${index})" class="absolute z-10 w-7 h-7 rounded-full bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-400 opacity-0 group-hover:opacity-100 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-500 dark:hover:text-blue-400 transition-all flex items-center justify-center shadow-sm cursor-pointer scale-75 group-hover:scale-100" title="Insert step here">
+                                    ${Icons.plus}
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    if (step.type === 'condition') {
+                        html += renderConditionStep(step, index, stepsArray.length);
+                    } else {
+                        html += renderStandardStep(step, index, stepsArray.length);
+                    }
+                });
+                return html;
+            };
+
+            const populateAddModalGrid = () => {
+                const grid = document.getElementById('addModalGrid');
+                let html = '';
+
+                // Group Condition first, then others
+                const orderedKeys = ['condition', 'api', 'database', 'file', 'command', 'nodejs', 'action'];
+
+                orderedKeys.forEach(type => {
+                    const config = StepConfig[type];
+                    const colors = getColorClasses(config.color);
+                    html += `
+                        <button onclick="FlowApp.addStep('${type}')" class="flex flex-col items-center gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-700 transition-all text-center ${colors.borderHover}">
+                            <div class="p-3 ${colors.bg} ${colors.text} rounded-lg shadow-sm">
+                                ${Icons[config.icon]}
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-bold text-sm text-gray-800 dark:text-gray-200">${config.name}</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">${config.desc}</span>
+                            </div>
+                        </button>
+                    `;
+                });
+                grid.innerHTML = html;
+            };
+
+            const render = () => {
+                const container = document.getElementById('flow-container');
+                if (flowData.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center p-12 glass-card bg-white/30 dark:bg-black/30 border-dashed border-2 border-gray-400 dark:border-gray-600 rounded-2xl max-w-md w-full">
+                            <div class="text-gray-400 mb-4 flex justify-center">${Icons.action}</div>
+                            <h2 class="text-xl font-medium mb-2">Flow is empty</h2>
+                            <p class="text-gray-500 dark:text-gray-400 mb-6">Start building your process by adding a step below.</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = buildFlowHtml(flowData, 'root');
+                }
+            };
+
+            // Init
+            window.addEventListener('DOMContentLoaded', () => {
+                populateAddModalGrid();
+                render();
+            });
+
+            // Public API
+            return {
+                flowData,
+                openAddModal,
+                closeModals,
+                addStep,
+                deleteStep,
+                moveStep,
+                duplicateStep,
+                openEditModal,
+                saveEdit,
+                addBranch,
+                deleteBranch
+            };
+        })();
+    </script>
+</body>
+</html>

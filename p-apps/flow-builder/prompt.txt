@@ -26,3 +26,24 @@ It should be simple, UI rich looking, with suitable font-awesome icons, easy to 
 Use suitable animations, Try to use SVG for icons and font-awesome icons.
 Use only html, css, javascript and tailwindcss.
 Use modular approach which can be easy to upgrade.
+
+
+
+================================================================
+Build app for flow builder with below features:
+
+* Ability to add new step
+* Ability to delete step
+* Ability to move step up/down
+* Ability to edit step
+* Ability to duplicate step
+* Ability to add step in between two steps.
+* Ability to two steps for condition step.
+* Ability to add two of more branches to branching step.
+
+=====instructions for app======
+Use glassmorphic, ability to switch day and night themes.
+It should be simple, UI rich looking, with suitable font-awesome icons, easy to operate.
+Use suitable animations, Try to use SVG for icons and font-awesome icons.
+Use only html, css, javascript and tailwindcss.
+Use modular approach which can be easy to upgrade.

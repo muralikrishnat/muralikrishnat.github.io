@@ -272,6 +272,13 @@
         "type": "file",
         "parentId": "root-flow-builder",
         "path": "./flow-builder/index5.html"
+      },
+      {
+        "id": "file-flow-builder-index6.html",
+        "name": "index6.html",
+        "type": "file",
+        "parentId": "root-flow-builder",
+        "path": "./flow-builder/index6.html"
       }
     ]
   },
